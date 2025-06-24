@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Game, Player, Course } from './types/golf';
 import PlayerSetup from './components/PlayerSetup';
 import ScoreCard from './components/ScoreCard';

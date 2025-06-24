@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Player, PlayerSetup as PlayerSetupType, Course } from '../types/golf';
 import {
   saveCustomCourse,
@@ -12,7 +12,7 @@ interface PlayerSetupProps {
   onStartGame: (players: Player[], course: Course) => void;
 }
 
-const PlayerSetup: React.FC<PlayerSetupProps> = ({ onStartGame }) => {
+const PlayerSetup = ({ onStartGame }: PlayerSetupProps) => {
   const [players, setPlayers] = useState<PlayerSetupType[]>([
     { id: '1', name: '', handicap: 0 },
     { id: '2', name: '', handicap: 0 },
