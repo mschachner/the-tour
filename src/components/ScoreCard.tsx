@@ -167,11 +167,12 @@ const ScoreCard = ({ game, onUpdateScore }: ScoreCardProps) => {
   };
 
   return (
-    <div className="golf-card overflow-x-auto">
+    <div className="golf-card">
       <h3 className="text-xl font-bold text-gray-800 mb-4">Score Card</h3>
-      
-      <div className="min-w-full">
-        <table className="w-full border-collapse">
+
+      {/* Desktop Table */}
+      <div className="hidden md:block overflow-x-auto">
+        <table className="min-w-full border-collapse">
           <thead>
             <tr className="bg-gray-100">
               <th className="border border-gray-300 px-3 py-2 text-left font-semibold">Player</th>
@@ -335,6 +336,121 @@ const ScoreCard = ({ game, onUpdateScore }: ScoreCardProps) => {
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile Layout */}
+      <div className="md:hidden space-y-4">
+        {game.players.map((player) => {
+          const toPar = calculateTotalToPar(player);
+          const adjustedScore = calculateAdjustedScore(player);
+          const adjustedToPar = calculateAdjustedToPar(player);
+
+          return (
+            <div key={player.id} className="border rounded-lg overflow-hidden">
+              <div className="flex justify-between items-center bg-gray-100 px-3 py-2">
+                <span className="font-semibold">{player.name}</span>
+                <span className="text-sm">HCP {player.handicap}</span>
+              </div>
+              <table className="w-full border-collapse">
+                <thead className="text-xs">
+                  <tr className="bg-gray-50">
+                    <th className="border px-2 py-1 text-left">Hole</th>
+                    <th className="border px-2 py-1 text-center">Strokes</th>
+                    <th className="border px-2 py-1 text-center">Putts</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {player.holes.map((hole) => {
+                    const strokeEditing = isEditing(player.id, hole.holeNumber, 'strokes');
+                    const puttEditing = isEditing(player.id, hole.holeNumber, 'putts');
+                    return (
+                      <tr key={hole.holeNumber}>
+                        <td className="border px-2 py-1">
+                          <div className="font-medium">{hole.holeNumber}</div>
+                          <div className="text-xs text-gray-600">Par {hole.par}</div>
+                        </td>
+                        <td className="border px-2 py-1 text-center">
+                          {strokeEditing ? (
+                            <input
+                              type="number"
+                              value={editingValue}
+                              onChange={handleInputChange}
+                              onBlur={(e) => handleCellChange(e.target.value)}
+                              onKeyPress={(e) => e.key === 'Enter' && handleCellChange((e.target as HTMLInputElement).value)}
+                              className="w-12 text-center border border-gray-300 rounded px-1 text-sm"
+                              autoFocus
+                              min="1"
+                              max="20"
+                            />
+                          ) : (
+                            <button
+                              onClick={() => handleCellClick(player.id, hole.holeNumber, 'strokes')}
+                              className={`w-full py-1 hover:bg-gray-200 transition-colors text-sm ${getScoreColor(hole.strokes, hole.par)} ${getScoreBorderStyle(hole.strokes, hole.par)}`}
+                              style={{
+                                ...getCrossHatchStyle(hole.strokes, hole.par),
+                                ...getDoubleCircleStyle(hole.strokes, hole.par),
+                                ...getDoubleSquareStyle(hole.strokes, hole.par)
+                              }}
+                            >
+                              {getScoreDisplay(hole.strokes, hole.par)}
+                            </button>
+                          )}
+                        </td>
+                        <td className="border px-2 py-1 text-center">
+                          {puttEditing ? (
+                            <input
+                              type="number"
+                              value={editingValue}
+                              onChange={handleInputChange}
+                              onBlur={(e) => handleCellChange(e.target.value)}
+                              onKeyPress={(e) => e.key === 'Enter' && handleCellChange((e.target as HTMLInputElement).value)}
+                              className="w-8 text-center border border-gray-300 rounded px-1 text-xs"
+                              autoFocus
+                              min="0"
+                              max="10"
+                            />
+                          ) : (
+                            <button
+                              onClick={() => handleCellClick(player.id, hole.holeNumber, 'putts')}
+                              className={`w-full py-1 rounded hover:bg-gray-200 transition-colors text-xs ${hole.putts > 0 ? 'bg-green-100' : ''}`}
+                            >
+                              {hole.putts > 0 ? hole.putts : '-'}
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  <tr className="bg-gray-50 font-semibold text-sm">
+                    <td className="border px-2 py-1">Total</td>
+                    <td className="border px-2 py-1 text-center">{player.totalScore}</td>
+                    <td className="border px-2 py-1 text-center">{player.totalPutts}</td>
+                  </tr>
+                  <tr className="bg-gray-50 font-semibold text-sm">
+                    <td className="border px-2 py-1">To Par</td>
+                    <td className="border px-2 py-1 text-center" colSpan={2}>
+                      {toPar === 0 ? 'E' : toPar > 0 ? `+${toPar}` : `${toPar}`}
+                    </td>
+                  </tr>
+                  {player.handicap > 0 && (
+                    <>
+                      <tr className="bg-gray-50 font-semibold text-sm">
+                        <td className="border px-2 py-1">Adjusted Score</td>
+                        <td className="border px-2 py-1 text-center" colSpan={2}>{adjustedScore}</td>
+                      </tr>
+                      <tr className="bg-gray-50 font-semibold text-sm">
+                        <td className="border px-2 py-1">Adjusted To Par</td>
+                        <td className="border px-2 py-1 text-center" colSpan={2}>
+                          {adjustedToPar === 0 ? 'E' : adjustedToPar > 0 ? `+${adjustedToPar}` : `${adjustedToPar}`}
+                        </td>
+                      </tr>
+                    </>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          );
+        })}
       </div>
       
       {/* Summary */}
