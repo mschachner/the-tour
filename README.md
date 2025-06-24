@@ -20,7 +20,7 @@ A modern, responsive golf score tracking application built with React and TypeSc
 - **Pre-loaded Famous Courses**:
   - Pebble Beach Golf Links (CA)
   - Augusta National Golf Club (GA)
-  - St Andrews Old Course (Scotland)
+ - St Andrews Old Course (Scotland)
 - **Public Course Database**: Search hundreds of courses online by typing a
   course name into the selector. Matching results appear automatically as you
   type.
@@ -110,6 +110,14 @@ The app includes three world-famous golf courses:
 - **Search Public Database**: Quickly find new courses online. Start typing a
   course name in the selector and matching courses from the public database
   will appear immediately.
+
+### Public Course Database
+
+The course selector queries the public API at
+`https://golf-courses-api.vercel.app/courses` whenever you search for a course
+name. An active internet connection is required. If the request fails, you'll
+see a notice below the selector and only the built-in courses will be
+available.
 
 #### Creating Custom Courses
 1. Select "Create Custom Course" during setup
