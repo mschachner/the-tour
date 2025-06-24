@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import type { ChangeEvent, KeyboardEvent } from 'react';
 import { Course } from '../types/golf';
 import {
-  getCourseSuggestions,
+  getCourseSuggestionsAsync,
+  fetchPublicCourses,
   findCourseByName,
   defaultCustomCourse,
   loadCustomCourses,
@@ -30,16 +31,32 @@ const CourseSelector = ({ onCourseSelect, selectedCourse, refreshKey }: CourseSe
     setSavedCourses(customCourses);
   }, [refreshKey]);
 
+  // Preload public courses on mount
   useEffect(() => {
-    if (inputValue.trim()) {
-      const newSuggestions = getCourseSuggestions(inputValue);
-      setSuggestions(newSuggestions);
-      setShowSuggestions(true);
-    } else {
-      const defaultSuggestions = getCourseSuggestions('');
-      setSuggestions(defaultSuggestions);
-      setShowSuggestions(false);
-    }
+    fetchPublicCourses().catch(() => undefined);
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      if (inputValue.trim()) {
+        const newSuggestions = await getCourseSuggestionsAsync(inputValue);
+        if (active) {
+          setSuggestions(newSuggestions);
+          setShowSuggestions(true);
+        }
+      } else {
+        const defaultSuggestions = await getCourseSuggestionsAsync('');
+        if (active) {
+          setSuggestions(defaultSuggestions);
+          setShowSuggestions(false);
+        }
+      }
+    };
+    load();
+    return () => {
+      active = false;
+    };
   }, [inputValue, refreshKey]);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -65,9 +82,10 @@ const CourseSelector = ({ onCourseSelect, selectedCourse, refreshKey }: CourseSe
       setShowSuggestions(true);
     } else {
       // Show default suggestions when focused
-      const defaultSuggestions = getCourseSuggestions('');
-      setSuggestions(defaultSuggestions);
-      setShowSuggestions(true);
+      getCourseSuggestionsAsync('').then((defaultSuggestions) => {
+        setSuggestions(defaultSuggestions);
+        setShowSuggestions(true);
+      });
     }
   };
 
@@ -121,10 +139,10 @@ const CourseSelector = ({ onCourseSelect, selectedCourse, refreshKey }: CourseSe
           onBlur={handleInputBlur}
           onFocus={handleInputFocus}
           onKeyDown={handleKeyDown}
-          placeholder="Search for a course or enter custom course name..."
+          placeholder="Search courses online or enter custom course name..."
           className="golf-input w-full pr-10"
         />
-        
+
         {inputValue && (
           <button
             onClick={() => setInputValue('')}
@@ -134,6 +152,9 @@ const CourseSelector = ({ onCourseSelect, selectedCourse, refreshKey }: CourseSe
           </button>
         )}
       </div>
+      <p className="text-xs text-gray-500 mt-1">
+        Start typing to search the public course database.
+      </p>
 
       {/* Course Suggestions */}
       {showSuggestions && (
