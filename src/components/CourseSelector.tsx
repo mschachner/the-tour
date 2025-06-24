@@ -1,6 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import type { ChangeEvent, KeyboardEvent } from 'react';
 import { Course } from '../types/golf';
-import { getCourseSuggestions, findCourseByName, defaultCustomCourse, loadCustomCourses, deleteCustomCourse } from '../data/courses';
+import {
+  getCourseSuggestions,
+  findCourseByName,
+  defaultCustomCourse,
+  loadCustomCourses,
+  deleteCustomCourse
+} from '../services/courseService';
 
 interface CourseSelectorProps {
   onCourseSelect: (course: Course) => void;
@@ -8,7 +15,7 @@ interface CourseSelectorProps {
   refreshKey?: number;
 }
 
-const CourseSelector: React.FC<CourseSelectorProps> = ({ onCourseSelect, selectedCourse, refreshKey }) => {
+const CourseSelector = ({ onCourseSelect, selectedCourse, refreshKey }: CourseSelectorProps) => {
   const [inputValue, setInputValue] = useState(selectedCourse?.name || '');
   const [suggestions, setSuggestions] = useState<Course[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -35,7 +42,7 @@ const CourseSelector: React.FC<CourseSelectorProps> = ({ onCourseSelect, selecte
     }
   }, [inputValue, refreshKey]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setInputValue(value);
     setIsCustomCourse(false);
@@ -73,7 +80,7 @@ const CourseSelector: React.FC<CourseSelectorProps> = ({ onCourseSelect, selecte
     onCourseSelect(customCourse);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       const exactMatch = findCourseByName(inputValue);

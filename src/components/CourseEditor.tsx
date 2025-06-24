@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Course, CourseHole } from '../types/golf';
-import { deleteCustomCourse } from '../data/courses';
+import { deleteCustomCourse } from '../services/courseService';
 
 interface CourseEditorProps {
   course: Course;
@@ -9,7 +9,7 @@ interface CourseEditorProps {
   onDeleteCourse?: () => void;
 }
 
-const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSaveCourse, onCancel, onDeleteCourse }) => {
+const CourseEditor = ({ course, onSaveCourse, onCancel, onDeleteCourse }: CourseEditorProps) => {
   const [editedCourse, setEditedCourse] = useState<Course>({
     ...course,
     holes: [...course.holes]

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useState, Fragment } from 'react';
+import type { ChangeEvent } from 'react';
 import { Game, Player, HoleScore } from '../types/golf';
 
 interface ScoreCardProps {
@@ -6,7 +7,7 @@ interface ScoreCardProps {
   onUpdateScore: (playerId: string, holeNumber: number, strokes: number, putts: number) => void;
 }
 
-const ScoreCard: React.FC<ScoreCardProps> = ({ game, onUpdateScore }) => {
+const ScoreCard = ({ game, onUpdateScore }: ScoreCardProps) => {
   const [editingCell, setEditingCell] = useState<{ playerId: string; holeNumber: number; type: 'strokes' | 'putts' } | null>(null);
   const [editingValue, setEditingValue] = useState<string>('');
 
@@ -42,7 +43,7 @@ const ScoreCard: React.FC<ScoreCardProps> = ({ game, onUpdateScore }) => {
     setEditingValue('');
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setEditingValue(e.target.value);
   };
 
@@ -189,7 +190,7 @@ const ScoreCard: React.FC<ScoreCardProps> = ({ game, onUpdateScore }) => {
           </thead>
           <tbody>
             {game.players.map((player, playerIndex) => (
-              <React.Fragment key={player.id}>
+              <Fragment key={player.id}>
                 {/* Strokes Row */}
                 <tr className={playerIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                   <td className="border border-gray-300 px-3 py-2 font-medium">
@@ -330,7 +331,7 @@ const ScoreCard: React.FC<ScoreCardProps> = ({ game, onUpdateScore }) => {
                   <td className="border border-gray-300 px-3 py-1"></td>
                   <td className="border border-gray-300 px-3 py-1"></td>
                 </tr>
-              </React.Fragment>
+              </Fragment>
             ))}
           </tbody>
         </table>
