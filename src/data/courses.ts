@@ -1,6 +1,5 @@
 import { Course } from '../types/golf';
 
-// Built-in courses that come with the app
 const builtInCourses: Course[] = [
   {
     id: 'pebble-beach',
@@ -67,7 +66,7 @@ const builtInCourses: Course[] = [
       { holeNumber: 2, par: 4, handicap: 5, distance: 453, description: 'Dyke' },
       { holeNumber: 3, par: 4, handicap: 15, distance: 397, description: 'Cartgate (Out)' },
       { holeNumber: 4, par: 4, handicap: 7, distance: 480, description: 'Ginger Beer' },
-      { holeNumber: 5, par: 5, handicap: 13, distance: 568, description: 'Hole O\'Cross (Out)' },
+      { holeNumber: 5, par: 5, handicap: 13, distance: 568, description: "Hole O'Cross (Out)" },
       { holeNumber: 6, par: 4, handicap: 3, distance: 412, description: 'Heathery (Out)' },
       { holeNumber: 7, par: 4, handicap: 9, distance: 371, description: 'High (Out)' },
       { holeNumber: 8, par: 3, handicap: 17, distance: 175, description: 'Short' },
@@ -75,7 +74,7 @@ const builtInCourses: Course[] = [
       { holeNumber: 10, par: 4, handicap: 8, distance: 386, description: 'Bobby Jones' },
       { holeNumber: 11, par: 3, handicap: 16, distance: 174, description: 'High (In)' },
       { holeNumber: 12, par: 4, handicap: 4, distance: 348, description: 'Heathery (In)' },
-      { holeNumber: 13, par: 4, handicap: 12, distance: 465, description: 'Hole O\'Cross (In)' },
+      { holeNumber: 13, par: 4, handicap: 12, distance: 465, description: "Hole O'Cross (In)" },
       { holeNumber: 14, par: 5, handicap: 6, distance: 618, description: 'Long' },
       { holeNumber: 15, par: 4, handicap: 2, distance: 455, description: 'Cartgate (In)' },
       { holeNumber: 16, par: 4, handicap: 10, distance: 423, description: 'Corner of the Dyke' },
@@ -85,7 +84,6 @@ const builtInCourses: Course[] = [
   }
 ];
 
-// Default custom course template
 const defaultCustomCourse: Course = {
   id: 'custom-course',
   name: 'Custom Course',
@@ -100,114 +98,4 @@ const defaultCustomCourse: Course = {
   }))
 };
 
-// LocalStorage key for custom courses
-const CUSTOM_COURSES_KEY = 'golfer-custom-courses';
-
-// Load custom courses from localStorage
-export const loadCustomCourses = (): Course[] => {
-  try {
-    const stored = localStorage.getItem(CUSTOM_COURSES_KEY);
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      // Validate that it's an array of courses
-      if (Array.isArray(parsed)) {
-        return parsed.filter(course => 
-          course && 
-          typeof course.id === 'string' && 
-          typeof course.name === 'string' &&
-          Array.isArray(course.holes) &&
-          course.holes.length === 18
-        );
-      }
-    }
-  } catch (error) {
-    console.error('Error loading custom courses from localStorage:', error);
-  }
-  return [];
-};
-
-// Save custom courses to localStorage
-export const saveCustomCourses = (customCourses: Course[]): void => {
-  try {
-    localStorage.setItem(CUSTOM_COURSES_KEY, JSON.stringify(customCourses));
-  } catch (error) {
-    console.error('Error saving custom courses to localStorage:', error);
-  }
-};
-
-// Save a single custom course
-export const saveCustomCourse = (course: Course): void => {
-  const customCourses = loadCustomCourses();
-  const existingIndex = customCourses.findIndex(c => c.id === course.id);
-  
-  if (existingIndex >= 0) {
-    // Update existing course
-    customCourses[existingIndex] = course;
-  } else {
-    // Add new course
-    customCourses.push(course);
-  }
-  
-  saveCustomCourses(customCourses);
-};
-
-// Delete a custom course
-export const deleteCustomCourse = (courseId: string): void => {
-  const customCourses = loadCustomCourses();
-  const filtered = customCourses.filter(c => c.id !== courseId);
-  saveCustomCourses(filtered);
-};
-
-// Generate unique ID for new custom courses
-export const generateCourseId = (name: string): string => {
-  const baseId = name.toLowerCase()
-    .replace(/[^a-z0-9\s]/g, '')
-    .replace(/\s+/g, '-')
-    .substring(0, 30);
-  
-  const timestamp = Date.now().toString(36);
-  return `${baseId}-${timestamp}`;
-};
-
-// Get all courses (built-in + custom)
-export const getAllCourses = (): Course[] => {
-  const customCourses = loadCustomCourses();
-  return [...builtInCourses, ...customCourses];
-};
-
-// Maintain backward compatibility
-export const courses = getAllCourses();
-
-export const findCourseByName = (name: string): Course | undefined => {
-  const allCourses = getAllCourses();
-  const searchName = name.toLowerCase().trim();
-  return allCourses.find(course => 
-    course.name.toLowerCase().includes(searchName) ||
-    course.location?.toLowerCase().includes(searchName)
-  );
-};
-
-export const getCourseSuggestions = (input: string): Course[] => {
-  const allCourses = getAllCourses();
-  
-  if (!input.trim()) {
-    // Return built-in courses first, then recent custom courses
-    const customCourses = loadCustomCourses().slice(-2); // Last 2 custom courses
-    return [...builtInCourses.slice(0, 3), ...customCourses].slice(0, 5);
-  }
-  
-  const searchTerm = input.toLowerCase().trim();
-  const filtered = allCourses.filter(course => 
-    course.name.toLowerCase().includes(searchTerm) ||
-    course.location?.toLowerCase().includes(searchTerm)
-  );
-  
-  // Always include "Custom Course" option if searching
-  if (!filtered.some(c => c.id === 'custom-course')) {
-    filtered.push(defaultCustomCourse);
-  }
-  
-  return filtered.slice(0, 5);
-};
-
-export { defaultCustomCourse }; 
+export { builtInCourses as default, defaultCustomCourse };

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Game, Player, Course } from './types/golf';
 import PlayerSetup from './components/PlayerSetup';
 import ScoreCard from './components/ScoreCard';
@@ -9,8 +9,6 @@ function App() {
   const [showSetup, setShowSetup] = useState(true);
 
   const startNewGame = (players: Player[], course: Course) => {
-    console.log('startNewGame called with:', { players, course });
-    
     const newGame: Game = {
       id: Date.now().toString(),
       date: new Date().toISOString().split('T')[0],
@@ -19,13 +17,9 @@ function App() {
       currentHole: 1,
       totalHoles: 18
     };
-    
-    console.log('New game created:', newGame);
-    console.log('Setting game state...');
+
     setGame(newGame);
-    console.log('Setting showSetup to false...');
     setShowSetup(false);
-    console.log('Game state updated successfully');
   };
 
   const updateScore = (playerId: string, holeNumber: number, strokes: number, putts: number) => {
