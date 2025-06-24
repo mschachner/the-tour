@@ -60,7 +60,7 @@ function App() {
     <div className="min-h-screen bg-gradient-to-br from-green-400 to-blue-500">
       <div className="container mx-auto px-4 py-8">
         <header className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">🏌️ Golf Score Tracker</h1>
+          <h1 className="text-4xl font-bold text-white mb-2">🏌️ The Tour</h1>
           <p className="text-white/80">Track your game with style</p>
         </header>
 
