@@ -247,7 +247,7 @@ const CourseEditor = ({ course, onSaveCourse, onCancel, onDeleteCourse }: Course
         {/* Hole Editor - Compact Grid */}
         <div>
           <h3 className="text-sm font-semibold text-gray-800 mb-3">Hole Details</h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-9 gap-2">
             {editedCourse.holes.map((hole) => (
               <div key={hole.holeNumber} className="bg-white border border-gray-200 rounded-lg p-2 hover:shadow-sm transition-shadow">
                 <div className="text-center">

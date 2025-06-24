@@ -471,7 +471,7 @@ const ScoreCard = ({ game, onUpdateScore }: ScoreCardProps) => {
                           <div className="font-medium">{hole.holeNumber}</div>
                           <div className="text-xs text-gray-600 flex items-center space-x-1">
                             <span>Par {hole.par}</span>
-                            <span className="text-gray-500">H{hole.handicap}</span>
+                            <span className="text-gray-500">H{hole.holeHandicap}</span>
                           </div>
                         </td>
                         <td className="border px-2 py-1 text-center">
