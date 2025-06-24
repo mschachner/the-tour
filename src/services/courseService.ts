@@ -105,6 +105,12 @@ export { defaultCustomCourse };
 
 const PUBLIC_COURSES_KEY = 'golfer-public-courses';
 let publicCoursesCache: Course[] | null = null;
+let lastPublicCourseError: string | null = null;
+
+export const getLastPublicCourseError = (): string | null => lastPublicCourseError;
+export const clearLastPublicCourseError = (): void => {
+  lastPublicCourseError = null;
+};
 
 export const fetchPublicCourses = async (): Promise<Course[]> => {
   if (publicCoursesCache) {
@@ -118,11 +124,13 @@ export const fetchPublicCourses = async (): Promise<Course[]> => {
       const parsed = JSON.parse(stored);
       if (Array.isArray(parsed)) {
         publicCoursesCache = parsed;
+        lastPublicCourseError = null;
         return parsed;
       }
     }
   } catch (err) {
     console.error('Failed to load cached public courses', err);
+    lastPublicCourseError = (err as Error).message;
   }
 
   try {
@@ -137,10 +145,12 @@ export const fetchPublicCourses = async (): Promise<Course[]> => {
     if (Array.isArray(courses)) {
       publicCoursesCache = courses as Course[];
       localStorage.setItem(PUBLIC_COURSES_KEY, JSON.stringify(publicCoursesCache));
+      lastPublicCourseError = null;
       return publicCoursesCache;
     }
   } catch (err) {
     console.error('Error fetching public courses:', err);
+    lastPublicCourseError = (err as Error).message;
   }
 
   return [];
@@ -176,10 +186,12 @@ export const searchPublicCourses = async (query: string): Promise<Course[]> => {
 
     if (Array.isArray(courses)) {
       searchCache[term] = courses as Course[];
+      lastPublicCourseError = null;
       return searchCache[term];
     }
   } catch (err) {
     console.error('Error searching public courses:', err);
+    lastPublicCourseError = (err as Error).message;
   }
 
   return [];
