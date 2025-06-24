@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { Player, PlayerSetup as PlayerSetupType, Course } from '../types/golf';
 import {
   saveCustomCourse,
-  generateCourseId,
-  defaultCustomCourse
+  generateCourseId
 } from '../services/courseService';
 import CourseSelector from './CourseSelector';
 import CourseEditor from './CourseEditor';
