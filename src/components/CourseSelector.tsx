@@ -1,6 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Course } from '../types/golf';
-import { getCourseSuggestions, findCourseByName, defaultCustomCourse, loadCustomCourses, deleteCustomCourse } from '../data/courses';
+import {
+  getCourseSuggestions,
+  findCourseByName,
+  defaultCustomCourse,
+  loadCustomCourses,
+  deleteCustomCourse
+} from '../services/courseService';
 
 interface CourseSelectorProps {
   onCourseSelect: (course: Course) => void;
