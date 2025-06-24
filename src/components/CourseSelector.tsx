@@ -139,10 +139,10 @@ const CourseSelector = ({ onCourseSelect, selectedCourse, refreshKey }: CourseSe
           onBlur={handleInputBlur}
           onFocus={handleInputFocus}
           onKeyDown={handleKeyDown}
-          placeholder="Search for a course or enter custom course name..."
+          placeholder="Search courses online or enter custom course name..."
           className="golf-input w-full pr-10"
         />
-        
+
         {inputValue && (
           <button
             onClick={() => setInputValue('')}
@@ -152,6 +152,9 @@ const CourseSelector = ({ onCourseSelect, selectedCourse, refreshKey }: CourseSe
           </button>
         )}
       </div>
+      <p className="text-xs text-gray-500 mt-1">
+        Start typing to search the public course database.
+      </p>
 
       {/* Course Suggestions */}
       {showSuggestions && (
