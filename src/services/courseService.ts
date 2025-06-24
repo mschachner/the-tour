@@ -100,3 +100,76 @@ export const getCourseSuggestions = (input: string): Course[] => {
 };
 
 export { defaultCustomCourse };
+
+// --- Remote Course Support ---
+
+const PUBLIC_COURSES_KEY = 'golfer-public-courses';
+let publicCoursesCache: Course[] | null = null;
+
+export const fetchPublicCourses = async (): Promise<Course[]> => {
+  if (publicCoursesCache) {
+    return publicCoursesCache;
+  }
+
+  // Try localStorage first to avoid unnecessary requests
+  try {
+    const stored = localStorage.getItem(PUBLIC_COURSES_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed)) {
+        publicCoursesCache = parsed;
+        return parsed;
+      }
+    }
+  } catch (err) {
+    console.error('Failed to load cached public courses', err);
+  }
+
+  try {
+    const resp = await fetch('https://golf-courses-api.vercel.app/courses');
+    if (!resp.ok) {
+      throw new Error(`HTTP ${resp.status}`);
+    }
+
+    const data = await resp.json();
+    const courses: unknown = Array.isArray(data) ? data : (data.courses ?? []);
+
+    if (Array.isArray(courses)) {
+      publicCoursesCache = courses as Course[];
+      localStorage.setItem(PUBLIC_COURSES_KEY, JSON.stringify(publicCoursesCache));
+      return publicCoursesCache;
+    }
+  } catch (err) {
+    console.error('Error fetching public courses:', err);
+  }
+
+  return [];
+};
+
+export const getAllCoursesAsync = async (): Promise<Course[]> => {
+  const custom = loadCustomCourses();
+  const remote = await fetchPublicCourses();
+  return [...builtInCourses, ...remote, ...custom];
+};
+
+export const getCourseSuggestionsAsync = async (input: string): Promise<Course[]> => {
+  const allCourses = await getAllCoursesAsync();
+
+  if (!input.trim()) {
+    const custom = loadCustomCourses().slice(-2);
+    const builtIn = builtInCourses.slice(0, 3);
+    return [...builtIn, ...custom].slice(0, 5);
+  }
+
+  const term = input.toLowerCase().trim();
+  const filtered = allCourses.filter(course =>
+    course.name.toLowerCase().includes(term) ||
+    course.location?.toLowerCase().includes(term)
+  );
+
+  if (!filtered.some(c => c.id === 'custom-course')) {
+    filtered.push(defaultCustomCourse);
+  }
+
+  return filtered.slice(0, 5);
+};
