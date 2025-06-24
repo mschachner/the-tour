@@ -8,7 +8,8 @@ import {
   defaultCustomCourse,
   loadCustomCourses,
   deleteCustomCourse,
-  getLastPublicCourseError
+  getLastPublicCourseError,
+  clearLastPublicCourseError
 } from '../services/courseService';
 
 interface CourseSelectorProps {
@@ -42,6 +43,7 @@ const CourseSelector = ({ onCourseSelect, selectedCourse, refreshKey }: CourseSe
     let active = true;
     const load = async () => {
       if (inputValue.trim()) {
+        clearLastPublicCourseError();
         const newSuggestions = await getCourseSuggestionsAsync(inputValue);
         if (active) {
           setSuggestions(newSuggestions);
@@ -53,7 +55,7 @@ const CourseSelector = ({ onCourseSelect, selectedCourse, refreshKey }: CourseSe
         if (active) {
           setSuggestions(defaultSuggestions);
           setShowSuggestions(false);
-          setPublicError(getLastPublicCourseError());
+          setPublicError(null);
         }
       }
     };
