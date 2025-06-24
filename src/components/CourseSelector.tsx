@@ -7,7 +7,8 @@ import {
   findCourseByName,
   defaultCustomCourse,
   loadCustomCourses,
-  deleteCustomCourse
+  deleteCustomCourse,
+  getLastPublicCourseError
 } from '../services/courseService';
 
 interface CourseSelectorProps {
@@ -23,6 +24,7 @@ const CourseSelector = ({ onCourseSelect, selectedCourse, refreshKey }: CourseSe
   const [isCustomCourse, setIsCustomCourse] = useState(false);
   const [showSavedCourses, setShowSavedCourses] = useState(false);
   const [savedCourses, setSavedCourses] = useState<Course[]>([]);
+  const [publicError, setPublicError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Load saved custom courses
@@ -44,12 +46,14 @@ const CourseSelector = ({ onCourseSelect, selectedCourse, refreshKey }: CourseSe
         if (active) {
           setSuggestions(newSuggestions);
           setShowSuggestions(true);
+          setPublicError(getLastPublicCourseError());
         }
       } else {
         const defaultSuggestions = await getCourseSuggestionsAsync('');
         if (active) {
           setSuggestions(defaultSuggestions);
           setShowSuggestions(false);
+          setPublicError(getLastPublicCourseError());
         }
       }
     };
@@ -155,6 +159,11 @@ const CourseSelector = ({ onCourseSelect, selectedCourse, refreshKey }: CourseSe
       <p className="text-xs text-gray-500 mt-1">
         Start typing to search the public course database.
       </p>
+      {publicError && (
+        <p className="text-xs text-red-600 mt-1">
+          Could not fetch public courses. Results may be limited.
+        </p>
+      )}
 
       {/* Course Suggestions */}
       {showSuggestions && (
