@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Course, CourseHole } from '../types/golf';
-import { deleteCustomCourse } from '../data/courses';
+import { deleteCustomCourse } from '../services/courseService';
 
 interface CourseEditorProps {
   course: Course;

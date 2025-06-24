@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { Player, PlayerSetup as PlayerSetupType, Course } from '../types/golf';
-import { saveCustomCourse, generateCourseId, defaultCustomCourse } from '../data/courses';
+import {
+  saveCustomCourse,
+  generateCourseId,
+  defaultCustomCourse
+} from '../services/courseService';
 import CourseSelector from './CourseSelector';
 import CourseEditor from './CourseEditor';
 
@@ -58,7 +62,6 @@ const PlayerSetup: React.FC<PlayerSetupProps> = ({ onStartGame }) => {
     // Save to localStorage
     try {
       saveCustomCourse(courseToSave);
-      console.log('Custom course saved to localStorage:', courseToSave);
     } catch (error) {
       console.error('Failed to save custom course:', error);
       alert('Failed to save course. Please try again.');
@@ -91,9 +94,7 @@ const PlayerSetup: React.FC<PlayerSetupProps> = ({ onStartGame }) => {
   };
 
   const handleStartGame = () => {
-    console.log('Start game clicked');
-    console.log('Valid players:', players.slice(0, activePlayers).filter(player => player.name.trim() !== ''));
-    console.log('Selected course:', selectedCourse);
+
     
     const validPlayers = players
       .slice(0, activePlayers)
@@ -109,7 +110,6 @@ const PlayerSetup: React.FC<PlayerSetupProps> = ({ onStartGame }) => {
       return;
     }
 
-    console.log('Creating game players...');
     // Convert PlayerSetup to Player with course data
     const gamePlayers: Player[] = validPlayers.map(player => ({
       ...player,
@@ -125,10 +125,7 @@ const PlayerSetup: React.FC<PlayerSetupProps> = ({ onStartGame }) => {
       }))
     }));
 
-    console.log('Game players created:', gamePlayers);
-    console.log('Calling onStartGame...');
     onStartGame(gamePlayers, selectedCourse);
-    console.log('onStartGame called successfully');
   };
 
   if (showCourseEditor && courseToEdit) {
