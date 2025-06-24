@@ -277,7 +277,7 @@ const ScoreCard = ({ game, onUpdateScore }: ScoreCardProps) => {
                                 "strokes",
                               )
                             }
-                            className={`mx-auto w-8 h-8 flex items-center justify-center hover:bg-gray-200 transition-colors text-sm ${getScoreColor(
+                            className={`mx-auto w-10 h-10 md:w-8 md:h-8 flex items-center justify-center rounded border border-gray-300 bg-white hover:bg-gray-200 transition-colors text-sm ${getScoreColor(
                               value,
                               hole.par,
                             )} ${getScoreBorderStyle(value, hole.par)}`}
@@ -411,7 +411,7 @@ const ScoreCard = ({ game, onUpdateScore }: ScoreCardProps) => {
                                 "putts",
                               )
                             }
-                            className={`w-full py-1 rounded hover:bg-gray-200 transition-colors text-xs ${
+                            className={`w-full py-2 md:py-1 rounded border border-gray-300 bg-white hover:bg-gray-200 transition-colors text-xs ${
                               value > 0 ? "bg-green-100" : ""
                             }`}
                           >
@@ -469,8 +469,9 @@ const ScoreCard = ({ game, onUpdateScore }: ScoreCardProps) => {
                       <tr key={hole.holeNumber}>
                         <td className="border px-2 py-1">
                           <div className="font-medium">{hole.holeNumber}</div>
-                          <div className="text-xs text-gray-600">
-                            Par {hole.par}
+                          <div className="text-xs text-gray-600 flex items-center space-x-1">
+                            <span>Par {hole.par}</span>
+                            <span className="text-gray-500">H{hole.handicap}</span>
                           </div>
                         </td>
                         <td className="border px-2 py-1 text-center">
@@ -500,7 +501,7 @@ const ScoreCard = ({ game, onUpdateScore }: ScoreCardProps) => {
                                   "strokes",
                                 )
                               }
-                              className={`mx-auto w-8 h-8 flex items-center justify-center hover:bg-gray-200 transition-colors text-sm ${getScoreColor(hole.strokes, hole.par)} ${getScoreBorderStyle(hole.strokes, hole.par)}`}
+                              className={`mx-auto w-10 h-10 md:w-8 md:h-8 flex items-center justify-center rounded border border-gray-300 bg-white hover:bg-gray-200 transition-colors text-sm ${getScoreColor(hole.strokes, hole.par)} ${getScoreBorderStyle(hole.strokes, hole.par)}`}
                               style={{
                                 ...getCrossHatchStyle(hole.strokes, hole.par),
                                 ...getDoubleCircleStyle(hole.strokes, hole.par),
@@ -547,7 +548,7 @@ const ScoreCard = ({ game, onUpdateScore }: ScoreCardProps) => {
                                   "putts",
                                 )
                               }
-                              className={`w-full py-1 rounded hover:bg-gray-200 transition-colors text-xs ${hole.putts > 0 ? "bg-green-100" : ""}`}
+                              className={`w-full py-2 md:py-1 rounded border border-gray-300 bg-white hover:bg-gray-200 transition-colors text-xs ${hole.putts > 0 ? "bg-green-100" : ""}`}
                             >
                               {hole.putts > 0 ? hole.putts : "-"}
                             </button>
