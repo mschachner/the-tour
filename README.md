@@ -22,7 +22,8 @@ A modern, responsive golf score tracking application built with React and TypeSc
   - Augusta National Golf Club (GA)
   - St Andrews Old Course (Scotland)
 - **Public Course Database**: Search hundreds of courses online by typing a
-  course name into the selector
+  course name into the selector. Matching results appear automatically as you
+  type.
 - **Custom Course Builder**: Create and edit your own courses
 - **Course Details**: Par, handicap, distance, and hole descriptions
 - **Local Storage**: Save custom courses for future games
@@ -106,9 +107,9 @@ The app includes three world-famous golf courses:
 - **Pebble Beach Golf Links**: Iconic oceanside course
 - **Augusta National**: Home of The Masters
 - **St Andrews Old Course**: The birthplace of golf
-- **Search Public Database**: Quickly find new courses online.
-  Simply start typing a course name in the selector and matching courses from
-  the public database will appear.
+- **Search Public Database**: Quickly find new courses online. Start typing a
+  course name in the selector and matching courses from the public database
+  will appear immediately.
 
 #### Creating Custom Courses
 1. Select "Create Custom Course" during setup

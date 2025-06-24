@@ -152,24 +152,62 @@ export const getAllCoursesAsync = async (): Promise<Course[]> => {
   return [...builtInCourses, ...remote, ...custom];
 };
 
+// Remote search for courses matching a query string
+const searchCache: Record<string, Course[]> = {};
+
+export const searchPublicCourses = async (query: string): Promise<Course[]> => {
+  const term = query.trim().toLowerCase();
+
+  if (searchCache[term]) {
+    return searchCache[term];
+  }
+
+  const baseUrl = 'https://golf-courses-api.vercel.app/courses';
+  const url = term ? `${baseUrl}?search=${encodeURIComponent(term)}` : baseUrl;
+
+  try {
+    const resp = await fetch(url);
+    if (!resp.ok) {
+      throw new Error(`HTTP ${resp.status}`);
+    }
+
+    const data = await resp.json();
+    const courses: unknown = Array.isArray(data) ? data : (data.courses ?? []);
+
+    if (Array.isArray(courses)) {
+      searchCache[term] = courses as Course[];
+      return searchCache[term];
+    }
+  } catch (err) {
+    console.error('Error searching public courses:', err);
+  }
+
+  return [];
+};
+
 export const getCourseSuggestionsAsync = async (input: string): Promise<Course[]> => {
-  const allCourses = await getAllCoursesAsync();
+  const trimmed = input.trim();
 
-  if (!input.trim()) {
-    const custom = loadCustomCourses().slice(-2);
-    const builtIn = builtInCourses.slice(0, 3);
-    return [...builtIn, ...custom].slice(0, 5);
+  const localSuggestions = getCourseSuggestions(input).filter(c => c.id !== 'custom-course');
+
+  if (!trimmed) {
+    return localSuggestions.slice(0, 5);
   }
 
-  const term = input.toLowerCase().trim();
-  const filtered = allCourses.filter(course =>
-    course.name.toLowerCase().includes(term) ||
-    course.location?.toLowerCase().includes(term)
-  );
+  const remote = await searchPublicCourses(trimmed);
+  const combined: Course[] = [...remote, ...localSuggestions];
 
-  if (!filtered.some(c => c.id === 'custom-course')) {
-    filtered.push(defaultCustomCourse);
+  if (!combined.some(c => c.id === 'custom-course')) {
+    combined.push(defaultCustomCourse);
   }
 
-  return filtered.slice(0, 5);
+  // Remove duplicate courses by id while preserving order
+  const seen = new Set<string>();
+  const unique = combined.filter(course => {
+    if (seen.has(course.id)) return false;
+    seen.add(course.id);
+    return true;
+  });
+
+  return unique.slice(0, 5);
 };
