@@ -1,46 +1,213 @@
-# Getting Started with Create React App
+# 🏌️ The Tour - Golf Score Tracker
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A modern, responsive golf score tracking application built with React and TypeScript. Track your games, manage players, and customize courses with an intuitive interface designed for golfers of all skill levels.
 
-## Available Scripts
+![Golf Score Tracker](https://img.shields.io/badge/Golf-Score%20Tracker-green?style=for-the-badge&logo=golf)
+![React](https://img.shields.io/badge/React-19.1.0-blue?style=flat-square&logo=react)
+![TypeScript](https://img.shields.io/badge/TypeScript-4.9.5-blue?style=flat-square&logo=typescript)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4.17-blue?style=flat-square&logo=tailwindcss)
 
-In the project directory, you can run:
+## ✨ Features
 
-### `npm start`
+### 🎯 Core Functionality
+- **Real-time Score Tracking**: Track strokes and putts for up to 4 players
+- **Course Management**: Choose from famous courses or create custom ones
+- **Player Setup**: Add players with handicaps and personal information
+- **Live Scoring**: Update scores hole-by-hole with instant calculations
+- **Total Score Calculation**: Automatic score totaling and handicap tracking
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+### 🏟️ Course Features
+- **Pre-loaded Famous Courses**:
+  - Pebble Beach Golf Links (CA)
+  - Augusta National Golf Club (GA)
+  - St Andrews Old Course (Scotland)
+- **Custom Course Builder**: Create and edit your own courses
+- **Course Details**: Par, handicap, distance, and hole descriptions
+- **Local Storage**: Save custom courses for future games
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+### 📱 User Experience
+- **Responsive Design**: Works seamlessly on desktop, tablet, and mobile
+- **Intuitive Interface**: Clean, modern UI with golf-themed styling
+- **Progressive Enhancement**: Graceful degradation for all devices
+- **Real-time Updates**: Instant score updates without page refreshes
 
-### `npm test`
+## 🚀 Quick Start
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Prerequisites
+- Node.js (16.0 or higher)
+- npm or yarn package manager
 
-### `npm run build`
+### Installation
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/mschachner/the-tour.git
+   cd the-tour
+   ```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+3. **Start the development server**
+   ```bash
+   npm start
+   ```
 
-### `npm run eject`
+4. **Open your browser**
+   Navigate to [http://localhost:3000](http://localhost:3000)
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+## 🏗️ Project Structure
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```
+the-tour/
+├── src/
+│   ├── components/           # React components
+│   │   ├── PlayerSetup.tsx   # Player configuration
+│   │   ├── ScoreCard.tsx     # Score tracking interface
+│   │   ├── CourseSelector.tsx # Course selection
+│   │   └── CourseEditor.tsx  # Custom course builder
+│   ├── data/
+│   │   └── courses.ts        # Course data and management
+│   ├── types/
+│   │   └── golf.ts          # TypeScript type definitions
+│   ├── App.tsx              # Main application component
+│   └── index.tsx            # Application entry point
+├── public/                  # Static assets
+└── package.json            # Project dependencies
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+## 🎮 How to Use
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+### Starting a New Game
 
-## Learn More
+1. **Select a Course**
+   - Choose from pre-loaded famous courses
+   - Create a custom course
+   - Edit existing course details
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+2. **Add Players**
+   - Set number of players (1-4)
+   - Enter player names
+   - Add handicaps for accurate scoring
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+3. **Start Playing**
+   - Track strokes and putts for each hole
+   - View running totals and statistics
+   - Navigate between holes seamlessly
+
+### Course Management
+
+#### Using Pre-loaded Courses
+The app includes three world-famous golf courses:
+- **Pebble Beach Golf Links**: Iconic oceanside course
+- **Augusta National**: Home of The Masters
+- **St Andrews Old Course**: The birthplace of golf
+
+#### Creating Custom Courses
+1. Select "Create Custom Course" during setup
+2. Configure 18 holes with:
+   - Par values (3, 4, or 5)
+   - Handicap ratings (1-18)
+   - Distances (optional)
+   - Hole descriptions (optional)
+3. Save for future use
+
+## 🛠️ Technical Details
+
+### Built With
+- **React 19.1.0**: Modern React with hooks and functional components
+- **TypeScript 4.9.5**: Type-safe JavaScript development
+- **Tailwind CSS 3.4.17**: Utility-first CSS framework
+- **Local Storage**: Persistent data storage for custom courses
+
+### Key Components
+
+#### Game State Management
+```typescript
+interface Game {
+  id: string;
+  date: string;
+  course: Course;
+  players: Player[];
+  currentHole: number;
+  totalHoles: number;
+}
+```
+
+#### Player Tracking
+```typescript
+interface Player {
+  id: string;
+  name: string;
+  handicap: number;
+  totalScore: number;
+  totalPutts: number;
+  holes: HoleScore[];
+}
+```
+
+#### Course Definition
+```typescript
+interface Course {
+  id: string;
+  name: string;
+  location?: string;
+  holes: CourseHole[];
+  totalPar: number;
+  totalDistance?: number;
+}
+```
+
+## 📱 Responsive Design
+
+The application is fully responsive and optimized for:
+- **Desktop**: Full-featured experience with expanded layouts
+- **Tablet**: Touch-optimized interface with readable fonts
+- **Mobile**: Compact design perfect for on-course use
+
+## 🎨 Styling
+
+The app uses a golf-themed color palette:
+- **Primary**: Golf course greens and sky blues
+- **Accent**: Clean whites and subtle grays
+- **Interactive**: Hover states and smooth transitions
+- **Typography**: Clear, readable fonts optimized for outdoor use
+
+## 🔧 Development
+
+### Available Scripts
+
+```bash
+npm start          # Start development server
+npm test           # Run test suite
+npm run build      # Build for production
+npm run eject      # Eject from Create React App
+```
+
+### Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🏌️ About
+
+The Tour was created to provide golfers with a simple, elegant way to track their games. Whether you're playing at your local course or dreaming of famous fairways, this app helps you focus on what matters most - enjoying the game.
+
+Perfect for:
+- **Casual Golfers**: Simple score tracking
+- **Serious Players**: Detailed statistics and handicap tracking
+- **Course Managers**: Custom course creation
+- **Golf Groups**: Multi-player game management
+
+---
+
+**Ready to improve your game?** Clone the repository and start tracking your scores today! 🏌️‍♂️⛳

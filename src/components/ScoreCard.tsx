@@ -1,0 +1,397 @@
+import React, { useState } from 'react';
+import { Game, Player, HoleScore } from '../types/golf';
+
+interface ScoreCardProps {
+  game: Game;
+  onUpdateScore: (playerId: string, holeNumber: number, strokes: number, putts: number) => void;
+}
+
+const ScoreCard: React.FC<ScoreCardProps> = ({ game, onUpdateScore }) => {
+  const [editingCell, setEditingCell] = useState<{ playerId: string; holeNumber: number; type: 'strokes' | 'putts' } | null>(null);
+  const [editingValue, setEditingValue] = useState<string>('');
+
+  const handleCellClick = (playerId: string, holeNumber: number, type: 'strokes' | 'putts') => {
+    const player = game.players.find(p => p.id === playerId);
+    if (player) {
+      const hole = player.holes.find(h => h.holeNumber === holeNumber);
+      if (hole) {
+        const currentValue = type === 'strokes' ? hole.strokes : hole.putts;
+        setEditingValue(currentValue > 0 ? currentValue.toString() : '');
+      }
+    }
+    setEditingCell({ playerId, holeNumber, type });
+  };
+
+  const handleCellChange = (value: string) => {
+    if (!editingCell) return;
+    
+    const numValue = parseInt(value) || 0;
+    const { playerId, holeNumber, type } = editingCell;
+    const player = game.players.find(p => p.id === playerId);
+    
+    if (player) {
+      const hole = player.holes.find(h => h.holeNumber === holeNumber);
+      if (hole) {
+        const newStrokes = type === 'strokes' ? numValue : hole.strokes;
+        const newPutts = type === 'putts' ? numValue : hole.putts;
+        onUpdateScore(playerId, holeNumber, newStrokes, newPutts);
+      }
+    }
+    
+    setEditingCell(null);
+    setEditingValue('');
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEditingValue(e.target.value);
+  };
+
+  const isEditing = (playerId: string, holeNumber: number, type: 'strokes' | 'putts') => {
+    return editingCell?.playerId === playerId && 
+           editingCell?.holeNumber === holeNumber && 
+           editingCell?.type === type;
+  };
+
+  const getScoreColor = (strokes: number, par: number) => {
+    if (strokes === 0) return '';
+    if (strokes < par) return 'bg-green-100 text-green-800';
+    if (strokes === par) return 'bg-blue-100 text-blue-800';
+    if (strokes === par + 1) return 'bg-yellow-100 text-yellow-800';
+    return 'bg-red-100 text-red-800';
+  };
+
+  const getScoreBorderStyle = (strokes: number, par: number) => {
+    if (strokes === 0) return '';
+    if (strokes === par - 2) return 'border-2 border-green-600 rounded-full'; // Double circle for eagle
+    if (strokes < par) return 'border-2 border-green-600 rounded-full'; // Circle for birdie
+    if (strokes === par) return ''; // No special border for par
+    if (strokes === par + 1) return 'border-2 border-yellow-600'; // Square for bogey
+    if (strokes === par + 2) return 'border-2 border-red-600'; // Double square for double bogey
+    return 'border-2 border-red-800 relative'; // Cross-hatched for triple bogey+
+  };
+
+  const getDoubleCircleStyle = (strokes: number, par: number) => {
+    if (strokes === par - 2) {
+      return {
+        boxShadow: 'inset 0 0 0 2px white, inset 0 0 0 4px green'
+      };
+    }
+    return {};
+  };
+
+  const getDoubleSquareStyle = (strokes: number, par: number) => {
+    if (strokes === par + 2) {
+      return {
+        boxShadow: 'inset 0 0 0 2px white, inset 0 0 0 4px red'
+      };
+    }
+    return {};
+  };
+
+  const getCrossHatchStyle = (strokes: number, par: number) => {
+    if (strokes > par + 2) {
+      return {
+        background: `linear-gradient(45deg, rgba(255,255,255,0.8) 40%, rgba(139,0,0,0.6) 40%, rgba(139,0,0,0.6) 60%, rgba(255,255,255,0.8) 60%), 
+                     linear-gradient(-45deg, rgba(255,255,255,0.8) 40%, rgba(139,0,0,0.6) 40%, rgba(139,0,0,0.6) 60%, rgba(255,255,255,0.8) 60%)`,
+        backgroundSize: '6px 6px'
+      };
+    }
+    return {};
+  };
+
+  const getScoreDisplay = (strokes: number, par: number) => {
+    if (strokes === 0) return '-';
+    return `${strokes}`;
+  };
+
+  const calculateTotalToPar = (player: Player) => {
+    return player.holes.reduce((total: number, hole: HoleScore) => {
+      if (hole.strokes > 0) {
+        return total + (hole.strokes - hole.par);
+      }
+      return total;
+    }, 0);
+  };
+
+  const calculateAdjustedScore = (player: Player) => {
+    if (player.handicap === 0) return player.totalScore;
+    
+    // Sort holes by handicap (lowest to highest) - easiest holes first
+    const sortedHoles = [...player.holes].sort((a, b) => a.holeHandicap - b.holeHandicap);
+    
+    let adjustedScore = player.totalScore;
+    let strokesToDeduct = 0;
+    
+    // Apply strokes starting from easiest holes (lowest handicap numbers)
+    // For handicap > 18, we cycle through holes multiple times
+    for (let i = 0; i < player.handicap; i++) {
+      const cycleIndex = i % 18; // Which hole in the current cycle
+      const hole = sortedHoles[cycleIndex];
+      if (hole && hole.strokes > 0) {
+        strokesToDeduct++;
+      }
+    }
+    
+    return adjustedScore - strokesToDeduct;
+  };
+
+  const getAdjustedScoreForHole = (player: Player, holeNumber: number) => {
+    if (player.handicap === 0) return null;
+    
+    const hole = player.holes.find(h => h.holeNumber === holeNumber);
+    if (!hole || hole.strokes === 0) return null;
+    
+    // Calculate how many strokes this player gets on this hole
+    const sortedHoles = [...player.holes].sort((a, b) => a.holeHandicap - b.holeHandicap);
+    const holeIndex = sortedHoles.findIndex(h => h.holeNumber === holeNumber);
+    
+    // Calculate strokes to deduct for this specific hole
+    let strokesToDeduct = 0;
+    
+    // For each stroke in the handicap, check if this hole gets it
+    for (let i = 0; i < player.handicap; i++) {
+      const cycleIndex = i % 18; // Which hole in the current cycle
+      if (cycleIndex === holeIndex) {
+        strokesToDeduct++;
+      }
+    }
+    
+    // Return adjusted score if strokes are deducted, otherwise return original score
+    return strokesToDeduct > 0 ? hole.strokes - strokesToDeduct : hole.strokes;
+  };
+
+  const calculateAdjustedToPar = (player: Player) => {
+    const adjustedScore = calculateAdjustedScore(player);
+    return adjustedScore - game.course.totalPar;
+  };
+
+  return (
+    <div className="golf-card overflow-x-auto">
+      <h3 className="text-xl font-bold text-gray-800 mb-4">Score Card</h3>
+      
+      <div className="min-w-full">
+        <table className="w-full border-collapse">
+          <thead>
+            <tr className="bg-gray-100">
+              <th className="border border-gray-300 px-3 py-2 text-left font-semibold">Player</th>
+              <th className="border border-gray-300 px-3 py-2 text-center font-semibold">Handicap</th>
+              {game.course.holes.map((hole) => (
+                <th key={hole.holeNumber} className="border border-gray-300 px-2 py-2 text-center font-semibold text-sm">
+                  <div>{hole.holeNumber}</div>
+                  <div className="text-xs text-gray-600">Par {hole.par}</div>
+                  <div className="text-xs text-gray-500">H{hole.handicap}</div>
+                </th>
+              ))}
+              <th className="border border-gray-300 px-3 py-2 text-center font-semibold">Total</th>
+              <th className="border border-gray-300 px-3 py-2 text-center font-semibold">To Par</th>
+              <th className="border border-gray-300 px-3 py-2 text-center font-semibold">Putts</th>
+            </tr>
+          </thead>
+          <tbody>
+            {game.players.map((player, playerIndex) => (
+              <React.Fragment key={player.id}>
+                {/* Strokes Row */}
+                <tr className={playerIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                  <td className="border border-gray-300 px-3 py-2 font-medium">
+                    {player.name}
+                  </td>
+                  <td className="border border-gray-300 px-3 py-2 text-center">
+                    {player.handicap}
+                  </td>
+                  {player.holes.map((hole) => {
+                    const value = hole.strokes;
+                    const editing = isEditing(player.id, hole.holeNumber, 'strokes');
+                    
+                    return (
+                      <td key={hole.holeNumber} className="border border-gray-300 px-2 py-1 text-center">
+                        {editing ? (
+                          <input
+                            type="number"
+                            value={editingValue}
+                            onChange={handleInputChange}
+                            onBlur={(e) => handleCellChange(e.target.value)}
+                            onKeyPress={(e) => e.key === 'Enter' && handleCellChange((e.target as HTMLInputElement).value)}
+                            className="w-12 text-center border border-gray-300 rounded px-1"
+                            autoFocus
+                            min="1"
+                            max="20"
+                          />
+                        ) : (
+                          <button
+                            onClick={() => handleCellClick(player.id, hole.holeNumber, 'strokes')}
+                            className={`w-full py-1 hover:bg-gray-200 transition-colors text-sm ${
+                              getScoreColor(value, hole.par)
+                            } ${getScoreBorderStyle(value, hole.par)}`}
+                            style={{
+                              ...getCrossHatchStyle(value, hole.par),
+                              ...getDoubleCircleStyle(value, hole.par),
+                              ...getDoubleSquareStyle(value, hole.par)
+                            }}
+                          >
+                            {getScoreDisplay(value, hole.par)}
+                          </button>
+                        )}
+                      </td>
+                    );
+                  })}
+                  <td className="border border-gray-300 px-3 py-2 text-center font-bold bg-blue-100">
+                    {player.totalScore}
+                  </td>
+                  <td className="border border-gray-300 px-3 py-2 text-center font-bold bg-purple-100">
+                    {(() => {
+                      const toPar = calculateTotalToPar(player);
+                      if (toPar === 0) return 'E';
+                      return toPar > 0 ? `+${toPar}` : `${toPar}`;
+                    })()}
+                  </td>
+                  <td className="border border-gray-300 px-3 py-2 text-center font-bold bg-green-100">
+                    {player.totalPutts}
+                  </td>
+                </tr>
+
+                {/* Adjusted Score Row (only show if player has handicap) */}
+                {player.handicap > 0 && (
+                  <tr className={playerIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                    <td className="border border-gray-300 px-3 py-1 text-xs text-gray-500">
+                      Adjusted
+                    </td>
+                    <td className="border border-gray-300 px-3 py-1 text-xs text-gray-500">
+                      ({player.handicap})
+                    </td>
+                    {player.holes.map((hole) => {
+                      const adjustedScore = getAdjustedScoreForHole(player, hole.holeNumber);
+                      
+                      return (
+                        <td key={hole.holeNumber} className="border border-gray-300 px-2 py-1 text-center">
+                          {adjustedScore !== null ? (
+                            <div className={`text-xs font-medium ${
+                              adjustedScore < hole.strokes ? 'text-blue-600' : 'text-gray-600'
+                            }`}>
+                              {adjustedScore}
+                            </div>
+                          ) : (
+                            <div className="text-xs text-gray-400">-</div>
+                          )}
+                        </td>
+                      );
+                    })}
+                    <td className="border border-gray-300 px-3 py-1 text-center font-bold bg-blue-50 text-blue-700 text-sm">
+                      {calculateAdjustedScore(player)}
+                    </td>
+                    <td className="border border-gray-300 px-3 py-1 text-center font-bold bg-purple-50 text-purple-700 text-sm">
+                      {(() => {
+                        const adjustedToPar = calculateAdjustedToPar(player);
+                        if (adjustedToPar === 0) return 'E';
+                        return adjustedToPar > 0 ? `+${adjustedToPar}` : `${adjustedToPar}`;
+                      })()}
+                    </td>
+                    <td className="border border-gray-300 px-3 py-1"></td>
+                  </tr>
+                )}
+                
+                {/* Putts Row */}
+                <tr className={playerIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                  <td className="border border-gray-300 px-3 py-1 text-xs text-gray-500">
+                    Putts
+                  </td>
+                  <td className="border border-gray-300 px-3 py-1"></td>
+                  {player.holes.map((hole) => {
+                    const value = hole.putts;
+                    const editing = isEditing(player.id, hole.holeNumber, 'putts');
+                    
+                    return (
+                      <td key={hole.holeNumber} className="border border-gray-300 px-2 py-1 text-center">
+                        {editing ? (
+                          <input
+                            type="number"
+                            value={editingValue}
+                            onChange={handleInputChange}
+                            onBlur={(e) => handleCellChange(e.target.value)}
+                            onKeyPress={(e) => e.key === 'Enter' && handleCellChange((e.target as HTMLInputElement).value)}
+                            className="w-8 text-center border border-gray-300 rounded px-1 text-xs"
+                            autoFocus
+                            min="0"
+                            max="10"
+                          />
+                        ) : (
+                          <button
+                            onClick={() => handleCellClick(player.id, hole.holeNumber, 'putts')}
+                            className={`w-full py-1 rounded hover:bg-gray-200 transition-colors text-xs ${
+                              value > 0 ? 'bg-green-100' : ''
+                            }`}
+                          >
+                            {value > 0 ? value : '-'}
+                          </button>
+                        )}
+                      </td>
+                    );
+                  })}
+                  <td className="border border-gray-300 px-3 py-1"></td>
+                  <td className="border border-gray-300 px-3 py-1"></td>
+                  <td className="border border-gray-300 px-3 py-1"></td>
+                </tr>
+              </React.Fragment>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      
+      {/* Summary */}
+      <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {game.players.map(player => {
+          const toPar = calculateTotalToPar(player);
+          const adjustedScore = calculateAdjustedScore(player);
+          const adjustedToPar = calculateAdjustedToPar(player);
+          
+          return (
+            <div key={player.id} className="bg-gray-50 rounded-lg p-4">
+              <h4 className="font-semibold text-gray-800 mb-2">{player.name}</h4>
+              <div className="space-y-1 text-sm">
+                <div className="flex justify-between">
+                  <span>Total Score:</span>
+                  <span className="font-bold text-blue-600">{player.totalScore}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>To Par:</span>
+                  <span className={`font-bold ${
+                    toPar === 0 ? 'text-gray-600' : 
+                    toPar > 0 ? 'text-red-600' : 'text-green-600'
+                  }`}>
+                    {toPar === 0 ? 'E' : toPar > 0 ? `+${toPar}` : `${toPar}`}
+                  </span>
+                </div>
+                {player.handicap > 0 && (
+                  <>
+                    <div className="flex justify-between">
+                      <span>Adjusted Score:</span>
+                      <span className="font-bold text-blue-600">{adjustedScore}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Adjusted To Par:</span>
+                      <span className={`font-bold ${
+                        adjustedToPar === 0 ? 'text-gray-600' : 
+                        adjustedToPar > 0 ? 'text-red-600' : 'text-green-600'
+                      }`}>
+                        {adjustedToPar === 0 ? 'E' : adjustedToPar > 0 ? `+${adjustedToPar}` : `${adjustedToPar}`}
+                      </span>
+                    </div>
+                  </>
+                )}
+                <div className="flex justify-between">
+                  <span>Total Putts:</span>
+                  <span className="font-bold text-green-600">{player.totalPutts}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Handicap:</span>
+                  <span className="font-bold">{player.handicap}</span>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+export default ScoreCard; 

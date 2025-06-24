@@ -1,0 +1,227 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { Course } from '../types/golf';
+import { getCourseSuggestions, findCourseByName, defaultCustomCourse, loadCustomCourses, deleteCustomCourse } from '../data/courses';
+
+interface CourseSelectorProps {
+  onCourseSelect: (course: Course) => void;
+  selectedCourse?: Course | null;
+  refreshKey?: number;
+}
+
+const CourseSelector: React.FC<CourseSelectorProps> = ({ onCourseSelect, selectedCourse, refreshKey }) => {
+  const [inputValue, setInputValue] = useState(selectedCourse?.name || '');
+  const [suggestions, setSuggestions] = useState<Course[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isCustomCourse, setIsCustomCourse] = useState(false);
+  const [showSavedCourses, setShowSavedCourses] = useState(false);
+  const [savedCourses, setSavedCourses] = useState<Course[]>([]);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Load saved custom courses
+  useEffect(() => {
+    const customCourses = loadCustomCourses();
+    setSavedCourses(customCourses);
+  }, [refreshKey]);
+
+  useEffect(() => {
+    if (inputValue.trim()) {
+      const newSuggestions = getCourseSuggestions(inputValue);
+      setSuggestions(newSuggestions);
+      setShowSuggestions(true);
+    } else {
+      const defaultSuggestions = getCourseSuggestions('');
+      setSuggestions(defaultSuggestions);
+      setShowSuggestions(false);
+    }
+  }, [inputValue, refreshKey]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setInputValue(value);
+    setIsCustomCourse(false);
+  };
+
+  const handleSuggestionClick = (course: Course) => {
+    setInputValue(course.name);
+    setShowSuggestions(false);
+    setIsCustomCourse(course.id === 'custom-course' || course.name.includes('Custom'));
+    onCourseSelect(course);
+  };
+
+  const handleInputBlur = () => {
+    // Delay hiding suggestions to allow for clicks
+    setTimeout(() => setShowSuggestions(false), 200);
+  };
+
+  const handleInputFocus = () => {
+    if (inputValue.trim()) {
+      setShowSuggestions(true);
+    } else {
+      // Show default suggestions when focused
+      const defaultSuggestions = getCourseSuggestions('');
+      setSuggestions(defaultSuggestions);
+      setShowSuggestions(true);
+    }
+  };
+
+  const handleCustomCourse = () => {
+    const customCourse: Course = {
+      ...defaultCustomCourse,
+      name: inputValue || 'Custom Course'
+    };
+    setIsCustomCourse(true);
+    onCourseSelect(customCourse);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const exactMatch = findCourseByName(inputValue);
+      if (exactMatch) {
+        handleSuggestionClick(exactMatch);
+      } else if (inputValue.trim()) {
+        handleCustomCourse();
+      }
+    }
+  };
+
+  const handleDeleteCustomCourse = (courseId: string, courseName: string) => {
+    if (window.confirm(`Are you sure you want to delete "${courseName}"?`)) {
+      deleteCustomCourse(courseId);
+      const updatedCourses = loadCustomCourses();
+      setSavedCourses(updatedCourses);
+      
+      // If the deleted course was selected, clear the selection
+      if (selectedCourse?.id === courseId) {
+        setInputValue('');
+        onCourseSelect(defaultCustomCourse);
+      }
+    }
+  };
+
+  return (
+    <div className="relative">
+      <label className="block text-sm font-medium text-gray-700 mb-2">
+        Golf Course
+      </label>
+      
+      <div className="relative">
+        <input
+          ref={inputRef}
+          type="text"
+          value={inputValue}
+          onChange={handleInputChange}
+          onBlur={handleInputBlur}
+          onFocus={handleInputFocus}
+          onKeyDown={handleKeyDown}
+          placeholder="Search for a course or enter custom course name..."
+          className="golf-input w-full pr-10"
+        />
+        
+        {inputValue && (
+          <button
+            onClick={() => setInputValue('')}
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+          >
+            ✕
+          </button>
+        )}
+      </div>
+
+      {/* Course Suggestions */}
+      {showSuggestions && (
+        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+          {suggestions.length > 0 && suggestions.map((course) => (
+            <button
+              key={course.id}
+              onClick={() => handleSuggestionClick(course)}
+              className="w-full text-left px-4 py-3 hover:bg-gray-100 border-b border-gray-200 last:border-b-0"
+            >
+              <div className="font-medium text-gray-900">{course.name}</div>
+              <div className="text-sm text-gray-600">
+                {course.location} • Par {course.totalPar}
+                {course.totalDistance && ` • ${course.totalDistance} yards`}
+              </div>
+            </button>
+          ))}
+          
+          {inputValue.trim() && (
+            <button
+              onClick={handleCustomCourse}
+              className="w-full text-left px-4 py-3 hover:bg-gray-100 border-t border-gray-200 text-blue-600 font-medium"
+            >
+              Use "{inputValue}" as custom course
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Selected Course Info */}
+      {selectedCourse && (
+        <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-md">
+          <div className="flex justify-between items-start">
+            <div>
+              <h4 className="font-semibold text-green-800">{selectedCourse.name}</h4>
+              {selectedCourse.location && (
+                <p className="text-sm text-green-600">{selectedCourse.location}</p>
+              )}
+              <p className="text-sm text-green-600">
+                Par {selectedCourse.totalPar}
+                {selectedCourse.totalDistance && ` • ${selectedCourse.totalDistance} yards`}
+              </p>
+            </div>
+            {isCustomCourse && (
+              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                Custom
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Saved Custom Courses */}
+      {savedCourses.length > 0 && (
+        <div className="mt-4">
+          <div className="flex justify-between items-center mb-2">
+            <label className="text-sm font-medium text-gray-700">
+              Saved Custom Courses ({savedCourses.length})
+            </label>
+            <button
+              onClick={() => setShowSavedCourses(!showSavedCourses)}
+              className="text-sm text-blue-600 hover:text-blue-800"
+            >
+              {showSavedCourses ? 'Hide' : 'Show'}
+            </button>
+          </div>
+          
+          {showSavedCourses && (
+            <div className="space-y-2 max-h-40 overflow-y-auto border border-gray-200 rounded-md">
+              {savedCourses.map((course) => (
+                <div key={course.id} className="flex justify-between items-center p-2 hover:bg-gray-50">
+                  <button
+                    onClick={() => handleSuggestionClick(course)}
+                    className="flex-1 text-left"
+                  >
+                    <div className="font-medium text-gray-900 text-sm">{course.name}</div>
+                    <div className="text-xs text-gray-600">
+                      {course.location} • Par {course.totalPar}
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => handleDeleteCustomCourse(course.id, course.name)}
+                    className="ml-2 text-red-500 hover:text-red-700 text-sm px-2 py-1"
+                    title="Delete course"
+                  >
+                    🗑️
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default CourseSelector; 
