@@ -1,5 +1,8 @@
-import { Course } from '../types/golf';
+import { Course, CourseHole } from '../types/golf';
 import builtInCourses, { defaultCustomCourse } from '../data/courses';
+
+const API_BASE_URL = 'https://api.golfcourseapi.com/v1';
+const API_KEY = process.env.REACT_APP_GOLFCOURSE_API_KEY || '';
 
 const CUSTOM_COURSES_KEY = 'golfer-custom-courses';
 
@@ -69,6 +72,65 @@ export const getAllCourses = (): Course[] => {
 
 export const courses = getAllCourses();
 
+interface RemoteHole {
+  par?: number;
+  yardage?: number;
+  handicap?: number;
+}
+
+interface RemoteTee {
+  par_total?: number;
+  total_yards?: number;
+  holes?: RemoteHole[];
+}
+
+interface RemoteCourse {
+  id: number;
+  club_name?: string;
+  course_name?: string;
+  location?: {
+    city?: string;
+    state?: string;
+    country?: string;
+  };
+  tees?: {
+    female?: RemoteTee[];
+    male?: RemoteTee[];
+  };
+}
+
+const mapRemoteCourse = (remote: RemoteCourse): Course => {
+  const name = remote.course_name || remote.club_name || 'Unknown Course';
+  let location = '';
+  if (remote.location) {
+    const { city, state, country } = remote.location;
+    location = [city, state, country].filter(Boolean).join(', ');
+  }
+
+  const tee = remote.tees?.male?.[0] || remote.tees?.female?.[0];
+  const holes: CourseHole[] = Array.isArray(tee?.holes)
+    ? tee!.holes!.map((h, i) => ({
+        holeNumber: i + 1,
+        par: h.par ?? 4,
+        handicap: h.handicap ?? i + 1,
+        distance: h.yardage,
+        description: ''
+      }))
+    : [];
+
+  const totalPar = tee?.par_total ?? holes.reduce((sum, h) => sum + h.par, 0);
+  const totalDistance = tee?.total_yards;
+
+  return {
+    id: String(remote.id),
+    name,
+    location,
+    holes,
+    totalPar,
+    totalDistance
+  };
+};
+
 export const findCourseByName = (name: string): Course | undefined => {
   const allCourses = getAllCourses();
   const searchName = name.toLowerCase().trim();
@@ -134,17 +196,23 @@ export const fetchPublicCourses = async (): Promise<Course[]> => {
   }
 
   try {
-    const resp = await fetch('https://golf-courses-api.vercel.app/courses');
+    const url = `${API_BASE_URL}/search?search_query=a`;
+    const resp = await fetch(url, {
+      headers: { Authorization: `Key ${API_KEY}` }
+    });
     if (!resp.ok) {
       throw new Error(`HTTP ${resp.status}`);
     }
 
     const data = await resp.json();
-    const courses: unknown = Array.isArray(data) ? data : (data.courses ?? []);
+    const courses: unknown = data.courses ?? data;
 
     if (Array.isArray(courses)) {
-      publicCoursesCache = courses as Course[];
-      localStorage.setItem(PUBLIC_COURSES_KEY, JSON.stringify(publicCoursesCache));
+      publicCoursesCache = (courses as RemoteCourse[]).map(mapRemoteCourse);
+      localStorage.setItem(
+        PUBLIC_COURSES_KEY,
+        JSON.stringify(publicCoursesCache)
+      );
       lastPublicCourseError = null;
       return publicCoursesCache;
     }
@@ -172,20 +240,27 @@ export const searchPublicCourses = async (query: string): Promise<Course[]> => {
     return searchCache[term];
   }
 
-  const baseUrl = 'https://golf-courses-api.vercel.app/courses';
-  const url = term ? `${baseUrl}?search=${encodeURIComponent(term)}` : baseUrl;
+  if (!term) {
+    const courses = await fetchPublicCourses();
+    searchCache[term] = courses;
+    return courses;
+  }
+
+  const url = `${API_BASE_URL}/search?search_query=${encodeURIComponent(term)}`;
 
   try {
-    const resp = await fetch(url);
+    const resp = await fetch(url, {
+      headers: { Authorization: `Key ${API_KEY}` }
+    });
     if (!resp.ok) {
       throw new Error(`HTTP ${resp.status}`);
     }
 
     const data = await resp.json();
-    const courses: unknown = Array.isArray(data) ? data : (data.courses ?? []);
+    const courses: unknown = data.courses ?? data;
 
     if (Array.isArray(courses)) {
-      searchCache[term] = courses as Course[];
+      searchCache[term] = (courses as RemoteCourse[]).map(mapRemoteCourse);
       lastPublicCourseError = null;
       return searchCache[term];
     }

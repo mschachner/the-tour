@@ -113,11 +113,10 @@ The app includes three world-famous golf courses:
 
 ### Public Course Database
 
-The course selector queries the public API at
-`https://golf-courses-api.vercel.app/courses` whenever you search for a course
-name. An active internet connection is required. If the request fails, you'll
-see a notice below the selector and only the built-in courses will be
-available.
+The course selector now uses **GolfCourseAPI** at
+`https://api.golfcourseapi.com/v1/search` to find remote courses. Set your API
+key in the `REACT_APP_GOLFCOURSE_API_KEY` environment variable before starting
+the app. If the request fails, only the built-in courses will be available.
 
 #### Creating Custom Courses
 1. Select "Create Custom Course" during setup
