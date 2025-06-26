@@ -1,30 +1,6 @@
 import { useState, Fragment } from "react";
 import type { ChangeEvent } from "react";
-import { Game, Player, HoleScore, CourseHole } from "../types/golf";
-
-const getClosestHoleForSide = (
-  holes: CourseHole[],
-  closest: Record<number, string | null>,
-  side: "front" | "back",
-): number | null => {
-  const [start, end] = side === "front" ? [1, 9] : [10, 18];
-  const par3Holes = holes
-    .filter(
-      (h) => h.holeNumber >= start && h.holeNumber <= end && h.par === 3,
-    )
-    .map((h) => h.holeNumber)
-    .sort((a, b) => a - b);
-
-  for (const hole of par3Holes) {
-    const val = closest[hole];
-    if (val === undefined) return hole; // first eligible par-3 not set yet
-    if (val === null) continue; // allow next par-3 if no winner
-    // once a winner exists, no further holes are eligible
-    return null;
-  }
-
-  return null;
-};
+import { Game, Player, HoleScore } from "../types/golf";
 
 interface ScoreCardProps {
   game: Game;
@@ -81,18 +57,6 @@ const ScoreCard = ({ game, onUpdateScore, onUpdateClosest }: ScoreCardProps) => 
     setEditingValue(e.target.value);
   };
 
-<<<<<<< m6f5ls-codex/add--closest-to-pin--skin-feature
-  const frontClosestHole = getClosestHoleForSide(
-    game.course.holes,
-    game.closestToPin,
-    "front",
-  );
-  const backClosestHole = getClosestHoleForSide(
-    game.course.holes,
-    game.closestToPin,
-    "back",
-  );
-=======
   const getClosestHoleForSide = (side: "front" | "back"): number | null => {
     const [start, end] = side === "front" ? [1, 9] : [10, 18];
     const par3Holes = game.course.holes
@@ -115,7 +79,6 @@ const ScoreCard = ({ game, onUpdateScore, onUpdateClosest }: ScoreCardProps) => 
 
   const frontClosestHole = getClosestHoleForSide("front");
   const backClosestHole = getClosestHoleForSide("back");
->>>>>>> main
   const isClosestHole = (holeNumber: number) =>
     holeNumber === frontClosestHole || holeNumber === backClosestHole;
 
