@@ -16,39 +16,35 @@ const ScoreCard = ({ game, onUpdateScore }: ScoreCardProps) => {
   const [editingCell, setEditingCell] = useState<{
     playerId: string;
     holeNumber: number;
-    type: "strokes" | "putts";
   } | null>(null);
   const [editingValue, setEditingValue] = useState<string>("");
 
   const handleCellClick = (
     playerId: string,
     holeNumber: number,
-    type: "strokes" | "putts",
   ) => {
     const player = game.players.find((p) => p.id === playerId);
     if (player) {
       const hole = player.holes.find((h) => h.holeNumber === holeNumber);
       if (hole) {
-        const currentValue = type === "strokes" ? hole.strokes : hole.putts;
+        const currentValue = hole.strokes;
         setEditingValue(currentValue > 0 ? currentValue.toString() : "");
       }
     }
-    setEditingCell({ playerId, holeNumber, type });
+    setEditingCell({ playerId, holeNumber });
   };
 
   const handleCellChange = (value: string) => {
     if (!editingCell) return;
 
     const numValue = parseInt(value) || 0;
-    const { playerId, holeNumber, type } = editingCell;
+    const { playerId, holeNumber } = editingCell;
     const player = game.players.find((p) => p.id === playerId);
 
     if (player) {
       const hole = player.holes.find((h) => h.holeNumber === holeNumber);
       if (hole) {
-        const newStrokes = type === "strokes" ? numValue : hole.strokes;
-        const newPutts = type === "putts" ? numValue : hole.putts;
-        onUpdateScore(playerId, holeNumber, newStrokes, newPutts);
+        onUpdateScore(playerId, holeNumber, numValue, hole.putts);
       }
     }
 
@@ -60,15 +56,10 @@ const ScoreCard = ({ game, onUpdateScore }: ScoreCardProps) => {
     setEditingValue(e.target.value);
   };
 
-  const isEditing = (
-    playerId: string,
-    holeNumber: number,
-    type: "strokes" | "putts",
-  ) => {
+  const isEditing = (playerId: string, holeNumber: number) => {
     return (
       editingCell?.playerId === playerId &&
-      editingCell?.holeNumber === holeNumber &&
-      editingCell?.type === type
+      editingCell?.holeNumber === holeNumber
     );
   };
 
@@ -220,9 +211,6 @@ const ScoreCard = ({ game, onUpdateScore }: ScoreCardProps) => {
               <th className="border border-gray-300 px-3 py-2 text-center font-semibold">
                 To Par
               </th>
-              <th className="border border-gray-300 px-3 py-2 text-center font-semibold">
-                Putts
-              </th>
             </tr>
           </thead>
           <tbody>
@@ -243,7 +231,6 @@ const ScoreCard = ({ game, onUpdateScore }: ScoreCardProps) => {
                     const editing = isEditing(
                       player.id,
                       hole.holeNumber,
-                      "strokes",
                     );
 
                     return (
@@ -274,7 +261,6 @@ const ScoreCard = ({ game, onUpdateScore }: ScoreCardProps) => {
                               handleCellClick(
                                 player.id,
                                 hole.holeNumber,
-                                "strokes",
                               )
                             }
                             className={`mx-auto w-10 h-10 md:w-8 md:h-8 flex items-center justify-center rounded border border-gray-300 bg-white hover:bg-gray-200 transition-colors text-sm ${getScoreColor(
@@ -302,9 +288,6 @@ const ScoreCard = ({ game, onUpdateScore }: ScoreCardProps) => {
                       if (toPar === 0) return "E";
                       return toPar > 0 ? `+${toPar}` : `${toPar}`;
                     })()}
-                  </td>
-                  <td className="border border-gray-300 px-3 py-2 text-center font-bold bg-green-100">
-                    {player.totalPutts}
                   </td>
                 </tr>
 
@@ -360,71 +343,9 @@ const ScoreCard = ({ game, onUpdateScore }: ScoreCardProps) => {
                           : `${adjustedToPar}`;
                       })()}
                     </td>
-                    <td className="border border-gray-300 px-3 py-1"></td>
                   </tr>
                 )}
 
-                {/* Putts Row */}
-                <tr
-                  className={playerIndex % 2 === 0 ? "bg-white" : "bg-gray-50"}
-                >
-                  <td className="border border-gray-300 px-3 py-1 text-xs text-gray-500">
-                    Putts
-                  </td>
-                  <td className="border border-gray-300 px-3 py-1"></td>
-                  {player.holes.map((hole) => {
-                    const value = hole.putts;
-                    const editing = isEditing(
-                      player.id,
-                      hole.holeNumber,
-                      "putts",
-                    );
-
-                    return (
-                      <td
-                        key={hole.holeNumber}
-                        className="border border-gray-300 px-2 py-1 text-center"
-                      >
-                        {editing ? (
-                          <input
-                            type="number"
-                            value={editingValue}
-                            onChange={handleInputChange}
-                            onBlur={(e) => handleCellChange(e.target.value)}
-                            onKeyPress={(e) =>
-                              e.key === "Enter" &&
-                              handleCellChange(
-                                (e.target as HTMLInputElement).value,
-                              )
-                            }
-                            className="w-8 text-center border border-gray-300 rounded px-1 text-xs"
-                            autoFocus
-                            min="0"
-                            max="10"
-                          />
-                        ) : (
-                          <button
-                            onClick={() =>
-                              handleCellClick(
-                                player.id,
-                                hole.holeNumber,
-                                "putts",
-                              )
-                            }
-                            className={`w-full py-2 md:py-1 rounded border border-gray-300 bg-white hover:bg-gray-200 transition-colors text-xs ${
-                              value > 0 ? "bg-green-100" : ""
-                            }`}
-                          >
-                            {value > 0 ? value : "-"}
-                          </button>
-                        )}
-                      </td>
-                    );
-                  })}
-                  <td className="border border-gray-300 px-3 py-1"></td>
-                  <td className="border border-gray-300 px-3 py-1"></td>
-                  <td className="border border-gray-300 px-3 py-1"></td>
-                </tr>
               </Fragment>
             ))}
           </tbody>
@@ -450,7 +371,6 @@ const ScoreCard = ({ game, onUpdateScore }: ScoreCardProps) => {
                     <th className="border px-2 py-1 text-left">Hole</th>
                     <th className="border px-2 py-1 text-center">Strokes</th>
                     <th className="border px-2 py-1 text-center">Adj</th>
-                    <th className="border px-2 py-1 text-center">Putts</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -458,12 +378,6 @@ const ScoreCard = ({ game, onUpdateScore }: ScoreCardProps) => {
                     const strokeEditing = isEditing(
                       player.id,
                       hole.holeNumber,
-                      "strokes",
-                    );
-                    const puttEditing = isEditing(
-                      player.id,
-                      hole.holeNumber,
-                      "putts",
                     );
                     return (
                       <tr key={hole.holeNumber}>
@@ -498,7 +412,6 @@ const ScoreCard = ({ game, onUpdateScore }: ScoreCardProps) => {
                                 handleCellClick(
                                   player.id,
                                   hole.holeNumber,
-                                  "strokes",
                                 )
                               }
                               className={`mx-auto w-10 h-10 md:w-8 md:h-8 flex items-center justify-center rounded border border-gray-300 bg-white hover:bg-gray-200 transition-colors text-sm ${getScoreColor(hole.strokes, hole.par)} ${getScoreBorderStyle(hole.strokes, hole.par)}`}
@@ -521,39 +434,6 @@ const ScoreCard = ({ game, onUpdateScore }: ScoreCardProps) => {
                             return adj !== null ? adj : "-";
                           })()}
                         </td>
-                        <td className="border px-2 py-1 text-center">
-                          {puttEditing ? (
-                            <input
-                              type="number"
-                              value={editingValue}
-                              onChange={handleInputChange}
-                              onBlur={(e) => handleCellChange(e.target.value)}
-                              onKeyPress={(e) =>
-                                e.key === "Enter" &&
-                                handleCellChange(
-                                  (e.target as HTMLInputElement).value,
-                                )
-                              }
-                              className="w-8 text-center border border-gray-300 rounded px-1 text-xs"
-                              autoFocus
-                              min="0"
-                              max="10"
-                            />
-                          ) : (
-                            <button
-                              onClick={() =>
-                                handleCellClick(
-                                  player.id,
-                                  hole.holeNumber,
-                                  "putts",
-                                )
-                              }
-                              className={`w-full py-2 md:py-1 rounded border border-gray-300 bg-white hover:bg-gray-200 transition-colors text-xs ${hole.putts > 0 ? "bg-green-100" : ""}`}
-                            >
-                              {hole.putts > 0 ? hole.putts : "-"}
-                            </button>
-                          )}
-                        </td>
                       </tr>
                     );
                   })}
@@ -565,13 +445,10 @@ const ScoreCard = ({ game, onUpdateScore }: ScoreCardProps) => {
                     <td className="border px-2 py-1 text-center">
                       {player.handicap > 0 ? adjustedScore : "-"}
                     </td>
-                    <td className="border px-2 py-1 text-center">
-                      {player.totalPutts}
-                    </td>
                   </tr>
                   <tr className="bg-gray-50 font-semibold text-sm">
                     <td className="border px-2 py-1">To Par</td>
-                    <td className="border px-2 py-1 text-center" colSpan={3}>
+                    <td className="border px-2 py-1 text-center" colSpan={2}>
                       {toPar === 0 ? "E" : toPar > 0 ? `+${toPar}` : `${toPar}`}
                     </td>
                   </tr>
@@ -581,7 +458,7 @@ const ScoreCard = ({ game, onUpdateScore }: ScoreCardProps) => {
                         <td className="border px-2 py-1">Adjusted Score</td>
                         <td
                           className="border px-2 py-1 text-center"
-                          colSpan={3}
+                          colSpan={2}
                         >
                           {adjustedScore}
                         </td>
@@ -590,7 +467,7 @@ const ScoreCard = ({ game, onUpdateScore }: ScoreCardProps) => {
                         <td className="border px-2 py-1">Adjusted To Par</td>
                         <td
                           className="border px-2 py-1 text-center"
-                          colSpan={3}
+                          colSpan={2}
                         >
                           {adjustedToPar === 0
                             ? "E"
@@ -669,12 +546,6 @@ const ScoreCard = ({ game, onUpdateScore }: ScoreCardProps) => {
                     </div>
                   </>
                 )}
-                <div className="flex justify-between">
-                  <span>Total Putts:</span>
-                  <span className="font-bold text-green-600">
-                    {player.totalPutts}
-                  </span>
-                </div>
                 <div className="flex justify-between">
                   <span>Handicap:</span>
                   <span className="font-bold">{player.handicap}</span>
