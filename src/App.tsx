@@ -4,7 +4,10 @@ import PlayerSetup from './components/PlayerSetup';
 import ScoreCard from './components/ScoreCard';
 import './App.css';
 
-const calculateSkins = (players: Player[]): Player[] => {
+const calculateSkins = (
+  players: Player[],
+  closest: Record<number, string | null> = {},
+): Player[] => {
   const skinsMap: Record<string, number> = {};
   players.forEach((p) => {
     skinsMap[p.id] = 0;
@@ -38,6 +41,27 @@ const calculateSkins = (players: Player[]): Player[] => {
     }
   }
 
+  // Closest to Pin skins
+  const addClosestSkin = (holeNumbers: number[]) => {
+    const hole = holeNumbers.sort((a, b) => a - b).find((h) => closest[h]);
+    if (hole !== undefined) {
+      const winner = closest[hole];
+      if (winner) {
+        skinsMap[winner] += 1;
+      }
+    }
+  };
+
+  const frontPar3 = players[0].holes
+    .filter((h) => h.holeNumber <= 9 && h.par === 3)
+    .map((h) => h.holeNumber);
+  const backPar3 = players[0].holes
+    .filter((h) => h.holeNumber > 9 && h.par === 3)
+    .map((h) => h.holeNumber);
+
+  addClosestSkin(frontPar3);
+  addClosestSkin(backPar3);
+
   return players.map((p) => ({ ...p, skins: skinsMap[p.id] }));
 };
 
@@ -52,7 +76,8 @@ function App() {
       course,
       players: calculateSkins(players),
       currentHole: 1,
-      totalHoles: 18
+      totalHoles: 18,
+      closestToPin: {}
     };
 
     setGame(newGame);
@@ -83,13 +108,23 @@ function App() {
         return player;
       });
 
-    const playersWithSkins = calculateSkins(updatedPlayers);
+    const playersWithSkins = calculateSkins(
+      updatedPlayers,
+      game.closestToPin,
+    );
 
     const updatedGame = {
       ...game,
       players: playersWithSkins,
     };
     setGame(updatedGame);
+  };
+
+  const updateClosestToPin = (holeNumber: number, playerId: string | null) => {
+    if (!game) return;
+    const closest = { ...game.closestToPin, [holeNumber]: playerId };
+    const playersWithSkins = calculateSkins(game.players, closest);
+    setGame({ ...game, closestToPin: closest, players: playersWithSkins });
   };
 
   const resetGame = () => {
@@ -124,7 +159,11 @@ function App() {
                 New Game
               </button>
             </div>
-            <ScoreCard game={game} onUpdateScore={updateScore} />
+            <ScoreCard
+              game={game}
+              onUpdateScore={updateScore}
+              onUpdateClosest={updateClosestToPin}
+            />
           </div>
         ) : null}
       </div>

@@ -47,4 +47,5 @@ export interface Game {
   players: Player[];
   currentHole: number;
   totalHoles: number;
-} 
+  closestToPin: Record<number, string | null>;
+}
