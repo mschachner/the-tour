@@ -114,6 +114,7 @@ const PlayerSetup = ({ onStartGame }: PlayerSetupProps) => {
       ...player,
       totalScore: 0,
       totalPutts: 0,
+      skins: 0,
       holes: selectedCourse.holes.map(hole => ({
         holeNumber: hole.holeNumber,
         strokes: 0,

@@ -10,6 +10,7 @@ export interface Player {
   handicap: number;
   totalScore: number;
   totalPutts: number;
+  skins: number;
   holes: HoleScore[];
 }
 

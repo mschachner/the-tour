@@ -211,6 +211,9 @@ const ScoreCard = ({ game, onUpdateScore }: ScoreCardProps) => {
               <th className="border border-gray-300 px-3 py-2 text-center font-semibold">
                 To Par
               </th>
+              <th className="border border-gray-300 px-3 py-2 text-center font-semibold">
+                Skins
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -288,6 +291,9 @@ const ScoreCard = ({ game, onUpdateScore }: ScoreCardProps) => {
                       if (toPar === 0) return "E";
                       return toPar > 0 ? `+${toPar}` : `${toPar}`;
                     })()}
+                  </td>
+                  <td className="border border-gray-300 px-3 py-2 text-center font-bold bg-green-100">
+                    {player.skins}
                   </td>
                 </tr>
 
@@ -452,6 +458,12 @@ const ScoreCard = ({ game, onUpdateScore }: ScoreCardProps) => {
                       {toPar === 0 ? "E" : toPar > 0 ? `+${toPar}` : `${toPar}`}
                     </td>
                   </tr>
+                  <tr className="bg-gray-50 font-semibold text-sm">
+                    <td className="border px-2 py-1">Skins</td>
+                    <td className="border px-2 py-1 text-center" colSpan={2}>
+                      {player.skins}
+                    </td>
+                  </tr>
                   {player.handicap > 0 && (
                     <>
                       <tr className="bg-gray-50 font-semibold text-sm">
@@ -549,6 +561,10 @@ const ScoreCard = ({ game, onUpdateScore }: ScoreCardProps) => {
                 <div className="flex justify-between">
                   <span>Handicap:</span>
                   <span className="font-bold">{player.handicap}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Skins:</span>
+                  <span className="font-bold">{player.skins}</span>
                 </div>
               </div>
             </div>

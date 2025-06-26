@@ -4,6 +4,43 @@ import PlayerSetup from './components/PlayerSetup';
 import ScoreCard from './components/ScoreCard';
 import './App.css';
 
+const calculateSkins = (players: Player[]): Player[] => {
+  const skinsMap: Record<string, number> = {};
+  players.forEach((p) => {
+    skinsMap[p.id] = 0;
+  });
+
+  const totalHoles = players[0]?.holes.length || 0;
+
+  for (let i = 0; i < totalHoles; i++) {
+    const holePar = players[0].holes[i].par;
+
+    const scores = players.map((p) => ({ id: p.id, strokes: p.holes[i].strokes }));
+    const validScores = scores.filter((s) => s.strokes > 0);
+    if (validScores.length === 0) continue;
+
+    const minScore = Math.min(...validScores.map((s) => s.strokes));
+    const winners = validScores.filter((s) => s.strokes === minScore);
+
+    players.forEach((p) => {
+      const strokes = p.holes[i].strokes;
+      if (strokes > 0 && strokes <= holePar + 2) {
+        if (strokes <= holePar - 2) skinsMap[p.id] += 2;
+        else if (strokes === holePar - 1) skinsMap[p.id] += 1;
+      }
+    });
+
+    if (winners.length === 1) {
+      const winning = winners[0];
+      if (winning.strokes <= holePar + 2) {
+        skinsMap[winning.id] += 1;
+      }
+    }
+  }
+
+  return players.map((p) => ({ ...p, skins: skinsMap[p.id] }));
+};
+
 function App() {
   const [game, setGame] = useState<Game | null>(null);
   const [showSetup, setShowSetup] = useState(true);
@@ -13,7 +50,7 @@ function App() {
       id: Date.now().toString(),
       date: new Date().toISOString().split('T')[0],
       course,
-      players,
+      players: calculateSkins(players),
       currentHole: 1,
       totalHoles: 18
     };
@@ -25,19 +62,17 @@ function App() {
   const updateScore = (playerId: string, holeNumber: number, strokes: number, putts: number) => {
     if (!game) return;
 
-    const updatedGame = {
-      ...game,
-      players: game.players.map(player => {
+    const updatedPlayers = game.players.map(player => {
         if (player.id === playerId) {
-          const updatedHoles = player.holes.map(hole => 
-            hole.holeNumber === holeNumber 
+          const updatedHoles = player.holes.map(hole =>
+            hole.holeNumber === holeNumber
               ? { ...hole, strokes, putts }
               : hole
           );
-          
+
           const totalScore = updatedHoles.reduce((sum, hole) => sum + hole.strokes, 0);
           const totalPutts = updatedHoles.reduce((sum, hole) => sum + hole.putts, 0);
-          
+
           return {
             ...player,
             holes: updatedHoles,
@@ -46,7 +81,13 @@ function App() {
           };
         }
         return player;
-      })
+      });
+
+    const playersWithSkins = calculateSkins(updatedPlayers);
+
+    const updatedGame = {
+      ...game,
+      players: playersWithSkins,
     };
     setGame(updatedGame);
   };
