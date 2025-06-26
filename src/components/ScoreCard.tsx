@@ -69,12 +69,24 @@ const ScoreCard = ({ game, onUpdateScore, onUpdateClosest }: ScoreCardProps) => 
 
     for (const h of par3Holes) {
       const val = game.closestToPin[h];
+<<<<<<< codex/add--closest-to-pin--skin-feature
+      if (val === undefined) return h; // first eligible par-3 not set yet
+      if (val === null) continue; // allow next par-3 if no winner
+      // once a winner exists, no further holes are eligible
+      return null;
+    }
+
+    return null;
+  };
+
+=======
       if (val === undefined) return h;
       if (val === null) continue;
       return h;
     }
     return null;
   };
+>>>>>>> main
   const frontClosestHole = getClosestHoleForSide("front");
   const backClosestHole = getClosestHoleForSide("back");
   const isClosestHole = (holeNumber: number) =>
