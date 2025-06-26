@@ -1,6 +1,30 @@
 import { useState, Fragment } from "react";
 import type { ChangeEvent } from "react";
-import { Game, Player, HoleScore } from "../types/golf";
+import { Game, Player, HoleScore, CourseHole } from "../types/golf";
+
+const getClosestHoleForSide = (
+  holes: CourseHole[],
+  closest: Record<number, string | null>,
+  side: "front" | "back",
+): number | null => {
+  const [start, end] = side === "front" ? [1, 9] : [10, 18];
+  const par3Holes = holes
+    .filter(
+      (h) => h.holeNumber >= start && h.holeNumber <= end && h.par === 3,
+    )
+    .map((h) => h.holeNumber)
+    .sort((a, b) => a - b);
+
+  for (const hole of par3Holes) {
+    const val = closest[hole];
+    if (val === undefined) return hole; // first eligible par-3 not set yet
+    if (val === null) continue; // allow next par-3 if no winner
+    // once a winner exists, no further holes are eligible
+    return null;
+  }
+
+  return null;
+};
 
 interface ScoreCardProps {
   game: Game;
@@ -10,9 +34,10 @@ interface ScoreCardProps {
     strokes: number,
     putts: number,
   ) => void;
+  onUpdateClosest: (holeNumber: number, playerId: string | null) => void;
 }
 
-const ScoreCard = ({ game, onUpdateScore }: ScoreCardProps) => {
+const ScoreCard = ({ game, onUpdateScore, onUpdateClosest }: ScoreCardProps) => {
   const [editingCell, setEditingCell] = useState<{
     playerId: string;
     holeNumber: number;
@@ -55,6 +80,19 @@ const ScoreCard = ({ game, onUpdateScore }: ScoreCardProps) => {
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setEditingValue(e.target.value);
   };
+
+  const frontClosestHole = getClosestHoleForSide(
+    game.course.holes,
+    game.closestToPin,
+    "front",
+  );
+  const backClosestHole = getClosestHoleForSide(
+    game.course.holes,
+    game.closestToPin,
+    "back",
+  );
+  const isClosestHole = (holeNumber: number) =>
+    holeNumber === frontClosestHole || holeNumber === backClosestHole;
 
   const isEditing = (playerId: string, holeNumber: number) => {
     return (
@@ -354,6 +392,42 @@ const ScoreCard = ({ game, onUpdateScore }: ScoreCardProps) => {
 
               </Fragment>
             ))}
+            <tr className="bg-yellow-50">
+              <td className="border border-gray-300 px-3 py-2 font-medium">
+                Closest to Pin
+              </td>
+              <td className="border border-gray-300 px-3 py-2" />
+              {game.course.holes.map((hole) => (
+                <td
+                  key={hole.holeNumber}
+                  className="border border-gray-300 px-2 py-1 text-center"
+                >
+                  {isClosestHole(hole.holeNumber) ? (
+                    <select
+                      className="text-sm"
+                      value={game.closestToPin[hole.holeNumber] ?? ""}
+                      onChange={(e) =>
+                        onUpdateClosest(
+                          hole.holeNumber,
+                          e.target.value === "" ? null : e.target.value,
+                        )
+                      }
+                    >
+                      <option value="">None</option>
+                      {game.players.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.name}
+                        </option>
+                      ))}
+                    </select>
+                  ) : null}
+                </td>
+              ))}
+              <td
+                className="border border-gray-300 px-3 py-2"
+                colSpan={3}
+              ></td>
+            </tr>
           </tbody>
         </table>
       </div>
