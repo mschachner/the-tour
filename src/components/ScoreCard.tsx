@@ -81,6 +81,7 @@ const ScoreCard = ({ game, onUpdateScore, onUpdateClosest }: ScoreCardProps) => 
     setEditingValue(e.target.value);
   };
 
+<<<<<<< m6f5ls-codex/add--closest-to-pin--skin-feature
   const frontClosestHole = getClosestHoleForSide(
     game.course.holes,
     game.closestToPin,
@@ -91,6 +92,30 @@ const ScoreCard = ({ game, onUpdateScore, onUpdateClosest }: ScoreCardProps) => 
     game.closestToPin,
     "back",
   );
+=======
+  const getClosestHoleForSide = (side: "front" | "back"): number | null => {
+    const [start, end] = side === "front" ? [1, 9] : [10, 18];
+    const par3Holes = game.course.holes
+      .filter(
+        (h) => h.holeNumber >= start && h.holeNumber <= end && h.par === 3,
+      )
+      .map((h) => h.holeNumber)
+      .sort((a, b) => a - b);
+
+    for (const hole of par3Holes) {
+      const val = game.closestToPin[hole];
+      if (val === undefined) return hole; // first eligible par-3 not set yet
+      if (val === null) continue; // allow next par-3 if no winner
+      // once a winner exists, no further holes are eligible
+      return null;
+    }
+
+    return null;
+  };
+
+  const frontClosestHole = getClosestHoleForSide("front");
+  const backClosestHole = getClosestHoleForSide("back");
+>>>>>>> main
   const isClosestHole = (holeNumber: number) =>
     holeNumber === frontClosestHole || holeNumber === backClosestHole;
 
@@ -216,6 +241,27 @@ const ScoreCard = ({ game, onUpdateScore, onUpdateClosest }: ScoreCardProps) => 
   const calculateAdjustedToPar = (player: Player) => {
     const adjustedScore = calculateAdjustedScore(player);
     return adjustedScore - game.course.totalPar;
+  };
+
+  const getClosestHoleForSide = (
+    side: "front" | "back",
+  ): number | null => {
+    const start = side === "front" ? 1 : 10;
+    const end = side === "front" ? 9 : 18;
+    const par3Holes = game.course.holes
+      .filter(
+        (h) => h.holeNumber >= start && h.holeNumber <= end && h.par === 3,
+      )
+      .map((h) => h.holeNumber)
+      .sort((a, b) => a - b);
+
+    for (const h of par3Holes) {
+      const val = game.closestToPin[h];
+      if (val === undefined) return h;
+      if (val === null) continue;
+      return h;
+    }
+    return null;
   };
 
   return (
