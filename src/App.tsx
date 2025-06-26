@@ -68,7 +68,6 @@ const calculateSkins = (
 function App() {
   const [game, setGame] = useState<Game | null>(null);
   const [showSetup, setShowSetup] = useState(true);
-
   const startNewGame = (players: Player[], course: Course) => {
     const newGame: Game = {
       id: Date.now().toString(),
