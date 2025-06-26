@@ -10,9 +10,10 @@ interface ScoreCardProps {
     strokes: number,
     putts: number,
   ) => void;
+  onUpdateClosest: (holeNumber: number, playerId: string | null) => void;
 }
 
-const ScoreCard = ({ game, onUpdateScore }: ScoreCardProps) => {
+const ScoreCard = ({ game, onUpdateScore, onUpdateClosest }: ScoreCardProps) => {
   const [editingCell, setEditingCell] = useState<{
     playerId: string;
     holeNumber: number;
@@ -55,6 +56,11 @@ const ScoreCard = ({ game, onUpdateScore }: ScoreCardProps) => {
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setEditingValue(e.target.value);
   };
+
+  const frontClosestHole = getClosestHoleForSide("front");
+  const backClosestHole = getClosestHoleForSide("back");
+  const isClosestHole = (holeNumber: number) =>
+    holeNumber === frontClosestHole || holeNumber === backClosestHole;
 
   const isEditing = (playerId: string, holeNumber: number) => {
     return (
@@ -178,6 +184,27 @@ const ScoreCard = ({ game, onUpdateScore }: ScoreCardProps) => {
   const calculateAdjustedToPar = (player: Player) => {
     const adjustedScore = calculateAdjustedScore(player);
     return adjustedScore - game.course.totalPar;
+  };
+
+  const getClosestHoleForSide = (
+    side: "front" | "back",
+  ): number | null => {
+    const start = side === "front" ? 1 : 10;
+    const end = side === "front" ? 9 : 18;
+    const par3Holes = game.course.holes
+      .filter(
+        (h) => h.holeNumber >= start && h.holeNumber <= end && h.par === 3,
+      )
+      .map((h) => h.holeNumber)
+      .sort((a, b) => a - b);
+
+    for (const h of par3Holes) {
+      const val = game.closestToPin[h];
+      if (val === undefined) return h;
+      if (val === null) continue;
+      return h;
+    }
+    return null;
   };
 
   return (
@@ -354,6 +381,42 @@ const ScoreCard = ({ game, onUpdateScore }: ScoreCardProps) => {
 
               </Fragment>
             ))}
+            <tr className="bg-yellow-50">
+              <td className="border border-gray-300 px-3 py-2 font-medium">
+                Closest to Pin
+              </td>
+              <td className="border border-gray-300 px-3 py-2" />
+              {game.course.holes.map((hole) => (
+                <td
+                  key={hole.holeNumber}
+                  className="border border-gray-300 px-2 py-1 text-center"
+                >
+                  {isClosestHole(hole.holeNumber) ? (
+                    <select
+                      className="text-sm"
+                      value={game.closestToPin[hole.holeNumber] ?? ""}
+                      onChange={(e) =>
+                        onUpdateClosest(
+                          hole.holeNumber,
+                          e.target.value === "" ? null : e.target.value,
+                        )
+                      }
+                    >
+                      <option value="">None</option>
+                      {game.players.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.name}
+                        </option>
+                      ))}
+                    </select>
+                  ) : null}
+                </td>
+              ))}
+              <td
+                className="border border-gray-300 px-3 py-2"
+                colSpan={3}
+              ></td>
+            </tr>
           </tbody>
         </table>
       </div>
