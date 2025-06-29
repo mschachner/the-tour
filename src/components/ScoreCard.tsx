@@ -92,7 +92,9 @@ const ScoreCard = ({ game, onUpdateScore, onUpdateClosest }: ScoreCardProps) => 
     "back",
   );
   const isClosestHole = (holeNumber: number) =>
-    holeNumber === frontClosestHole || holeNumber === backClosestHole;
+    holeNumber === frontClosestHole ||
+    holeNumber === backClosestHole ||
+    game.closestToPin[holeNumber] !== undefined;
 
   const isEditing = (playerId: string, holeNumber: number) => {
     return (
