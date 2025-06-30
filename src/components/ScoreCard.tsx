@@ -60,6 +60,7 @@ interface ScoreCardProps {
   onUpdateClosest: (holeNumber: number, playerId: string | null) => void;
   onUpdateLongest: (holeNumber: number, playerId: string | null) => void;
   onToggleGreenie: (holeNumber: number, playerId: string, value: boolean) => void;
+  onToggleFiver: (holeNumber: number, playerId: string, value: boolean) => void;
 }
 
 const ScoreCard = ({
@@ -68,6 +69,7 @@ const ScoreCard = ({
   onUpdateClosest,
   onUpdateLongest,
   onToggleGreenie,
+  onToggleFiver,
 }: ScoreCardProps) => {
   const [editingCell, setEditingCell] = useState<{
     playerId: string;
@@ -322,6 +324,13 @@ const ScoreCard = ({
                       G
                     </th>
                   )}
+                  {hole.par === 5 && (
+                    <th
+                      className="border border-orange-300 bg-orange-50 px-1 py-2 text-center font-semibold text-xs"
+                    >
+                      5
+                    </th>
+                  )}
                 </Fragment>
               ))}
               <th className="border border-gray-300 px-3 py-2 text-center font-semibold">
@@ -406,6 +415,23 @@ const ScoreCard = ({
                             />
                           </td>
                         )}
+                        {hole.par === 5 && (
+                          <td className="border border-orange-300 bg-orange-50 px-1 text-center">
+                            <input
+                              type="checkbox"
+                              checked={
+                                game.fivers[hole.holeNumber]?.[player.id] || false
+                              }
+                              onChange={(e) =>
+                                onToggleFiver(
+                                  hole.holeNumber,
+                                  player.id,
+                                  e.target.checked,
+                                )
+                              }
+                            />
+                          </td>
+                        )}
                       </Fragment>
                     );
                   })}
@@ -463,6 +489,9 @@ const ScoreCard = ({
                           {hole.par === 3 && isGreenieHole(hole.holeNumber) && (
                             <td className="border border-green-300 bg-green-50 px-1" />
                           )}
+                          {hole.par === 5 && (
+                            <td className="border border-orange-300 bg-orange-50 px-1" />
+                          )}
                         </Fragment>
                       );
                     })}
@@ -519,6 +548,9 @@ const ScoreCard = ({
                   {hole.par === 3 && isGreenieHole(hole.holeNumber) && (
                     <td className="border border-green-300 bg-green-50 px-1" />
                   )}
+                  {hole.par === 5 && (
+                    <td className="border border-orange-300 bg-orange-50 px-1" />
+                  )}
                 </Fragment>
               ))}
               <td
@@ -563,6 +595,9 @@ const ScoreCard = ({
                   {hole.par === 3 && isGreenieHole(hole.holeNumber) && (
                     <td className="border border-green-300 bg-green-50 px-1" />
                   )}
+                  {hole.par === 5 && (
+                    <td className="border border-orange-300 bg-orange-50 px-1" />
+                  )}
                 </Fragment>
               ))}
               <td
@@ -593,6 +628,7 @@ const ScoreCard = ({
                     <th className="border px-2 py-1 text-left">Hole</th>
                     <th className="border px-2 py-1 text-center">Strokes</th>
                     <th className="border px-2 py-1 text-center">G</th>
+                    <th className="border px-2 py-1 text-center">5</th>
                     <th className="border px-2 py-1 text-center">Adj</th>
                   </tr>
                 </thead>
@@ -667,6 +703,25 @@ const ScoreCard = ({
                             "-"
                           )}
                         </td>
+                        <td className="border px-2 py-1 text-center">
+                          {hole.par === 5 ? (
+                            <input
+                              type="checkbox"
+                              checked={
+                                game.fivers[hole.holeNumber]?.[player.id] || false
+                              }
+                              onChange={(e) =>
+                                onToggleFiver(
+                                  hole.holeNumber,
+                                  player.id,
+                                  e.target.checked,
+                                )
+                              }
+                            />
+                          ) : (
+                            "-"
+                          )}
+                        </td>
                         <td className="border px-2 py-1 text-center text-sm">
                           {(() => {
                             const adj = getAdjustedScoreForHole(
@@ -691,13 +746,13 @@ const ScoreCard = ({
                   </tr>
                   <tr className="bg-gray-50 font-semibold text-sm">
                     <td className="border px-2 py-1">To Par</td>
-                    <td className="border px-2 py-1 text-center" colSpan={3}>
+                    <td className="border px-2 py-1 text-center" colSpan={4}>
                       {toPar === 0 ? "E" : toPar > 0 ? `+${toPar}` : `${toPar}`}
                     </td>
                   </tr>
                   <tr className="bg-gray-50 font-semibold text-sm">
                     <td className="border px-2 py-1">Skins</td>
-                    <td className="border px-2 py-1 text-center" colSpan={3}>
+                    <td className="border px-2 py-1 text-center" colSpan={4}>
                       {player.skins}
                     </td>
                   </tr>
@@ -707,7 +762,7 @@ const ScoreCard = ({
                         <td className="border px-2 py-1">Adjusted Score</td>
                         <td
                           className="border px-2 py-1 text-center"
-                          colSpan={3}
+                          colSpan={4}
                         >
                           {adjustedScore}
                         </td>
@@ -716,7 +771,7 @@ const ScoreCard = ({
                         <td className="border px-2 py-1">Adjusted To Par</td>
                         <td
                           className="border px-2 py-1 text-center"
-                          colSpan={3}
+                          colSpan={4}
                         >
                           {adjustedToPar === 0
                             ? "E"
