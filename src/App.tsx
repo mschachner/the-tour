@@ -7,6 +7,7 @@ import './App.css';
 const calculateSkins = (
   players: Player[],
   closest: Record<number, string | null> = {},
+  greenies: Record<number, Record<string, boolean>> = {},
 ): Player[] => {
   const skinsMap: Record<string, number> = {};
   players.forEach((p) => {
@@ -62,6 +63,15 @@ const calculateSkins = (
   addClosestSkin(frontPar3);
   addClosestSkin(backPar3);
 
+  // Greenies
+  Object.entries(greenies).forEach(([hole, playersMarked]) => {
+    Object.entries(playersMarked).forEach(([id, val]) => {
+      if (val) {
+        skinsMap[id] = (skinsMap[id] || 0) + 1;
+      }
+    });
+  });
+
   return players.map((p) => ({ ...p, skins: skinsMap[p.id] }));
 };
 
@@ -76,7 +86,8 @@ function App() {
       players: calculateSkins(players),
       currentHole: 1,
       totalHoles: 18,
-      closestToPin: {}
+      closestToPin: {},
+      greenies: {}
     };
 
     setGame(newGame);
@@ -110,6 +121,7 @@ function App() {
     const playersWithSkins = calculateSkins(
       updatedPlayers,
       game.closestToPin,
+      game.greenies,
     );
 
     const updatedGame = {
@@ -145,8 +157,29 @@ function App() {
       }
     }
 
-    const playersWithSkins = calculateSkins(game.players, closest);
+    const playersWithSkins = calculateSkins(
+      game.players,
+      closest,
+      game.greenies,
+    );
     setGame({ ...game, closestToPin: closest, players: playersWithSkins });
+  };
+
+  const toggleGreenie = (
+    holeNumber: number,
+    playerId: string,
+    value: boolean,
+  ) => {
+    if (!game) return;
+    const holeGreenies = { ...(game.greenies[holeNumber] || {}) };
+    holeGreenies[playerId] = value;
+    const greenies = { ...game.greenies, [holeNumber]: holeGreenies };
+    const playersWithSkins = calculateSkins(
+      game.players,
+      game.closestToPin,
+      greenies,
+    );
+    setGame({ ...game, greenies, players: playersWithSkins });
   };
 
   const resetGame = () => {
@@ -185,6 +218,7 @@ function App() {
               game={game}
               onUpdateScore={updateScore}
               onUpdateClosest={updateClosestToPin}
+              onToggleGreenie={toggleGreenie}
             />
           </div>
         ) : null}
