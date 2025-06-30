@@ -50,4 +50,5 @@ export interface Game {
   closestToPin: Record<number, string | null>;
   longestDrive: Record<number, string | null>;
   greenies: Record<number, Record<string, boolean>>;
+  fivers: Record<number, Record<string, boolean>>;
 }

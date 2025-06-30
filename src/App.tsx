@@ -9,6 +9,7 @@ const calculateSkins = (
   closest: Record<number, string | null> = {},
   longest: Record<number, string | null> = {},
   greenies: Record<number, Record<string, boolean>> = {},
+  fivers: Record<number, Record<string, boolean>> = {},
 ): Player[] => {
   const skinsMap: Record<string, number> = {};
   players.forEach((p) => {
@@ -94,6 +95,15 @@ const calculateSkins = (
     });
   });
 
+  // Fivers
+  Object.entries(fivers).forEach(([hole, playersMarked]) => {
+    Object.entries(playersMarked).forEach(([id, val]) => {
+      if (val) {
+        skinsMap[id] = (skinsMap[id] || 0) + 1;
+      }
+    });
+  });
+
   return players.map((p) => ({ ...p, skins: skinsMap[p.id] }));
 };
 
@@ -136,7 +146,8 @@ function App() {
       totalHoles: 18,
       closestToPin: {},
       longestDrive: {},
-      greenies: {}
+      greenies: {},
+      fivers: {}
     };
 
     setGame(newGame);
@@ -172,6 +183,7 @@ function App() {
       game.closestToPin,
       game.longestDrive,
       game.greenies,
+      game.fivers,
     );
 
     const updatedGame = {
@@ -222,6 +234,7 @@ function App() {
       closest,
       game.longestDrive,
       greenies,
+      game.fivers,
     );
     setGame({
       ...game,
@@ -262,6 +275,7 @@ function App() {
       game.closestToPin,
       longestMap,
       game.greenies,
+      game.fivers,
     );
     setGame({
       ...game,
@@ -288,8 +302,28 @@ function App() {
       game.closestToPin,
       game.longestDrive,
       greenies,
+      game.fivers,
     );
     setGame({ ...game, greenies, players: playersWithSkins });
+  };
+
+  const handleToggleFiver = (
+    holeNumber: number,
+    playerId: string,
+    value: boolean,
+  ) => {
+    if (!game) return;
+    const holeFivers = { ...(game.fivers[holeNumber] || {}) };
+    holeFivers[playerId] = value;
+    const fivers = { ...game.fivers, [holeNumber]: holeFivers };
+    const playersWithSkins = calculateSkins(
+      game.players,
+      game.closestToPin,
+      game.longestDrive,
+      game.greenies,
+      fivers,
+    );
+    setGame({ ...game, fivers, players: playersWithSkins });
   };
 
   const resetGame = () => {
@@ -330,6 +364,7 @@ function App() {
               onUpdateClosest={updateClosestToPin}
               onUpdateLongest={updateLongestDrive}
               onToggleGreenie={handleToggleGreenie}
+              onToggleFiver={handleToggleFiver}
             />
           </div>
         ) : null}
