@@ -35,9 +35,15 @@ interface ScoreCardProps {
     putts: number,
   ) => void;
   onUpdateClosest: (holeNumber: number, playerId: string | null) => void;
+  onToggleGreenie: (holeNumber: number, playerId: string, value: boolean) => void;
 }
 
-const ScoreCard = ({ game, onUpdateScore, onUpdateClosest }: ScoreCardProps) => {
+const ScoreCard = ({
+  game,
+  onUpdateScore,
+  onUpdateClosest,
+  onToggleGreenie,
+}: ScoreCardProps) => {
   const [editingCell, setEditingCell] = useState<{
     playerId: string;
     holeNumber: number;
@@ -95,6 +101,31 @@ const ScoreCard = ({ game, onUpdateScore, onUpdateClosest }: ScoreCardProps) => 
     holeNumber === frontClosestHole ||
     holeNumber === backClosestHole ||
     game.closestToPin[holeNumber] !== undefined;
+
+  const getGreenieHolesForSide = (
+    holes: CourseHole[],
+    closest: Record<number, string | null>,
+    side: "front" | "back",
+  ): number[] => {
+    const [start, end] = side === "front" ? [1, 9] : [10, 18];
+    const par3 = holes
+      .filter((h) => h.par === 3 && h.holeNumber >= start && h.holeNumber <= end)
+      .map((h) => h.holeNumber)
+      .sort((a, b) => a - b);
+
+    const awarded = par3.find(
+      (h) => closest[h] !== undefined && closest[h] !== null,
+    );
+    if (awarded === undefined) return [];
+    return par3.filter((h) => h > awarded);
+  };
+
+  const greenieHolesSet = new Set<number>([
+    ...getGreenieHolesForSide(game.course.holes, game.closestToPin, "front"),
+    ...getGreenieHolesForSide(game.course.holes, game.closestToPin, "back"),
+  ]);
+
+  const isGreenieHole = (holeNumber: number) => greenieHolesSet.has(holeNumber);
 
   const isEditing = (playerId: string, holeNumber: number) => {
     return (
@@ -236,14 +267,22 @@ const ScoreCard = ({ game, onUpdateScore, onUpdateClosest }: ScoreCardProps) => 
                 Handicap
               </th>
               {game.course.holes.map((hole) => (
-                <th
-                  key={hole.holeNumber}
-                  className="border border-gray-300 px-2 py-2 text-center font-semibold text-sm"
-                >
-                  <div>{hole.holeNumber}</div>
-                  <div className="text-xs text-gray-600">Par {hole.par}</div>
-                  <div className="text-xs text-gray-500">H{hole.handicap}</div>
-                </th>
+                <Fragment key={hole.holeNumber}>
+                  <th
+                    className="border border-gray-300 px-2 py-2 text-center font-semibold text-sm"
+                  >
+                    <div>{hole.holeNumber}</div>
+                    <div className="text-xs text-gray-600">Par {hole.par}</div>
+                    <div className="text-xs text-gray-500">H{hole.handicap}</div>
+                  </th>
+                  {hole.par === 3 && isGreenieHole(hole.holeNumber) && (
+                    <th
+                      className="border border-green-300 bg-green-50 px-1 py-2 text-center font-semibold text-xs"
+                    >
+                      G
+                    </th>
+                  )}
+                </Fragment>
               ))}
               <th className="border border-gray-300 px-3 py-2 text-center font-semibold">
                 Total
@@ -271,55 +310,63 @@ const ScoreCard = ({ game, onUpdateScore, onUpdateClosest }: ScoreCardProps) => 
                   </td>
                   {player.holes.map((hole) => {
                     const value = hole.strokes;
-                    const editing = isEditing(
-                      player.id,
-                      hole.holeNumber,
-                    );
+                    const editing = isEditing(player.id, hole.holeNumber);
 
                     return (
-                      <td
-                        key={hole.holeNumber}
-                        className="border border-gray-300 px-2 py-1 text-center"
-                      >
-                        {editing ? (
-                          <input
-                            type="number"
-                            value={editingValue}
-                            onChange={handleInputChange}
-                            onBlur={(e) => handleCellChange(e.target.value)}
-                            onKeyPress={(e) =>
-                              e.key === "Enter" &&
-                              handleCellChange(
-                                (e.target as HTMLInputElement).value,
-                              )
-                            }
-                            className="w-12 text-center border border-gray-300 rounded px-1"
-                            autoFocus
-                            min="1"
-                            max="20"
-                          />
-                        ) : (
-                          <button
-                            onClick={() =>
-                              handleCellClick(
-                                player.id,
-                                hole.holeNumber,
-                              )
-                            }
-                            className={`mx-auto w-10 h-10 md:w-8 md:h-8 flex items-center justify-center rounded border border-gray-300 bg-white hover:bg-gray-200 transition-colors text-sm ${getScoreColor(
-                              value,
-                              hole.par,
-                            )} ${getScoreBorderStyle(value, hole.par)}`}
-                            style={{
-                              ...getCrossHatchStyle(value, hole.par),
-                              ...getDoubleCircleStyle(value, hole.par),
-                              ...getDoubleSquareStyle(value, hole.par),
-                            }}
-                          >
-                            {getScoreDisplay(value, hole.par)}
-                          </button>
+                      <Fragment key={hole.holeNumber}>
+                        <td className="border border-gray-300 px-2 py-1 text-center">
+                          {editing ? (
+                            <input
+                              type="number"
+                              value={editingValue}
+                              onChange={handleInputChange}
+                              onBlur={(e) => handleCellChange(e.target.value)}
+                              onKeyPress={(e) =>
+                                e.key === "Enter" &&
+                                handleCellChange((e.target as HTMLInputElement).value)
+                              }
+                              className="w-12 text-center border border-gray-300 rounded px-1"
+                              autoFocus
+                              min="1"
+                              max="20"
+                            />
+                          ) : (
+                            <button
+                              onClick={() =>
+                                handleCellClick(player.id, hole.holeNumber)
+                              }
+                              className={`mx-auto w-10 h-10 md:w-8 md:h-8 flex items-center justify-center rounded border border-gray-300 bg-white hover:bg-gray-200 transition-colors text-sm ${getScoreColor(
+                                value,
+                                hole.par,
+                              )} ${getScoreBorderStyle(value, hole.par)}`}
+                              style={{
+                                ...getCrossHatchStyle(value, hole.par),
+                                ...getDoubleCircleStyle(value, hole.par),
+                                ...getDoubleSquareStyle(value, hole.par),
+                              }}
+                            >
+                              {getScoreDisplay(value, hole.par)}
+                            </button>
+                          )}
+                        </td>
+                        {hole.par === 3 && isGreenieHole(hole.holeNumber) && (
+                          <td className="border border-green-300 bg-green-50 px-1 text-center">
+                            <input
+                              type="checkbox"
+                              checked={
+                                game.greenies[hole.holeNumber]?.[player.id] || false
+                              }
+                              onChange={(e) =>
+                                onToggleGreenie(
+                                  hole.holeNumber,
+                                  player.id,
+                                  e.target.checked,
+                                )
+                              }
+                            />
+                          </td>
                         )}
-                      </td>
+                      </Fragment>
                     );
                   })}
                   <td className="border border-gray-300 px-3 py-2 text-center font-bold bg-blue-100">
@@ -357,24 +404,26 @@ const ScoreCard = ({ game, onUpdateScore, onUpdateClosest }: ScoreCardProps) => 
                       );
 
                       return (
-                        <td
-                          key={hole.holeNumber}
-                          className="border border-gray-300 px-2 py-1 text-center"
-                        >
-                          {adjustedScore !== null ? (
-                            <div
-                              className={`text-xs font-medium ${
-                                adjustedScore < hole.strokes
-                                  ? "text-blue-600"
-                                  : "text-gray-600"
-                              }`}
-                            >
-                              {adjustedScore}
-                            </div>
-                          ) : (
-                            <div className="text-xs text-gray-400">-</div>
+                        <Fragment key={hole.holeNumber}>
+                          <td className="border border-gray-300 px-2 py-1 text-center">
+                            {adjustedScore !== null ? (
+                              <div
+                                className={`text-xs font-medium ${
+                                  adjustedScore < hole.strokes
+                                    ? "text-blue-600"
+                                    : "text-gray-600"
+                                }`}
+                              >
+                                {adjustedScore}
+                              </div>
+                            ) : (
+                              <div className="text-xs text-gray-400">-</div>
+                            )}
+                          </td>
+                          {hole.par === 3 && isGreenieHole(hole.holeNumber) && (
+                            <td className="border border-green-300 bg-green-50 px-1" />
                           )}
-                        </td>
+                        </Fragment>
                       );
                     })}
                     <td className="border border-gray-300 px-3 py-1 text-center font-bold bg-blue-50 text-blue-700 text-sm">
@@ -400,35 +449,37 @@ const ScoreCard = ({ game, onUpdateScore, onUpdateClosest }: ScoreCardProps) => 
               </td>
               <td className="border border-gray-300 px-3 py-2" />
               {game.course.holes.map((hole) => (
-                <td
-                  key={hole.holeNumber}
-                  className="border border-gray-300 px-2 py-1 text-center"
-                >
-                  {isClosestHole(hole.holeNumber) ? (
-                    <select
-                      className="text-sm"
-                      value={
-                        game.closestToPin[hole.holeNumber] === null
-                          ? "none"
-                          : game.closestToPin[hole.holeNumber] ?? ""
-                      }
-                      onChange={(e) =>
-                        onUpdateClosest(
-                          hole.holeNumber,
-                          e.target.value === "none" ? null : e.target.value,
-                        )
-                      }
-                    >
-                      <option value="" disabled>...</option>
-                      <option value="none">None</option>
-                      {game.players.map((p) => (
-                        <option key={p.id} value={p.id}>
-                          {p.name}
-                        </option>
-                      ))}
-                    </select>
-                  ) : null}
-                </td>
+                <Fragment key={hole.holeNumber}>
+                  <td className="border border-gray-300 px-2 py-1 text-center">
+                    {isClosestHole(hole.holeNumber) ? (
+                      <select
+                        className="text-sm"
+                        value={
+                          game.closestToPin[hole.holeNumber] === null
+                            ? "none"
+                            : game.closestToPin[hole.holeNumber] ?? ""
+                        }
+                        onChange={(e) =>
+                          onUpdateClosest(
+                            hole.holeNumber,
+                            e.target.value === "none" ? null : e.target.value,
+                          )
+                        }
+                      >
+                        <option value="" disabled>...</option>
+                        <option value="none">None</option>
+                        {game.players.map((p) => (
+                          <option key={p.id} value={p.id}>
+                            {p.name}
+                          </option>
+                        ))}
+                      </select>
+                    ) : null}
+                  </td>
+                  {hole.par === 3 && isGreenieHole(hole.holeNumber) && (
+                    <td className="border border-green-300 bg-green-50 px-1" />
+                  )}
+                </Fragment>
               ))}
               <td
                 className="border border-gray-300 px-3 py-2"
@@ -457,6 +508,7 @@ const ScoreCard = ({ game, onUpdateScore, onUpdateClosest }: ScoreCardProps) => 
                   <tr className="bg-gray-50">
                     <th className="border px-2 py-1 text-left">Hole</th>
                     <th className="border px-2 py-1 text-center">Strokes</th>
+                    <th className="border px-2 py-1 text-center">G</th>
                     <th className="border px-2 py-1 text-center">Adj</th>
                   </tr>
                 </thead>
@@ -512,6 +564,25 @@ const ScoreCard = ({ game, onUpdateScore, onUpdateClosest }: ScoreCardProps) => 
                             </button>
                           )}
                         </td>
+                        <td className="border px-2 py-1 text-center">
+                          {hole.par === 3 && isGreenieHole(hole.holeNumber) ? (
+                            <input
+                              type="checkbox"
+                              checked={
+                                game.greenies[hole.holeNumber]?.[player.id] || false
+                              }
+                              onChange={(e) =>
+                                onToggleGreenie(
+                                  hole.holeNumber,
+                                  player.id,
+                                  e.target.checked,
+                                )
+                              }
+                            />
+                          ) : (
+                            "-"
+                          )}
+                        </td>
                         <td className="border px-2 py-1 text-center text-sm">
                           {(() => {
                             const adj = getAdjustedScoreForHole(
@@ -529,19 +600,20 @@ const ScoreCard = ({ game, onUpdateScore, onUpdateClosest }: ScoreCardProps) => 
                     <td className="border px-2 py-1 text-center">
                       {player.totalScore}
                     </td>
+                    <td className="border px-2 py-1" />
                     <td className="border px-2 py-1 text-center">
                       {player.handicap > 0 ? adjustedScore : "-"}
                     </td>
                   </tr>
                   <tr className="bg-gray-50 font-semibold text-sm">
                     <td className="border px-2 py-1">To Par</td>
-                    <td className="border px-2 py-1 text-center" colSpan={2}>
+                    <td className="border px-2 py-1 text-center" colSpan={3}>
                       {toPar === 0 ? "E" : toPar > 0 ? `+${toPar}` : `${toPar}`}
                     </td>
                   </tr>
                   <tr className="bg-gray-50 font-semibold text-sm">
                     <td className="border px-2 py-1">Skins</td>
-                    <td className="border px-2 py-1 text-center" colSpan={2}>
+                    <td className="border px-2 py-1 text-center" colSpan={3}>
                       {player.skins}
                     </td>
                   </tr>
@@ -551,7 +623,7 @@ const ScoreCard = ({ game, onUpdateScore, onUpdateClosest }: ScoreCardProps) => 
                         <td className="border px-2 py-1">Adjusted Score</td>
                         <td
                           className="border px-2 py-1 text-center"
-                          colSpan={2}
+                          colSpan={3}
                         >
                           {adjustedScore}
                         </td>
@@ -560,7 +632,7 @@ const ScoreCard = ({ game, onUpdateScore, onUpdateClosest }: ScoreCardProps) => 
                         <td className="border px-2 py-1">Adjusted To Par</td>
                         <td
                           className="border px-2 py-1 text-center"
-                          colSpan={2}
+                          colSpan={3}
                         >
                           {adjustedToPar === 0
                             ? "E"
