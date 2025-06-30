@@ -48,5 +48,6 @@ export interface Game {
   currentHole: number;
   totalHoles: number;
   closestToPin: Record<number, string | null>;
+  longestDrive: Record<number, string | null>;
   greenies: Record<number, Record<string, boolean>>;
 }
