@@ -206,7 +206,7 @@ function App() {
     });
   };
 
-  const toggleGreenie = (
+  const handleToggleGreenie = (
     holeNumber: number,
     playerId: string,
     value: boolean,
@@ -216,23 +216,6 @@ function App() {
       getGreenieHoles(game.course.holes, game.closestToPin),
     );
     if (!validHoles.has(holeNumber)) return;
-    const holeGreenies = { ...(game.greenies[holeNumber] || {}) };
-    holeGreenies[playerId] = value;
-    const greenies = { ...game.greenies, [holeNumber]: holeGreenies };
-    const playersWithSkins = calculateSkins(
-      game.players,
-      game.closestToPin,
-      greenies,
-    );
-    setGame({ ...game, greenies, players: playersWithSkins });
-  };
-
-  const toggleGreenie = (
-    holeNumber: number,
-    playerId: string,
-    value: boolean,
-  ) => {
-    if (!game) return;
     const holeGreenies = { ...(game.greenies[holeNumber] || {}) };
     holeGreenies[playerId] = value;
     const greenies = { ...game.greenies, [holeNumber]: holeGreenies };
@@ -280,7 +263,7 @@ function App() {
               game={game}
               onUpdateScore={updateScore}
               onUpdateClosest={updateClosestToPin}
-              onToggleGreenie={toggleGreenie}
+              onToggleGreenie={handleToggleGreenie}
             />
           </div>
         ) : null}
