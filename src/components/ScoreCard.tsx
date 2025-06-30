@@ -92,7 +92,9 @@ const ScoreCard = ({ game, onUpdateScore, onUpdateClosest }: ScoreCardProps) => 
     "back",
   );
   const isClosestHole = (holeNumber: number) =>
-    holeNumber === frontClosestHole || holeNumber === backClosestHole;
+    holeNumber === frontClosestHole ||
+    holeNumber === backClosestHole ||
+    game.closestToPin[holeNumber] !== undefined;
 
   const isEditing = (playerId: string, holeNumber: number) => {
     return (
@@ -405,15 +407,20 @@ const ScoreCard = ({ game, onUpdateScore, onUpdateClosest }: ScoreCardProps) => 
                   {isClosestHole(hole.holeNumber) ? (
                     <select
                       className="text-sm"
-                      value={game.closestToPin[hole.holeNumber] ?? ""}
+                      value={
+                        game.closestToPin[hole.holeNumber] === null
+                          ? "none"
+                          : game.closestToPin[hole.holeNumber] ?? ""
+                      }
                       onChange={(e) =>
                         onUpdateClosest(
                           hole.holeNumber,
-                          e.target.value === "" ? null : e.target.value,
+                          e.target.value === "none" ? null : e.target.value,
                         )
                       }
                     >
-                      <option value="">None</option>
+                      <option value="" disabled>...</option>
+                      <option value="none">None</option>
                       {game.players.map((p) => (
                         <option key={p.id} value={p.id}>
                           {p.name}
