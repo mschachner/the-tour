@@ -121,7 +121,30 @@ function App() {
 
   const updateClosestToPin = (holeNumber: number, playerId: string | null) => {
     if (!game) return;
-    const closest = { ...game.closestToPin, [holeNumber]: playerId };
+    let closest: Record<number, string | null> = {
+      ...game.closestToPin,
+      [holeNumber]: playerId,
+    };
+
+    if (playerId) {
+      const sideStart = holeNumber <= 9 ? 1 : 10;
+      const sideEnd = holeNumber <= 9 ? 9 : 18;
+      const laterPar3 = game.course.holes
+        .filter(
+          (h) =>
+            h.par === 3 &&
+            h.holeNumber > holeNumber &&
+            h.holeNumber >= sideStart &&
+            h.holeNumber <= sideEnd,
+        )
+        .map((h) => h.holeNumber);
+
+      closest = { ...closest };
+      for (const h of laterPar3) {
+        delete closest[h];
+      }
+    }
+
     const playersWithSkins = calculateSkins(game.players, closest);
     setGame({ ...game, closestToPin: closest, players: playersWithSkins });
   };

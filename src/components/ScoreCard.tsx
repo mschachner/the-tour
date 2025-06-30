@@ -419,7 +419,7 @@ const ScoreCard = ({ game, onUpdateScore, onUpdateClosest }: ScoreCardProps) => 
                         )
                       }
                     >
-                      <option value="" disabled>Select one</option>
+                      <option value="" disabled>...</option>
                       <option value="none">None</option>
                       {game.players.map((p) => (
                         <option key={p.id} value={p.id}>
