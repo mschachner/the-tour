@@ -113,7 +113,9 @@ const ScoreCard = ({
       .map((h) => h.holeNumber)
       .sort((a, b) => a - b);
 
-    const awarded = par3.find((h) => closest[h] !== undefined);
+    const awarded = par3.find(
+      (h) => closest[h] !== undefined && closest[h] !== null,
+    );
     if (awarded === undefined) return [];
     return par3.filter((h) => h > awarded);
   };

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Game, Player, Course } from './types/golf';
+import { Game, Player, Course, CourseHole } from './types/golf';
 import PlayerSetup from './components/PlayerSetup';
 import ScoreCard from './components/ScoreCard';
 import './App.css';
@@ -74,6 +74,32 @@ const calculateSkins = (
 
   return players.map((p) => ({ ...p, skins: skinsMap[p.id] }));
 };
+
+const getGreenieHolesForSide = (
+  holes: CourseHole[],
+  closest: Record<number, string | null>,
+  side: 'front' | 'back',
+): number[] => {
+  const [start, end] = side === 'front' ? [1, 9] : [10, 18];
+  const par3 = holes
+    .filter((h) => h.par === 3 && h.holeNumber >= start && h.holeNumber <= end)
+    .map((h) => h.holeNumber)
+    .sort((a, b) => a - b);
+
+  const awarded = par3.find(
+    (h) => closest[h] !== undefined && closest[h] !== null,
+  );
+  if (awarded === undefined) return [];
+  return par3.filter((h) => h > awarded);
+};
+
+const getGreenieHoles = (
+  holes: CourseHole[],
+  closest: Record<number, string | null>,
+): number[] => [
+  ...getGreenieHolesForSide(holes, closest, 'front'),
+  ...getGreenieHolesForSide(holes, closest, 'back'),
+];
 
 function App() {
   const [game, setGame] = useState<Game | null>(null);
@@ -157,12 +183,48 @@ function App() {
       }
     }
 
+    const validGreenieHoles = new Set(
+      getGreenieHoles(game.course.holes, closest),
+    );
+    const greenies: Record<number, Record<string, boolean>> = {};
+    Object.entries(game.greenies).forEach(([hole, playersMarked]) => {
+      if (validGreenieHoles.has(Number(hole))) {
+        greenies[Number(hole)] = { ...playersMarked };
+      }
+    });
+
     const playersWithSkins = calculateSkins(
       game.players,
       closest,
-      game.greenies,
+      greenies,
     );
-    setGame({ ...game, closestToPin: closest, players: playersWithSkins });
+    setGame({
+      ...game,
+      closestToPin: closest,
+      greenies,
+      players: playersWithSkins,
+    });
+  };
+
+  const toggleGreenie = (
+    holeNumber: number,
+    playerId: string,
+    value: boolean,
+  ) => {
+    if (!game) return;
+    const validHoles = new Set(
+      getGreenieHoles(game.course.holes, game.closestToPin),
+    );
+    if (!validHoles.has(holeNumber)) return;
+    const holeGreenies = { ...(game.greenies[holeNumber] || {}) };
+    holeGreenies[playerId] = value;
+    const greenies = { ...game.greenies, [holeNumber]: holeGreenies };
+    const playersWithSkins = calculateSkins(
+      game.players,
+      game.closestToPin,
+      greenies,
+    );
+    setGame({ ...game, greenies, players: playersWithSkins });
   };
 
   const toggleGreenie = (
