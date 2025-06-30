@@ -227,6 +227,23 @@ function App() {
     setGame({ ...game, greenies, players: playersWithSkins });
   };
 
+  const toggleGreenie = (
+    holeNumber: number,
+    playerId: string,
+    value: boolean,
+  ) => {
+    if (!game) return;
+    const holeGreenies = { ...(game.greenies[holeNumber] || {}) };
+    holeGreenies[playerId] = value;
+    const greenies = { ...game.greenies, [holeNumber]: holeGreenies };
+    const playersWithSkins = calculateSkins(
+      game.players,
+      game.closestToPin,
+      greenies,
+    );
+    setGame({ ...game, greenies, players: playersWithSkins });
+  };
+
   const resetGame = () => {
     setGame(null);
     setShowSetup(true);
