@@ -26,6 +26,29 @@ const getClosestHoleForSide = (
   return null;
 };
 
+const getLongestHoleForSide = (
+  holes: CourseHole[],
+  longest: Record<number, string | null>,
+  side: "front" | "back",
+): number | null => {
+  const [start, end] = side === "front" ? [1, 9] : [10, 18];
+  const par5Holes = holes
+    .filter(
+      (h) => h.holeNumber >= start && h.holeNumber <= end && h.par === 5,
+    )
+    .map((h) => h.holeNumber)
+    .sort((a, b) => a - b);
+
+  for (const hole of par5Holes) {
+    const val = longest[hole];
+    if (val === undefined) return hole;
+    if (val === null) continue;
+    return null;
+  }
+
+  return null;
+};
+
 interface ScoreCardProps {
   game: Game;
   onUpdateScore: (
@@ -35,6 +58,7 @@ interface ScoreCardProps {
     putts: number,
   ) => void;
   onUpdateClosest: (holeNumber: number, playerId: string | null) => void;
+  onUpdateLongest: (holeNumber: number, playerId: string | null) => void;
   onToggleGreenie: (holeNumber: number, playerId: string, value: boolean) => void;
 }
 
@@ -42,6 +66,7 @@ const ScoreCard = ({
   game,
   onUpdateScore,
   onUpdateClosest,
+  onUpdateLongest,
   onToggleGreenie,
 }: ScoreCardProps) => {
   const [editingCell, setEditingCell] = useState<{
@@ -101,6 +126,21 @@ const ScoreCard = ({
     holeNumber === frontClosestHole ||
     holeNumber === backClosestHole ||
     game.closestToPin[holeNumber] !== undefined;
+
+  const frontLongestHole = getLongestHoleForSide(
+    game.course.holes,
+    game.longestDrive,
+    "front",
+  );
+  const backLongestHole = getLongestHoleForSide(
+    game.course.holes,
+    game.longestDrive,
+    "back",
+  );
+  const isLongestHole = (holeNumber: number) =>
+    holeNumber === frontLongestHole ||
+    holeNumber === backLongestHole ||
+    game.longestDrive[holeNumber] !== undefined;
 
   const getGreenieHolesForSide = (
     holes: CourseHole[],
@@ -461,6 +501,50 @@ const ScoreCard = ({
                         }
                         onChange={(e) =>
                           onUpdateClosest(
+                            hole.holeNumber,
+                            e.target.value === "none" ? null : e.target.value,
+                          )
+                        }
+                      >
+                        <option value="" disabled>...</option>
+                        <option value="none">None</option>
+                        {game.players.map((p) => (
+                          <option key={p.id} value={p.id}>
+                            {p.name}
+                          </option>
+                        ))}
+                      </select>
+                    ) : null}
+                  </td>
+                  {hole.par === 3 && isGreenieHole(hole.holeNumber) && (
+                    <td className="border border-green-300 bg-green-50 px-1" />
+                  )}
+                </Fragment>
+              ))}
+              <td
+                className="border border-gray-300 px-3 py-2"
+                colSpan={3}
+              ></td>
+            </tr>
+
+            <tr className="bg-yellow-50">
+              <td className="border border-gray-300 px-3 py-2 font-medium">
+                Longest Drive
+              </td>
+              <td className="border border-gray-300 px-3 py-2" />
+              {game.course.holes.map((hole) => (
+                <Fragment key={hole.holeNumber}>
+                  <td className="border border-gray-300 px-2 py-1 text-center">
+                    {isLongestHole(hole.holeNumber) ? (
+                      <select
+                        className="text-sm"
+                        value={
+                          game.longestDrive[hole.holeNumber] === null
+                            ? "none"
+                            : game.longestDrive[hole.holeNumber] ?? ""
+                        }
+                        onChange={(e) =>
+                          onUpdateLongest(
                             hole.holeNumber,
                             e.target.value === "none" ? null : e.target.value,
                           )

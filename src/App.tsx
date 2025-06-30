@@ -7,6 +7,7 @@ import './App.css';
 const calculateSkins = (
   players: Player[],
   closest: Record<number, string | null> = {},
+  longest: Record<number, string | null> = {},
   greenies: Record<number, Record<string, boolean>> = {},
 ): Player[] => {
   const skinsMap: Record<string, number> = {};
@@ -63,6 +64,27 @@ const calculateSkins = (
   addClosestSkin(frontPar3);
   addClosestSkin(backPar3);
 
+  // Longest Drive skins
+  const addLongestSkin = (holeNumbers: number[]) => {
+    const hole = holeNumbers.sort((a, b) => a - b).find((h) => longest[h]);
+    if (hole !== undefined) {
+      const winner = longest[hole];
+      if (winner) {
+        skinsMap[winner] += 1;
+      }
+    }
+  };
+
+  const frontPar5 = players[0].holes
+    .filter((h) => h.holeNumber <= 9 && h.par === 5)
+    .map((h) => h.holeNumber);
+  const backPar5 = players[0].holes
+    .filter((h) => h.holeNumber > 9 && h.par === 5)
+    .map((h) => h.holeNumber);
+
+  addLongestSkin(frontPar5);
+  addLongestSkin(backPar5);
+
   // Greenies
   Object.entries(greenies).forEach(([hole, playersMarked]) => {
     Object.entries(playersMarked).forEach(([id, val]) => {
@@ -113,6 +135,7 @@ function App() {
       currentHole: 1,
       totalHoles: 18,
       closestToPin: {},
+      longestDrive: {},
       greenies: {}
     };
 
@@ -147,6 +170,7 @@ function App() {
     const playersWithSkins = calculateSkins(
       updatedPlayers,
       game.closestToPin,
+      game.longestDrive,
       game.greenies,
     );
 
@@ -196,12 +220,52 @@ function App() {
     const playersWithSkins = calculateSkins(
       game.players,
       closest,
+      game.longestDrive,
       greenies,
     );
     setGame({
       ...game,
       closestToPin: closest,
       greenies,
+      players: playersWithSkins,
+    });
+  };
+
+  const updateLongestDrive = (holeNumber: number, playerId: string | null) => {
+    if (!game) return;
+    let longestMap: Record<number, string | null> = {
+      ...game.longestDrive,
+      [holeNumber]: playerId,
+    };
+
+    if (playerId) {
+      const sideStart = holeNumber <= 9 ? 1 : 10;
+      const sideEnd = holeNumber <= 9 ? 9 : 18;
+      const laterPar5 = game.course.holes
+        .filter(
+          (h) =>
+            h.par === 5 &&
+            h.holeNumber > holeNumber &&
+            h.holeNumber >= sideStart &&
+            h.holeNumber <= sideEnd,
+        )
+        .map((h) => h.holeNumber);
+
+      longestMap = { ...longestMap };
+      for (const h of laterPar5) {
+        delete longestMap[h];
+      }
+    }
+
+    const playersWithSkins = calculateSkins(
+      game.players,
+      game.closestToPin,
+      longestMap,
+      game.greenies,
+    );
+    setGame({
+      ...game,
+      longestDrive: longestMap,
       players: playersWithSkins,
     });
   };
@@ -222,6 +286,7 @@ function App() {
     const playersWithSkins = calculateSkins(
       game.players,
       game.closestToPin,
+      game.longestDrive,
       greenies,
     );
     setGame({ ...game, greenies, players: playersWithSkins });
@@ -263,6 +328,7 @@ function App() {
               game={game}
               onUpdateScore={updateScore}
               onUpdateClosest={updateClosestToPin}
+              onUpdateLongest={updateLongestDrive}
               onToggleGreenie={handleToggleGreenie}
             />
           </div>
