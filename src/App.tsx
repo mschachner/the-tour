@@ -44,6 +44,29 @@ const calculateSkins = (
     }
   }
 
+  // Lowest-handicap hole skins (par or better)
+  const frontLowest = players[0].holes
+    .filter((h) => h.holeNumber <= 9)
+    .sort((a, b) => a.holeHandicap - b.holeHandicap)[0];
+  const backLowest = players[0].holes
+    .filter((h) => h.holeNumber > 9)
+    .sort((a, b) => a.holeHandicap - b.holeHandicap)[0];
+
+  players.forEach((p) => {
+    if (frontLowest) {
+      const hole = p.holes.find((h) => h.holeNumber === frontLowest.holeNumber);
+      if (hole && hole.strokes > 0 && hole.strokes <= frontLowest.par) {
+        skinsMap[p.id] += 1;
+      }
+    }
+    if (backLowest) {
+      const hole = p.holes.find((h) => h.holeNumber === backLowest.holeNumber);
+      if (hole && hole.strokes > 0 && hole.strokes <= backLowest.par) {
+        skinsMap[p.id] += 1;
+      }
+    }
+  });
+
   // Closest to Pin skins
   const addClosestSkin = (holeNumbers: number[]) => {
     const hole = holeNumbers.sort((a, b) => a - b).find((h) => closest[h]);
