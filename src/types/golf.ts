@@ -49,6 +49,9 @@ export interface Game {
   greenies: Record<number, Record<string, boolean>>;
   fivers: Record<number, Record<string, boolean>>;
   fours: Record<number, Record<string, boolean>>;
+  sandyHoles: Record<number, boolean>;
+  sandies: Record<number, Record<string, boolean>>;
+  doubleSandies: Record<number, Record<string, boolean>>;
   lostBallHoles: Record<number, boolean>;
   lostBalls: Record<number, Record<string, boolean>>;
 }

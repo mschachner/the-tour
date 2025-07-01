@@ -77,6 +77,13 @@ interface ScoreCardProps {
   onToggleGreenie: (holeNumber: number, playerId: string, value: boolean) => void;
   onToggleFiver: (holeNumber: number, playerId: string, value: boolean) => void;
   onToggleFour: (holeNumber: number, playerId: string, value: boolean) => void;
+  onToggleSandyHole: (holeNumber: number, value: boolean) => void;
+  onToggleSandy: (holeNumber: number, playerId: string, value: boolean) => void;
+  onToggleDoubleSandy: (
+    holeNumber: number,
+    playerId: string,
+    value: boolean,
+  ) => void;
   onToggleLostBallHole: (holeNumber: number, value: boolean) => void;
   onToggleLostBall: (holeNumber: number, playerId: string, value: boolean) => void;
 }
@@ -89,6 +96,9 @@ const ScoreCard = ({
   onToggleGreenie,
   onToggleFiver,
   onToggleFour,
+  onToggleSandyHole,
+  onToggleSandy,
+  onToggleDoubleSandy,
   onToggleLostBallHole,
   onToggleLostBall,
 }: ScoreCardProps) => {
@@ -169,6 +179,9 @@ const ScoreCard = ({
   const backFourHole = getFourHoleForSide(game.course.holes, "back");
   const isFourHole = (holeNumber: number) =>
     holeNumber === frontFourHole || holeNumber === backFourHole;
+
+  const isSandyHole = (holeNumber: number) =>
+    game.sandyHoles[holeNumber];
 
   const isLostBallHole = (holeNumber: number) =>
     game.lostBallHoles[holeNumber];
@@ -331,6 +344,13 @@ const ScoreCard = ({
                       4
                     </th>
                   )}
+                  {isSandyHole(hole.holeNumber) && (
+                    <th
+                      className={`border border-yellow-300 bg-yellow-50 px-1 py-2 text-center font-semibold text-xs ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
+                    >
+                      🏖️
+                    </th>
+                  )}
                   {isLostBallHole(hole.holeNumber) && (
                     <th
                       className={`border border-red-300 bg-red-50 px-1 py-2 text-center font-semibold text-xs ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
@@ -458,6 +478,48 @@ const ScoreCard = ({
                             />
                           </td>
                         )}
+                        {isSandyHole(hole.holeNumber) && (
+                          <td className={`border border-yellow-300 bg-yellow-50 px-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
+                          >
+                            <div className="flex flex-col items-center space-y-0.5">
+                              <input
+                                type="checkbox"
+                                checked={
+                                  game.sandies[hole.holeNumber]?.[player.id] || false
+                                }
+                                onChange={(e) =>
+                                  onToggleSandy(
+                                    hole.holeNumber,
+                                    player.id,
+                                    e.target.checked,
+                                  )
+                                }
+                              />
+                              {game.sandies[hole.holeNumber]?.[player.id] && (
+                                <label className="relative">
+                                  <input
+                                    type="checkbox"
+                                    checked={
+                                      game.doubleSandies[hole.holeNumber]?.[player.id] ||
+                                      false
+                                    }
+                                    onChange={(e) =>
+                                      onToggleDoubleSandy(
+                                        hole.holeNumber,
+                                        player.id,
+                                        e.target.checked,
+                                      )
+                                    }
+                                    className="w-4 h-4"
+                                  />
+                                  <span className="absolute inset-0 flex items-center justify-center text-[10px] pointer-events-none">
+                                    2
+                                  </span>
+                                </label>
+                              )}
+                            </div>
+                          </td>
+                        )}
                         {isLostBallHole(hole.holeNumber) && (
                           <td className={`border border-red-300 bg-red-50 px-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
                           >
@@ -540,6 +602,9 @@ const ScoreCard = ({
                   {hole.par === 4 && isFourHole(hole.holeNumber) && (
                     <td className={`border border-blue-300 bg-blue-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
                   )}
+                  {isSandyHole(hole.holeNumber) && (
+                    <td className={`border border-yellow-300 bg-yellow-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
+                  )}
                   {isLostBallHole(hole.holeNumber) && (
                     <td className={`border border-red-300 bg-red-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
                   )}
@@ -594,6 +659,48 @@ const ScoreCard = ({
                   {hole.par === 4 && isFourHole(hole.holeNumber) && (
                     <td className={`border border-blue-300 bg-blue-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
                   )}
+                  {isSandyHole(hole.holeNumber) && (
+                    <td className={`border border-yellow-300 bg-yellow-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
+                  )}
+                  {isLostBallHole(hole.holeNumber) && (
+                    <td className={`border border-red-300 bg-red-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
+                  )}
+                </Fragment>
+              ))}
+              <td
+                className="border border-gray-300 px-3 py-2"
+                colSpan={3}
+              ></td>
+            </tr>
+            <tr className="bg-yellow-50">
+              <td className="border border-gray-300 px-3 py-2 font-medium">
+                🏖️
+              </td>
+
+              {game.course.holes.map((hole) => (
+                <Fragment key={hole.holeNumber}>
+                  <td className={`border border-gray-300 px-2 py-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={game.sandyHoles[hole.holeNumber] || false}
+                      onChange={(e) =>
+                        onToggleSandyHole(hole.holeNumber, e.target.checked)
+                      }
+                    />
+                  </td>
+                  {hole.par === 3 && isGreenieHole(hole.holeNumber) && (
+                    <td className={`border border-green-300 bg-green-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
+                  )}
+                  {hole.par === 5 && (
+                    <td className={`border border-orange-300 bg-orange-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
+                  )}
+                  {hole.par === 4 && isFourHole(hole.holeNumber) && (
+                    <td className={`border border-blue-300 bg-blue-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
+                  )}
+                  {isSandyHole(hole.holeNumber) && (
+                    <td className={`border border-yellow-300 bg-yellow-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
+                  )}
                   {isLostBallHole(hole.holeNumber) && (
                     <td className={`border border-red-300 bg-red-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
                   )}
@@ -630,6 +737,9 @@ const ScoreCard = ({
                   {hole.par === 4 && isFourHole(hole.holeNumber) && (
                     <td className={`border border-blue-300 bg-blue-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
                   )}
+                  {isSandyHole(hole.holeNumber) && (
+                    <td className={`border border-yellow-300 bg-yellow-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
+                  )}
                   {isLostBallHole(hole.holeNumber) && (
                     <td className={`border border-red-300 bg-red-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
                   )}
@@ -662,6 +772,7 @@ const ScoreCard = ({
                     <th className="border px-2 py-1 text-center">G</th>
                     <th className="border px-2 py-1 text-center">5</th>
                     <th className="border px-2 py-1 text-center">4</th>
+                    <th className="border px-2 py-1 text-center">🏖️</th>
                     <th className="border px-2 py-1 text-center">😅</th>
                   </tr>
                 </thead>
@@ -777,6 +888,47 @@ const ScoreCard = ({
                           )}
                         </td>
                         <td className={`border px-2 py-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}>
+                          {isSandyHole(hole.holeNumber) ? (
+                            <div className="flex flex-col items-center space-y-0.5">
+                              <input
+                                type="checkbox"
+                                checked={
+                                  game.sandies[hole.holeNumber]?.[player.id] || false
+                                }
+                                onChange={(e) =>
+                                  onToggleSandy(
+                                    hole.holeNumber,
+                                    player.id,
+                                    e.target.checked,
+                                  )
+                                }
+                              />
+                              {game.sandies[hole.holeNumber]?.[player.id] && (
+                                <label className="relative">
+                                  <input
+                                    type="checkbox"
+                                    checked={
+                                      game.doubleSandies[hole.holeNumber]?.[player.id] ||
+                                      false
+                                    }
+                                    onChange={(e) =>
+                                      onToggleDoubleSandy(
+                                        hole.holeNumber,
+                                        player.id,
+                                        e.target.checked,
+                                      )
+                                    }
+                                    className="w-4 h-4"
+                                  />
+                                  <span className="absolute inset-0 flex items-center justify-center text-[10px] pointer-events-none">2</span>
+                                </label>
+                              )}
+                            </div>
+                          ) : (
+                            "-"
+                          )}
+                        </td>
+                        <td className={`border px-2 py-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}>
                           {isLostBallHole(hole.holeNumber) ? (
                             <input
                               type="checkbox"
@@ -807,16 +959,17 @@ const ScoreCard = ({
                   <td className="border px-2 py-1" />
                   <td className="border px-2 py-1" />
                   <td className="border px-2 py-1" />
+                  <td className="border px-2 py-1" />
                   </tr>
                   <tr className="bg-gray-50 font-semibold text-sm">
                     <td className="border px-2 py-1">To Par</td>
-                    <td className="border px-2 py-1 text-center" colSpan={5}>
+                    <td className="border px-2 py-1 text-center" colSpan={6}>
                       {toPar === 0 ? "E" : toPar > 0 ? `+${toPar}` : `${toPar}`}
                     </td>
                   </tr>
                   <tr className="bg-gray-50 font-semibold text-sm">
                     <td className="border px-2 py-1">Skins</td>
-                    <td className="border px-2 py-1 text-center" colSpan={5}>
+                    <td className="border px-2 py-1 text-center" colSpan={6}>
                       {player.skins}
                     </td>
                   </tr>

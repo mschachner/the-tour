@@ -11,6 +11,8 @@ const calculateSkins = (
   greenies: Record<number, Record<string, boolean>> = {},
   fivers: Record<number, Record<string, boolean>> = {},
   fours: Record<number, Record<string, boolean>> = {},
+  sandies: Record<number, Record<string, boolean>> = {},
+  doubleSandies: Record<number, Record<string, boolean>> = {},
   lostBalls: Record<number, Record<string, boolean>> = {},
 ): Player[] => {
   const skinsMap: Record<string, number> = {};
@@ -138,6 +140,24 @@ const calculateSkins = (
     });
   });
 
+  // Sandy skins
+  Object.entries(sandies).forEach(([hole, playersMarked]) => {
+    Object.entries(playersMarked).forEach(([id, val]) => {
+      if (val) {
+        skinsMap[id] = (skinsMap[id] || 0) + 1;
+      }
+    });
+  });
+
+  // Double Sandy skins
+  Object.entries(doubleSandies).forEach(([hole, playersMarked]) => {
+    Object.entries(playersMarked).forEach(([id, val]) => {
+      if (val) {
+        skinsMap[id] = (skinsMap[id] || 0) + 1;
+      }
+    });
+  });
+
   // Lost Ball skins
   Object.entries(lostBalls).forEach(([hole, playersMarked]) => {
     Object.entries(playersMarked).forEach(([id, val]) => {
@@ -205,7 +225,7 @@ function App() {
       id: Date.now().toString(),
       date: new Date().toISOString().split('T')[0],
       course,
-      players: calculateSkins(players, {}, {}, {}, {}, {}, {}),
+      players: calculateSkins(players, {}, {}, {}, {}, {}, {}, {}, {}),
       currentHole: 1,
       totalHoles: 18,
       closestToPin: {},
@@ -213,6 +233,9 @@ function App() {
       greenies: {},
       fivers: {},
       fours: {},
+      sandyHoles: {},
+      sandies: {},
+      doubleSandies: {},
       lostBallHoles: {},
       lostBalls: {}
     };
@@ -252,6 +275,8 @@ function App() {
       game.greenies,
       game.fivers,
       game.fours,
+      game.sandies,
+      game.doubleSandies,
       game.lostBalls,
     );
 
@@ -305,6 +330,8 @@ function App() {
       greenies,
       game.fivers,
       game.fours,
+      game.sandies,
+      game.doubleSandies,
       game.lostBalls,
     );
     setGame({
@@ -348,6 +375,8 @@ function App() {
       game.greenies,
       game.fivers,
       game.fours,
+      game.sandies,
+      game.doubleSandies,
       game.lostBalls,
     );
     setGame({
@@ -377,6 +406,8 @@ function App() {
       greenies,
       game.fivers,
       game.fours,
+      game.sandies,
+      game.doubleSandies,
       game.lostBalls,
     );
     setGame({ ...game, greenies, players: playersWithSkins });
@@ -398,6 +429,8 @@ function App() {
       game.greenies,
       fivers,
       game.fours,
+      game.sandies,
+      game.doubleSandies,
       game.lostBalls,
     );
     setGame({ ...game, fivers, players: playersWithSkins });
@@ -421,9 +454,105 @@ function App() {
       game.greenies,
       game.fivers,
       fours,
+      game.sandies,
+      game.doubleSandies,
       game.lostBalls,
     );
     setGame({ ...game, fours, players: playersWithSkins });
+  };
+
+  const handleToggleSandyHole = (holeNumber: number, value: boolean) => {
+    if (!game) return;
+    const sandyHoles = { ...game.sandyHoles, [holeNumber]: value };
+    let sandies = { ...game.sandies };
+    let doubleSandies = { ...game.doubleSandies };
+    if (!value) {
+      const { [holeNumber]: _removed, ...rest } = sandies;
+      sandies = rest;
+      const { [holeNumber]: _dRemoved, ...dRest } = doubleSandies;
+      doubleSandies = dRest;
+    } else if (!sandies[holeNumber]) {
+      sandies[holeNumber] = {};
+    }
+    const playersWithSkins = calculateSkins(
+      game.players,
+      game.closestToPin,
+      game.longestDrive,
+      game.greenies,
+      game.fivers,
+      game.fours,
+      sandies,
+      doubleSandies,
+      game.lostBalls,
+    );
+    setGame({
+      ...game,
+      sandyHoles,
+      sandies,
+      doubleSandies,
+      players: playersWithSkins,
+    });
+  };
+
+  const handleToggleSandy = (
+    holeNumber: number,
+    playerId: string,
+    value: boolean,
+  ) => {
+    if (!game) return;
+    if (!game.sandyHoles[holeNumber]) return;
+    const holeMarks = { ...(game.sandies[holeNumber] || {}) };
+    holeMarks[playerId] = value;
+    const sandies = { ...game.sandies, [holeNumber]: holeMarks };
+    let doubleSandies = { ...game.doubleSandies };
+    if (!value) {
+      if (doubleSandies[holeNumber]) {
+        const { [playerId]: _r, ...rest } = doubleSandies[holeNumber];
+        doubleSandies = {
+          ...doubleSandies,
+          [holeNumber]: rest,
+        };
+      }
+    } else if (!doubleSandies[holeNumber]) {
+      doubleSandies[holeNumber] = {};
+    }
+    const playersWithSkins = calculateSkins(
+      game.players,
+      game.closestToPin,
+      game.longestDrive,
+      game.greenies,
+      game.fivers,
+      game.fours,
+      sandies,
+      doubleSandies,
+      game.lostBalls,
+    );
+    setGame({ ...game, sandies, doubleSandies, players: playersWithSkins });
+  };
+
+  const handleToggleDoubleSandy = (
+    holeNumber: number,
+    playerId: string,
+    value: boolean,
+  ) => {
+    if (!game) return;
+    if (!game.sandyHoles[holeNumber]) return;
+    if (!game.sandies[holeNumber]?.[playerId]) return;
+    const holeMarks = { ...(game.doubleSandies[holeNumber] || {}) };
+    holeMarks[playerId] = value;
+    const doubleSandies = { ...game.doubleSandies, [holeNumber]: holeMarks };
+    const playersWithSkins = calculateSkins(
+      game.players,
+      game.closestToPin,
+      game.longestDrive,
+      game.greenies,
+      game.fivers,
+      game.fours,
+      game.sandies,
+      doubleSandies,
+      game.lostBalls,
+    );
+    setGame({ ...game, doubleSandies, players: playersWithSkins });
   };
 
   const handleToggleLostBallHole = (holeNumber: number, value: boolean) => {
@@ -443,6 +572,8 @@ function App() {
       game.greenies,
       game.fivers,
       game.fours,
+      game.sandies,
+      game.doubleSandies,
       lostBalls,
     );
     setGame({ ...game, lostBallHoles, lostBalls, players: playersWithSkins });
@@ -465,6 +596,8 @@ function App() {
       game.greenies,
       game.fivers,
       game.fours,
+      game.sandies,
+      game.doubleSandies,
       lostBalls,
     );
     setGame({ ...game, lostBalls, players: playersWithSkins });
@@ -510,6 +643,9 @@ function App() {
               onToggleGreenie={handleToggleGreenie}
               onToggleFiver={handleToggleFiver}
               onToggleFour={handleToggleFour}
+              onToggleSandyHole={handleToggleSandyHole}
+              onToggleSandy={handleToggleSandy}
+              onToggleDoubleSandy={handleToggleDoubleSandy}
               onToggleLostBallHole={handleToggleLostBallHole}
               onToggleLostBall={handleToggleLostBall}
             />
