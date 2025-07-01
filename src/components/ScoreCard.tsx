@@ -173,6 +173,28 @@ const ScoreCard = ({
   const isLostBallHole = (holeNumber: number) =>
     game.lostBallHoles[holeNumber];
 
+  const holeWinners: Record<number, string | null> = (() => {
+    const winners: Record<number, string | null> = {};
+    game.course.holes.forEach((hole) => {
+      const scores = game.players
+        .map((p) => ({
+          id: p.id,
+          strokes:
+            p.holes.find((h) => h.holeNumber === hole.holeNumber)?.strokes || 0,
+        }))
+        .filter((s) => s.strokes > 0);
+      if (scores.length === 0) {
+        winners[hole.holeNumber] = null;
+        return;
+      }
+      const min = Math.min(...scores.map((s) => s.strokes));
+      const minScores = scores.filter((s) => s.strokes === min);
+      winners[hole.holeNumber] =
+        minScores.length === 1 ? minScores[0].id : null;
+    });
+    return winners;
+  })();
+
   const getGreenieHolesForSide = (
     holes: CourseHole[],
     closest: Record<number, string | null>,
@@ -340,7 +362,7 @@ const ScoreCard = ({
               {game.course.holes.map((hole) => (
                 <Fragment key={hole.holeNumber}>
                   <th
-                    className="border border-gray-300 px-2 py-2 text-center font-semibold text-sm"
+                    className={`border border-gray-300 px-2 py-2 text-center font-semibold text-sm ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
                   >
                     <div>{hole.holeNumber}</div>
                     <div className="text-xs text-gray-600">Par {hole.par}</div>
@@ -348,28 +370,28 @@ const ScoreCard = ({
                   </th>
                   {hole.par === 3 && isGreenieHole(hole.holeNumber) && (
                     <th
-                      className="border border-green-300 bg-green-50 px-1 py-2 text-center font-semibold text-xs"
+                      className={`border border-green-300 bg-green-50 px-1 py-2 text-center font-semibold text-xs ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
                     >
                       G
                     </th>
                   )}
                   {hole.par === 5 && (
                     <th
-                      className="border border-orange-300 bg-orange-50 px-1 py-2 text-center font-semibold text-xs"
+                      className={`border border-orange-300 bg-orange-50 px-1 py-2 text-center font-semibold text-xs ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
                     >
                       5
                     </th>
                   )}
                   {hole.par === 4 && isFourHole(hole.holeNumber) && (
                     <th
-                      className="border border-blue-300 bg-blue-50 px-1 py-2 text-center font-semibold text-xs"
+                      className={`border border-blue-300 bg-blue-50 px-1 py-2 text-center font-semibold text-xs ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
                     >
                       4
                     </th>
                   )}
                   {isLostBallHole(hole.holeNumber) && (
                     <th
-                      className="border border-red-300 bg-red-50 px-1 py-2 text-center font-semibold text-xs"
+                      className={`border border-red-300 bg-red-50 px-1 py-2 text-center font-semibold text-xs ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
                     >
                       😅
                     </th>
@@ -406,7 +428,7 @@ const ScoreCard = ({
 
                     return (
                       <Fragment key={hole.holeNumber}>
-                        <td className="border border-gray-300 px-2 py-1 text-center">
+                        <td className={`border border-gray-300 px-2 py-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}>
                           {editing ? (
                             <input
                               type="number"
@@ -427,7 +449,9 @@ const ScoreCard = ({
                               onClick={() =>
                                 handleCellClick(player.id, hole.holeNumber)
                               }
-                              className={`mx-auto w-10 h-10 md:w-8 md:h-8 flex items-center justify-center rounded border border-gray-300 bg-white hover:bg-gray-200 transition-colors text-sm ${getScoreColor(
+                              className={`mx-auto w-10 h-10 md:w-8 md:h-8 flex items-center justify-center rounded border border-gray-300 bg-white hover:bg-gray-200 transition-colors ${
+                                holeWinners[hole.holeNumber] === player.id ? "text-lg font-bold" : "text-sm"
+                              } ${getScoreColor(
                                 value,
                                 hole.par,
                               )} ${getScoreBorderStyle(value, hole.par)}`}
@@ -442,7 +466,8 @@ const ScoreCard = ({
                           )}
                         </td>
                         {hole.par === 3 && isGreenieHole(hole.holeNumber) && (
-                          <td className="border border-green-300 bg-green-50 px-1 text-center">
+                          <td className={`border border-green-300 bg-green-50 px-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
+                          >
                             <input
                               type="checkbox"
                               checked={
@@ -459,7 +484,8 @@ const ScoreCard = ({
                           </td>
                         )}
                         {hole.par === 5 && (
-                          <td className="border border-orange-300 bg-orange-50 px-1 text-center">
+                          <td className={`border border-orange-300 bg-orange-50 px-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
+                          >
                             <input
                               type="checkbox"
                               checked={
@@ -476,7 +502,8 @@ const ScoreCard = ({
                           </td>
                         )}
                         {hole.par === 4 && isFourHole(hole.holeNumber) && (
-                          <td className="border border-blue-300 bg-blue-50 px-1 text-center">
+                          <td className={`border border-blue-300 bg-blue-50 px-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
+                          >
                             <input
                               type="checkbox"
                               checked={
@@ -493,7 +520,8 @@ const ScoreCard = ({
                           </td>
                         )}
                         {isLostBallHole(hole.holeNumber) && (
-                          <td className="border border-red-300 bg-red-50 px-1 text-center">
+                          <td className={`border border-red-300 bg-red-50 px-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
+                          >
                             <input
                               type="checkbox"
                               checked={
@@ -548,7 +576,7 @@ const ScoreCard = ({
 
                       return (
                         <Fragment key={hole.holeNumber}>
-                          <td className="border border-gray-300 px-2 py-1 text-center">
+                          <td className={`border border-gray-300 px-2 py-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}>
                             {adjustedScore !== null ? (
                               <div
                                 className={`text-xs font-medium ${
@@ -564,16 +592,16 @@ const ScoreCard = ({
                             )}
                           </td>
                           {hole.par === 3 && isGreenieHole(hole.holeNumber) && (
-                            <td className="border border-green-300 bg-green-50 px-1" />
+                            <td className={`border border-green-300 bg-green-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
                           )}
                           {hole.par === 5 && (
-                            <td className="border border-orange-300 bg-orange-50 px-1" />
+                            <td className={`border border-orange-300 bg-orange-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
                           )}
                           {hole.par === 4 && isFourHole(hole.holeNumber) && (
-                            <td className="border border-blue-300 bg-blue-50 px-1" />
+                            <td className={`border border-blue-300 bg-blue-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
                           )}
                           {isLostBallHole(hole.holeNumber) && (
-                            <td className="border border-red-300 bg-red-50 px-1" />
+                            <td className={`border border-red-300 bg-red-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
                           )}
                         </Fragment>
                       );
@@ -597,12 +625,13 @@ const ScoreCard = ({
             ))}
             <tr className="bg-yellow-50">
               <td className="border border-gray-300 px-3 py-2 font-medium">
-                Closest to Pin
+                CTP
               </td>
               <td className="border border-gray-300 px-3 py-2" />
               {game.course.holes.map((hole) => (
                 <Fragment key={hole.holeNumber}>
-                  <td className="border border-gray-300 px-2 py-1 text-center">
+                  <td className={`border border-gray-300 px-2 py-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
+                  >
                     {isClosestHole(hole.holeNumber) ? (
                       <select
                         className="text-sm"
@@ -629,16 +658,16 @@ const ScoreCard = ({
                     ) : null}
                   </td>
                   {hole.par === 3 && isGreenieHole(hole.holeNumber) && (
-                    <td className="border border-green-300 bg-green-50 px-1" />
+                    <td className={`border border-green-300 bg-green-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
                   )}
                   {hole.par === 5 && (
-                    <td className="border border-orange-300 bg-orange-50 px-1" />
+                    <td className={`border border-orange-300 bg-orange-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
                   )}
                   {hole.par === 4 && isFourHole(hole.holeNumber) && (
-                    <td className="border border-blue-300 bg-blue-50 px-1" />
+                    <td className={`border border-blue-300 bg-blue-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
                   )}
                   {isLostBallHole(hole.holeNumber) && (
-                    <td className="border border-red-300 bg-red-50 px-1" />
+                    <td className={`border border-red-300 bg-red-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
                   )}
                 </Fragment>
               ))}
@@ -650,12 +679,13 @@ const ScoreCard = ({
 
             <tr className="bg-yellow-50">
               <td className="border border-gray-300 px-3 py-2 font-medium">
-                Longest Drive
+                LD
               </td>
               <td className="border border-gray-300 px-3 py-2" />
               {game.course.holes.map((hole) => (
                 <Fragment key={hole.holeNumber}>
-                  <td className="border border-gray-300 px-2 py-1 text-center">
+                  <td className={`border border-gray-300 px-2 py-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
+                  >
                     {isLongestHole(hole.holeNumber) ? (
                       <select
                         className="text-sm"
@@ -682,16 +712,16 @@ const ScoreCard = ({
                     ) : null}
                   </td>
                   {hole.par === 3 && isGreenieHole(hole.holeNumber) && (
-                    <td className="border border-green-300 bg-green-50 px-1" />
+                    <td className={`border border-green-300 bg-green-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
                   )}
                   {hole.par === 5 && (
-                    <td className="border border-orange-300 bg-orange-50 px-1" />
+                    <td className={`border border-orange-300 bg-orange-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
                   )}
                   {hole.par === 4 && isFourHole(hole.holeNumber) && (
-                    <td className="border border-blue-300 bg-blue-50 px-1" />
+                    <td className={`border border-blue-300 bg-blue-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
                   )}
                   {isLostBallHole(hole.holeNumber) && (
-                    <td className="border border-red-300 bg-red-50 px-1" />
+                    <td className={`border border-red-300 bg-red-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
                   )}
                 </Fragment>
               ))}
@@ -702,12 +732,13 @@ const ScoreCard = ({
             </tr>
             <tr className="bg-yellow-50">
               <td className="border border-gray-300 px-3 py-2 font-medium">
-                Lost Ball
+                LB
               </td>
               <td className="border border-gray-300 px-3 py-2" />
               {game.course.holes.map((hole) => (
                 <Fragment key={hole.holeNumber}>
-                  <td className="border border-gray-300 px-2 py-1 text-center">
+                  <td className={`border border-gray-300 px-2 py-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
+                  >
                     <input
                       type="checkbox"
                       checked={game.lostBallHoles[hole.holeNumber] || false}
@@ -717,16 +748,16 @@ const ScoreCard = ({
                     />
                   </td>
                   {hole.par === 3 && isGreenieHole(hole.holeNumber) && (
-                    <td className="border border-green-300 bg-green-50 px-1" />
+                    <td className={`border border-green-300 bg-green-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
                   )}
                   {hole.par === 5 && (
-                    <td className="border border-orange-300 bg-orange-50 px-1" />
+                    <td className={`border border-orange-300 bg-orange-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
                   )}
                   {hole.par === 4 && isFourHole(hole.holeNumber) && (
-                    <td className="border border-blue-300 bg-blue-50 px-1" />
+                    <td className={`border border-blue-300 bg-blue-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
                   )}
                   {isLostBallHole(hole.holeNumber) && (
-                    <td className="border border-red-300 bg-red-50 px-1" />
+                    <td className={`border border-red-300 bg-red-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
                   )}
                 </Fragment>
               ))}
@@ -779,7 +810,7 @@ const ScoreCard = ({
                             <span className="text-gray-500">H{hole.holeHandicap}</span>
                           </div>
                         </td>
-                        <td className="border px-2 py-1 text-center">
+                        <td className={`border px-2 py-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}>
                           {strokeEditing ? (
                             <input
                               type="number"
@@ -805,7 +836,9 @@ const ScoreCard = ({
                                   hole.holeNumber,
                                 )
                               }
-                              className={`mx-auto w-10 h-10 md:w-8 md:h-8 flex items-center justify-center rounded border border-gray-300 bg-white hover:bg-gray-200 transition-colors text-sm ${getScoreColor(hole.strokes, hole.par)} ${getScoreBorderStyle(hole.strokes, hole.par)}`}
+                              className={`mx-auto w-10 h-10 md:w-8 md:h-8 flex items-center justify-center rounded border border-gray-300 bg-white hover:bg-gray-200 transition-colors ${
+                                holeWinners[hole.holeNumber] === player.id ? "text-lg font-bold" : "text-sm"
+                              } ${getScoreColor(hole.strokes, hole.par)} ${getScoreBorderStyle(hole.strokes, hole.par)}`}
                               style={{
                                 ...getCrossHatchStyle(hole.strokes, hole.par),
                                 ...getDoubleCircleStyle(hole.strokes, hole.par),
@@ -816,7 +849,7 @@ const ScoreCard = ({
                             </button>
                           )}
                         </td>
-                        <td className="border px-2 py-1 text-center">
+                        <td className={`border px-2 py-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}>
                           {hole.par === 3 && isGreenieHole(hole.holeNumber) ? (
                             <input
                               type="checkbox"
@@ -835,7 +868,7 @@ const ScoreCard = ({
                             "-"
                           )}
                         </td>
-                        <td className="border px-2 py-1 text-center">
+                        <td className={`border px-2 py-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}>
                           {hole.par === 5 ? (
                             <input
                               type="checkbox"
@@ -854,7 +887,7 @@ const ScoreCard = ({
                             "-"
                           )}
                         </td>
-                        <td className="border px-2 py-1 text-center">
+                        <td className={`border px-2 py-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}>
                           {hole.par === 4 && isFourHole(hole.holeNumber) ? (
                             <input
                               type="checkbox"
@@ -873,7 +906,7 @@ const ScoreCard = ({
                             "-"
                           )}
                         </td>
-                        <td className="border px-2 py-1 text-center">
+                        <td className={`border px-2 py-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}>
                           {isLostBallHole(hole.holeNumber) ? (
                             <input
                               type="checkbox"
@@ -892,7 +925,7 @@ const ScoreCard = ({
                             "-"
                           )}
                         </td>
-                        <td className="border px-2 py-1 text-center text-sm">
+                        <td className={`border px-2 py-1 text-center text-sm ${hole.holeNumber === 10 ? "border-l-4" : ""}`}>
                           {(() => {
                             const adj = getAdjustedScoreForHole(
                               player,
