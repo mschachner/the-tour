@@ -288,61 +288,6 @@ const ScoreCard = ({
     }, 0);
   };
 
-  const calculateAdjustedScore = (player: Player) => {
-    if (player.handicap === 0) return player.totalScore;
-
-    // Sort holes by handicap (lowest to highest) - easiest holes first
-    const sortedHoles = [...player.holes].sort(
-      (a, b) => a.holeHandicap - b.holeHandicap,
-    );
-
-    let adjustedScore = player.totalScore;
-    let strokesToDeduct = 0;
-
-    // Apply strokes starting from easiest holes (lowest handicap numbers)
-    // For handicap > 18, we cycle through holes multiple times
-    for (let i = 0; i < player.handicap; i++) {
-      const cycleIndex = i % 18; // Which hole in the current cycle
-      const hole = sortedHoles[cycleIndex];
-      if (hole && hole.strokes > 0) {
-        strokesToDeduct++;
-      }
-    }
-
-    return adjustedScore - strokesToDeduct;
-  };
-
-  const getAdjustedScoreForHole = (player: Player, holeNumber: number) => {
-    if (player.handicap === 0) return null;
-
-    const hole = player.holes.find((h) => h.holeNumber === holeNumber);
-    if (!hole || hole.strokes === 0) return null;
-
-    // Calculate how many strokes this player gets on this hole
-    const sortedHoles = [...player.holes].sort(
-      (a, b) => a.holeHandicap - b.holeHandicap,
-    );
-    const holeIndex = sortedHoles.findIndex((h) => h.holeNumber === holeNumber);
-
-    // Calculate strokes to deduct for this specific hole
-    let strokesToDeduct = 0;
-
-    // For each stroke in the handicap, check if this hole gets it
-    for (let i = 0; i < player.handicap; i++) {
-      const cycleIndex = i % 18; // Which hole in the current cycle
-      if (cycleIndex === holeIndex) {
-        strokesToDeduct++;
-      }
-    }
-
-    // Return adjusted score if strokes are deducted, otherwise return original score
-    return strokesToDeduct > 0 ? hole.strokes - strokesToDeduct : hole.strokes;
-  };
-
-  const calculateAdjustedToPar = (player: Player) => {
-    const adjustedScore = calculateAdjustedScore(player);
-    return adjustedScore - game.course.totalPar;
-  };
 
   return (
     <div className="golf-card">
@@ -355,9 +300,6 @@ const ScoreCard = ({
             <tr className="bg-gray-100">
               <th className="border border-gray-300 px-3 py-2 text-left font-semibold">
                 Player
-              </th>
-              <th className="border border-gray-300 px-3 py-2 text-center font-semibold">
-                Handicap
               </th>
               {game.course.holes.map((hole) => (
                 <Fragment key={hole.holeNumber}>
@@ -418,9 +360,6 @@ const ScoreCard = ({
                 >
                   <td className="border border-gray-300 px-3 py-2 font-medium">
                     {player.name}
-                  </td>
-                  <td className="border border-gray-300 px-3 py-2 text-center">
-                    {player.handicap}
                   </td>
                   {player.holes.map((hole) => {
                     const value = hole.strokes;
@@ -555,71 +494,6 @@ const ScoreCard = ({
                   </td>
                 </tr>
 
-                {/* Adjusted Score Row (only show if player has handicap) */}
-                {player.handicap > 0 && (
-                  <tr
-                    className={
-                      playerIndex % 2 === 0 ? "bg-white" : "bg-gray-50"
-                    }
-                  >
-                    <td className="border border-gray-300 px-3 py-1 text-xs text-gray-500">
-                      Adjusted
-                    </td>
-                    <td className="border border-gray-300 px-3 py-1 text-xs text-gray-500">
-                      ({player.handicap})
-                    </td>
-                    {player.holes.map((hole) => {
-                      const adjustedScore = getAdjustedScoreForHole(
-                        player,
-                        hole.holeNumber,
-                      );
-
-                      return (
-                        <Fragment key={hole.holeNumber}>
-                          <td className={`border border-gray-300 px-2 py-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}>
-                            {adjustedScore !== null ? (
-                              <div
-                                className={`text-xs font-medium ${
-                                  adjustedScore < hole.strokes
-                                    ? "text-blue-600"
-                                    : "text-gray-600"
-                                }`}
-                              >
-                                {adjustedScore}
-                              </div>
-                            ) : (
-                              <div className="text-xs text-gray-400">-</div>
-                            )}
-                          </td>
-                          {hole.par === 3 && isGreenieHole(hole.holeNumber) && (
-                            <td className={`border border-green-300 bg-green-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
-                          )}
-                          {hole.par === 5 && (
-                            <td className={`border border-orange-300 bg-orange-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
-                          )}
-                          {hole.par === 4 && isFourHole(hole.holeNumber) && (
-                            <td className={`border border-blue-300 bg-blue-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
-                          )}
-                          {isLostBallHole(hole.holeNumber) && (
-                            <td className={`border border-red-300 bg-red-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
-                          )}
-                        </Fragment>
-                      );
-                    })}
-                    <td className="border border-gray-300 px-3 py-1 text-center font-bold bg-blue-50 text-blue-700 text-sm">
-                      {calculateAdjustedScore(player)}
-                    </td>
-                    <td className="border border-gray-300 px-3 py-1 text-center font-bold bg-purple-50 text-purple-700 text-sm">
-                      {(() => {
-                        const adjustedToPar = calculateAdjustedToPar(player);
-                        if (adjustedToPar === 0) return "E";
-                        return adjustedToPar > 0
-                          ? `+${adjustedToPar}`
-                          : `${adjustedToPar}`;
-                      })()}
-                    </td>
-                  </tr>
-                )}
 
               </Fragment>
             ))}
@@ -627,7 +501,7 @@ const ScoreCard = ({
               <td className="border border-gray-300 px-3 py-2 font-medium">
                 CTP
               </td>
-              <td className="border border-gray-300 px-3 py-2" />
+
               {game.course.holes.map((hole) => (
                 <Fragment key={hole.holeNumber}>
                   <td className={`border border-gray-300 px-2 py-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
@@ -681,7 +555,7 @@ const ScoreCard = ({
               <td className="border border-gray-300 px-3 py-2 font-medium">
                 LD
               </td>
-              <td className="border border-gray-300 px-3 py-2" />
+
               {game.course.holes.map((hole) => (
                 <Fragment key={hole.holeNumber}>
                   <td className={`border border-gray-300 px-2 py-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
@@ -734,7 +608,7 @@ const ScoreCard = ({
               <td className="border border-gray-300 px-3 py-2 font-medium">
                 LB
               </td>
-              <td className="border border-gray-300 px-3 py-2" />
+
               {game.course.holes.map((hole) => (
                 <Fragment key={hole.holeNumber}>
                   <td className={`border border-gray-300 px-2 py-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
@@ -772,16 +646,13 @@ const ScoreCard = ({
 
       {/* Mobile Layout */}
       <div className="md:hidden space-y-4">
-        {game.players.map((player) => {
+          {game.players.map((player) => {
           const toPar = calculateTotalToPar(player);
-          const adjustedScore = calculateAdjustedScore(player);
-          const adjustedToPar = calculateAdjustedToPar(player);
 
           return (
             <div key={player.id} className="border rounded-lg overflow-hidden">
               <div className="flex justify-between items-center bg-gray-100 px-3 py-2">
                 <span className="font-semibold">{player.name}</span>
-                <span className="text-sm">HCP {player.handicap}</span>
               </div>
               <table className="w-full border-collapse">
                 <thead className="text-xs">
@@ -792,7 +663,6 @@ const ScoreCard = ({
                     <th className="border px-2 py-1 text-center">5</th>
                     <th className="border px-2 py-1 text-center">4</th>
                     <th className="border px-2 py-1 text-center">😅</th>
-                    <th className="border px-2 py-1 text-center">Adj</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -925,15 +795,6 @@ const ScoreCard = ({
                             "-"
                           )}
                         </td>
-                        <td className={`border px-2 py-1 text-center text-sm ${hole.holeNumber === 10 ? "border-l-4" : ""}`}>
-                          {(() => {
-                            const adj = getAdjustedScoreForHole(
-                              player,
-                              hole.holeNumber,
-                            );
-                            return adj !== null ? adj : "-";
-                          })()}
-                        </td>
                       </tr>
                     );
                   })}
@@ -946,48 +807,19 @@ const ScoreCard = ({
                   <td className="border px-2 py-1" />
                   <td className="border px-2 py-1" />
                   <td className="border px-2 py-1" />
-                  <td className="border px-2 py-1 text-center">
-                    {player.handicap > 0 ? adjustedScore : "-"}
-                  </td>
                   </tr>
                   <tr className="bg-gray-50 font-semibold text-sm">
                     <td className="border px-2 py-1">To Par</td>
-                    <td className="border px-2 py-1 text-center" colSpan={6}>
+                    <td className="border px-2 py-1 text-center" colSpan={5}>
                       {toPar === 0 ? "E" : toPar > 0 ? `+${toPar}` : `${toPar}`}
                     </td>
                   </tr>
                   <tr className="bg-gray-50 font-semibold text-sm">
                     <td className="border px-2 py-1">Skins</td>
-                    <td className="border px-2 py-1 text-center" colSpan={6}>
+                    <td className="border px-2 py-1 text-center" colSpan={5}>
                       {player.skins}
                     </td>
                   </tr>
-                  {player.handicap > 0 && (
-                    <>
-                      <tr className="bg-gray-50 font-semibold text-sm">
-                        <td className="border px-2 py-1">Adjusted Score</td>
-                        <td
-                          className="border px-2 py-1 text-center"
-                          colSpan={6}
-                        >
-                          {adjustedScore}
-                        </td>
-                      </tr>
-                      <tr className="bg-gray-50 font-semibold text-sm">
-                        <td className="border px-2 py-1">Adjusted To Par</td>
-                        <td
-                          className="border px-2 py-1 text-center"
-                          colSpan={6}
-                        >
-                          {adjustedToPar === 0
-                            ? "E"
-                            : adjustedToPar > 0
-                              ? `+${adjustedToPar}`
-                              : `${adjustedToPar}`}
-                        </td>
-                      </tr>
-                    </>
-                  )}
                 </tbody>
               </table>
             </div>
@@ -999,8 +831,6 @@ const ScoreCard = ({
       <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {game.players.map((player) => {
           const toPar = calculateTotalToPar(player);
-          const adjustedScore = calculateAdjustedScore(player);
-          const adjustedToPar = calculateAdjustedToPar(player);
 
           return (
             <div key={player.id} className="bg-gray-50 rounded-lg p-4">
@@ -1027,38 +857,6 @@ const ScoreCard = ({
                   >
                     {toPar === 0 ? "E" : toPar > 0 ? `+${toPar}` : `${toPar}`}
                   </span>
-                </div>
-                {player.handicap > 0 && (
-                  <>
-                    <div className="flex justify-between">
-                      <span>Adjusted Score:</span>
-                      <span className="font-bold text-blue-600">
-                        {adjustedScore}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Adjusted To Par:</span>
-                      <span
-                        className={`font-bold ${
-                          adjustedToPar === 0
-                            ? "text-gray-600"
-                            : adjustedToPar > 0
-                              ? "text-red-600"
-                              : "text-green-600"
-                        }`}
-                      >
-                        {adjustedToPar === 0
-                          ? "E"
-                          : adjustedToPar > 0
-                            ? `+${adjustedToPar}`
-                            : `${adjustedToPar}`}
-                      </span>
-                    </div>
-                  </>
-                )}
-                <div className="flex justify-between">
-                  <span>Handicap:</span>
-                  <span className="font-bold">{player.handicap}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Skins:</span>

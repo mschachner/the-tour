@@ -12,9 +12,9 @@ A modern, responsive golf score tracking application built with React and TypeSc
 ### 🎯 Core Functionality
 - **Real-time Score Tracking**: Track strokes and putts for up to 4 players
 - **Course Management**: Choose from famous courses or create custom ones
-- **Player Setup**: Add players with handicaps and personal information
+- **Player Setup**: Add player names and personal information
 - **Live Scoring**: Update scores hole-by-hole with instant calculations
-- **Total Score Calculation**: Automatic score totaling and handicap tracking
+- **Total Score Calculation**: Automatic score totaling
 
 ### 🏟️ Course Features
 - **Pre-loaded Famous Courses**:
@@ -93,7 +93,6 @@ the-tour/
 2. **Add Players**
    - Set number of players (1-4)
    - Enter player names
-   - Add handicaps for accurate scoring
 
 3. **Start Playing**
    - Track strokes and putts for each hole
@@ -154,7 +153,6 @@ interface Game {
 interface Player {
   id: string;
   name: string;
-  handicap: number;
   totalScore: number;
   totalPutts: number;
   holes: HoleScore[];
@@ -217,7 +215,7 @@ The Tour was created to provide golfers with a simple, elegant way to track thei
 
 Perfect for:
 - **Casual Golfers**: Simple score tracking
-- **Serious Players**: Detailed statistics and handicap tracking
+- **Serious Players**: Detailed statistics and score tracking
 - **Course Managers**: Custom course creation
 - **Golf Groups**: Multi-player game management
 
