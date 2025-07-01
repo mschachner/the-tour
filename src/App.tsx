@@ -10,6 +10,7 @@ const calculateSkins = (
   longest: Record<number, string | null> = {},
   greenies: Record<number, Record<string, boolean>> = {},
   fivers: Record<number, Record<string, boolean>> = {},
+  fours: Record<number, Record<string, boolean>> = {},
 ): Player[] => {
   const skinsMap: Record<string, number> = {};
   players.forEach((p) => {
@@ -127,6 +128,15 @@ const calculateSkins = (
     });
   });
 
+  // Four skins
+  Object.entries(fours).forEach(([hole, playersMarked]) => {
+    Object.entries(playersMarked).forEach(([id, val]) => {
+      if (val) {
+        skinsMap[id] = (skinsMap[id] || 0) + 1;
+      }
+    });
+  });
+
   return players.map((p) => ({ ...p, skins: skinsMap[p.id] }));
 };
 
@@ -156,6 +166,27 @@ const getGreenieHoles = (
   ...getGreenieHolesForSide(holes, closest, 'back'),
 ];
 
+const getFourHoleForSide = (
+  holes: CourseHole[],
+  side: 'front' | 'back',
+): number | null => {
+  const [start, end] = side === 'front' ? [1, 9] : [10, 18];
+  const sideHoles = holes.filter(
+    (h) => h.holeNumber >= start && h.holeNumber <= end,
+  );
+  const lowest = [...sideHoles].sort((a, b) => a.handicap - b.handicap)[0];
+  const par4 = sideHoles
+    .filter((h) => h.par === 4 && h.holeNumber !== lowest.holeNumber)
+    .sort((a, b) => a.handicap - b.handicap)[0];
+  return par4 ? par4.holeNumber : null;
+};
+
+const getFourHoles = (holes: CourseHole[]): number[] => {
+  const front = getFourHoleForSide(holes, 'front');
+  const back = getFourHoleForSide(holes, 'back');
+  return [front, back].filter((n): n is number => n !== null);
+};
+
 function App() {
   const [game, setGame] = useState<Game | null>(null);
   const [showSetup, setShowSetup] = useState(true);
@@ -170,7 +201,8 @@ function App() {
       closestToPin: {},
       longestDrive: {},
       greenies: {},
-      fivers: {}
+      fivers: {},
+      fours: {}
     };
 
     setGame(newGame);
@@ -207,6 +239,7 @@ function App() {
       game.longestDrive,
       game.greenies,
       game.fivers,
+      game.fours,
     );
 
     const updatedGame = {
@@ -258,6 +291,7 @@ function App() {
       game.longestDrive,
       greenies,
       game.fivers,
+      game.fours,
     );
     setGame({
       ...game,
@@ -299,6 +333,7 @@ function App() {
       longestMap,
       game.greenies,
       game.fivers,
+      game.fours,
     );
     setGame({
       ...game,
@@ -326,6 +361,7 @@ function App() {
       game.longestDrive,
       greenies,
       game.fivers,
+      game.fours,
     );
     setGame({ ...game, greenies, players: playersWithSkins });
   };
@@ -345,8 +381,31 @@ function App() {
       game.longestDrive,
       game.greenies,
       fivers,
+      game.fours,
     );
     setGame({ ...game, fivers, players: playersWithSkins });
+  };
+
+  const handleToggleFour = (
+    holeNumber: number,
+    playerId: string,
+    value: boolean,
+  ) => {
+    if (!game) return;
+    const validHoles = new Set(getFourHoles(game.course.holes));
+    if (!validHoles.has(holeNumber)) return;
+    const holeFours = { ...(game.fours[holeNumber] || {}) };
+    holeFours[playerId] = value;
+    const fours = { ...game.fours, [holeNumber]: holeFours };
+    const playersWithSkins = calculateSkins(
+      game.players,
+      game.closestToPin,
+      game.longestDrive,
+      game.greenies,
+      game.fivers,
+      fours,
+    );
+    setGame({ ...game, fours, players: playersWithSkins });
   };
 
   const resetGame = () => {
@@ -388,6 +447,7 @@ function App() {
               onUpdateLongest={updateLongestDrive}
               onToggleGreenie={handleToggleGreenie}
               onToggleFiver={handleToggleFiver}
+              onToggleFour={handleToggleFour}
             />
           </div>
         ) : null}

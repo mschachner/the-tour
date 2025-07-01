@@ -49,6 +49,21 @@ const getLongestHoleForSide = (
   return null;
 };
 
+const getFourHoleForSide = (
+  holes: CourseHole[],
+  side: "front" | "back",
+): number | null => {
+  const [start, end] = side === "front" ? [1, 9] : [10, 18];
+  const sideHoles = holes.filter(
+    (h) => h.holeNumber >= start && h.holeNumber <= end,
+  );
+  const lowest = [...sideHoles].sort((a, b) => a.handicap - b.handicap)[0];
+  const par4 = sideHoles
+    .filter((h) => h.par === 4 && h.holeNumber !== lowest.holeNumber)
+    .sort((a, b) => a.handicap - b.handicap)[0];
+  return par4 ? par4.holeNumber : null;
+};
+
 interface ScoreCardProps {
   game: Game;
   onUpdateScore: (
@@ -61,6 +76,7 @@ interface ScoreCardProps {
   onUpdateLongest: (holeNumber: number, playerId: string | null) => void;
   onToggleGreenie: (holeNumber: number, playerId: string, value: boolean) => void;
   onToggleFiver: (holeNumber: number, playerId: string, value: boolean) => void;
+  onToggleFour: (holeNumber: number, playerId: string, value: boolean) => void;
 }
 
 const ScoreCard = ({
@@ -70,6 +86,7 @@ const ScoreCard = ({
   onUpdateLongest,
   onToggleGreenie,
   onToggleFiver,
+  onToggleFour,
 }: ScoreCardProps) => {
   const [editingCell, setEditingCell] = useState<{
     playerId: string;
@@ -143,6 +160,11 @@ const ScoreCard = ({
     holeNumber === frontLongestHole ||
     holeNumber === backLongestHole ||
     game.longestDrive[holeNumber] !== undefined;
+
+  const frontFourHole = getFourHoleForSide(game.course.holes, "front");
+  const backFourHole = getFourHoleForSide(game.course.holes, "back");
+  const isFourHole = (holeNumber: number) =>
+    holeNumber === frontFourHole || holeNumber === backFourHole;
 
   const getGreenieHolesForSide = (
     holes: CourseHole[],
@@ -331,6 +353,13 @@ const ScoreCard = ({
                       5
                     </th>
                   )}
+                  {hole.par === 4 && isFourHole(hole.holeNumber) && (
+                    <th
+                      className="border border-blue-300 bg-blue-50 px-1 py-2 text-center font-semibold text-xs"
+                    >
+                      4
+                    </th>
+                  )}
                 </Fragment>
               ))}
               <th className="border border-gray-300 px-3 py-2 text-center font-semibold">
@@ -432,6 +461,23 @@ const ScoreCard = ({
                             />
                           </td>
                         )}
+                        {hole.par === 4 && isFourHole(hole.holeNumber) && (
+                          <td className="border border-blue-300 bg-blue-50 px-1 text-center">
+                            <input
+                              type="checkbox"
+                              checked={
+                                game.fours[hole.holeNumber]?.[player.id] || false
+                              }
+                              onChange={(e) =>
+                                onToggleFour(
+                                  hole.holeNumber,
+                                  player.id,
+                                  e.target.checked,
+                                )
+                              }
+                            />
+                          </td>
+                        )}
                       </Fragment>
                     );
                   })}
@@ -492,6 +538,9 @@ const ScoreCard = ({
                           {hole.par === 5 && (
                             <td className="border border-orange-300 bg-orange-50 px-1" />
                           )}
+                          {hole.par === 4 && isFourHole(hole.holeNumber) && (
+                            <td className="border border-blue-300 bg-blue-50 px-1" />
+                          )}
                         </Fragment>
                       );
                     })}
@@ -551,6 +600,9 @@ const ScoreCard = ({
                   {hole.par === 5 && (
                     <td className="border border-orange-300 bg-orange-50 px-1" />
                   )}
+                  {hole.par === 4 && isFourHole(hole.holeNumber) && (
+                    <td className="border border-blue-300 bg-blue-50 px-1" />
+                  )}
                 </Fragment>
               ))}
               <td
@@ -598,6 +650,9 @@ const ScoreCard = ({
                   {hole.par === 5 && (
                     <td className="border border-orange-300 bg-orange-50 px-1" />
                   )}
+                  {hole.par === 4 && isFourHole(hole.holeNumber) && (
+                    <td className="border border-blue-300 bg-blue-50 px-1" />
+                  )}
                 </Fragment>
               ))}
               <td
@@ -629,6 +684,7 @@ const ScoreCard = ({
                     <th className="border px-2 py-1 text-center">Strokes</th>
                     <th className="border px-2 py-1 text-center">G</th>
                     <th className="border px-2 py-1 text-center">5</th>
+                    <th className="border px-2 py-1 text-center">4</th>
                     <th className="border px-2 py-1 text-center">Adj</th>
                   </tr>
                 </thead>
@@ -722,6 +778,25 @@ const ScoreCard = ({
                             "-"
                           )}
                         </td>
+                        <td className="border px-2 py-1 text-center">
+                          {hole.par === 4 && isFourHole(hole.holeNumber) ? (
+                            <input
+                              type="checkbox"
+                              checked={
+                                game.fours[hole.holeNumber]?.[player.id] || false
+                              }
+                              onChange={(e) =>
+                                onToggleFour(
+                                  hole.holeNumber,
+                                  player.id,
+                                  e.target.checked,
+                                )
+                              }
+                            />
+                          ) : (
+                            "-"
+                          )}
+                        </td>
                         <td className="border px-2 py-1 text-center text-sm">
                           {(() => {
                             const adj = getAdjustedScoreForHole(
@@ -740,19 +815,21 @@ const ScoreCard = ({
                       {player.totalScore}
                     </td>
                     <td className="border px-2 py-1" />
+                    <td className="border px-2 py-1" />
+                    <td className="border px-2 py-1" />
                     <td className="border px-2 py-1 text-center">
                       {player.handicap > 0 ? adjustedScore : "-"}
                     </td>
                   </tr>
                   <tr className="bg-gray-50 font-semibold text-sm">
                     <td className="border px-2 py-1">To Par</td>
-                    <td className="border px-2 py-1 text-center" colSpan={4}>
+                    <td className="border px-2 py-1 text-center" colSpan={5}>
                       {toPar === 0 ? "E" : toPar > 0 ? `+${toPar}` : `${toPar}`}
                     </td>
                   </tr>
                   <tr className="bg-gray-50 font-semibold text-sm">
                     <td className="border px-2 py-1">Skins</td>
-                    <td className="border px-2 py-1 text-center" colSpan={4}>
+                    <td className="border px-2 py-1 text-center" colSpan={5}>
                       {player.skins}
                     </td>
                   </tr>
@@ -762,7 +839,7 @@ const ScoreCard = ({
                         <td className="border px-2 py-1">Adjusted Score</td>
                         <td
                           className="border px-2 py-1 text-center"
-                          colSpan={4}
+                          colSpan={5}
                         >
                           {adjustedScore}
                         </td>
@@ -771,7 +848,7 @@ const ScoreCard = ({
                         <td className="border px-2 py-1">Adjusted To Par</td>
                         <td
                           className="border px-2 py-1 text-center"
-                          colSpan={4}
+                          colSpan={5}
                         >
                           {adjustedToPar === 0
                             ? "E"
