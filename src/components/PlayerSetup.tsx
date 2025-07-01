@@ -13,10 +13,10 @@ interface PlayerSetupProps {
 
 const PlayerSetup = ({ onStartGame }: PlayerSetupProps) => {
   const [players, setPlayers] = useState<PlayerSetupType[]>([
-    { id: '1', name: '', handicap: 0 },
-    { id: '2', name: '', handicap: 0 },
-    { id: '3', name: '', handicap: 0 },
-    { id: '4', name: '', handicap: 0 }
+    { id: '1', name: '' },
+    { id: '2', name: '' },
+    { id: '3', name: '' },
+    { id: '4', name: '' }
   ]);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [activePlayers, setActivePlayers] = useState(2);
@@ -24,16 +24,16 @@ const PlayerSetup = ({ onStartGame }: PlayerSetupProps) => {
   const [courseToEdit, setCourseToEdit] = useState<Course | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const updatePlayer = (id: string, field: keyof PlayerSetupType, value: string | number) => {
-    setPlayers(prev => prev.map(player => 
-      player.id === id ? { ...player, [field]: value } : player
-    ));
+  const updatePlayer = (
+    id: string,
+    field: keyof PlayerSetupType,
+    value: string,
+  ) => {
+    setPlayers((prev) =>
+      prev.map((player) => (player.id === id ? { ...player, [field]: value } : player)),
+    );
   };
 
-  const handleHandicapChange = (id: string, value: string) => {
-    const numValue = parseInt(value) || 0;
-    updatePlayer(id, 'handicap', numValue);
-  };
 
   const handleCourseSelect = (course: Course) => {
     // Check if this is a custom course that should be editable
@@ -110,19 +110,18 @@ const PlayerSetup = ({ onStartGame }: PlayerSetupProps) => {
     }
 
     // Convert PlayerSetup to Player with course data
-    const gamePlayers: Player[] = validPlayers.map(player => ({
+    const gamePlayers: Player[] = validPlayers.map((player) => ({
       ...player,
       totalScore: 0,
       totalPutts: 0,
       skins: 0,
-      holes: selectedCourse.holes.map(hole => ({
+      holes: selectedCourse.holes.map((hole) => ({
         holeNumber: hole.holeNumber,
         strokes: 0,
         putts: 0,
-        handicap: player.handicap,
         par: hole.par,
-        holeHandicap: hole.handicap
-      }))
+        holeHandicap: hole.handicap,
+      })),
     }));
 
     onStartGame(gamePlayers, selectedCourse);
@@ -192,7 +191,7 @@ const PlayerSetup = ({ onStartGame }: PlayerSetupProps) => {
           <h3 className="text-lg font-semibold text-gray-800 mb-4">Players</h3>
           <div className="space-y-4">
             {players.slice(0, activePlayers).map((player, index) => (
-              <div key={player.id} className="grid grid-cols-2 gap-4">
+              <div key={player.id} className="grid grid-cols-1 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Player {index + 1} Name
@@ -202,19 +201,6 @@ const PlayerSetup = ({ onStartGame }: PlayerSetupProps) => {
                     value={player.name}
                     onChange={(e) => updatePlayer(player.id, 'name', e.target.value)}
                     placeholder={`Player ${index + 1}`}
-                    className="golf-input w-full"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Handicap
-                  </label>
-                  <input
-                    type="number"
-                    value={player.handicap || ''}
-                    onChange={(e) => handleHandicapChange(player.id, e.target.value)}
-                    min="0"
-                    max="54"
                     className="golf-input w-full"
                   />
                 </div>

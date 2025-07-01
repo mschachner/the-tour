@@ -1,13 +1,11 @@
 export interface PlayerSetup {
   id: string;
   name: string;
-  handicap: number;
 }
 
 export interface Player {
   id: string;
   name: string;
-  handicap: number;
   totalScore: number;
   totalPutts: number;
   skins: number;
@@ -18,7 +16,6 @@ export interface HoleScore {
   holeNumber: number;
   strokes: number;
   putts: number;
-  handicap: number;
   par: number;
   holeHandicap: number;
 }
