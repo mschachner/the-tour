@@ -77,6 +77,8 @@ interface ScoreCardProps {
   onToggleGreenie: (holeNumber: number, playerId: string, value: boolean) => void;
   onToggleFiver: (holeNumber: number, playerId: string, value: boolean) => void;
   onToggleFour: (holeNumber: number, playerId: string, value: boolean) => void;
+  onToggleLostBallHole: (holeNumber: number, value: boolean) => void;
+  onToggleLostBall: (holeNumber: number, playerId: string, value: boolean) => void;
 }
 
 const ScoreCard = ({
@@ -87,6 +89,8 @@ const ScoreCard = ({
   onToggleGreenie,
   onToggleFiver,
   onToggleFour,
+  onToggleLostBallHole,
+  onToggleLostBall,
 }: ScoreCardProps) => {
   const [editingCell, setEditingCell] = useState<{
     playerId: string;
@@ -165,6 +169,9 @@ const ScoreCard = ({
   const backFourHole = getFourHoleForSide(game.course.holes, "back");
   const isFourHole = (holeNumber: number) =>
     holeNumber === frontFourHole || holeNumber === backFourHole;
+
+  const isLostBallHole = (holeNumber: number) =>
+    game.lostBallHoles[holeNumber];
 
   const getGreenieHolesForSide = (
     holes: CourseHole[],
@@ -360,6 +367,13 @@ const ScoreCard = ({
                       4
                     </th>
                   )}
+                  {isLostBallHole(hole.holeNumber) && (
+                    <th
+                      className="border border-red-300 bg-red-50 px-1 py-2 text-center font-semibold text-xs"
+                    >
+                      😅
+                    </th>
+                  )}
                 </Fragment>
               ))}
               <th className="border border-gray-300 px-3 py-2 text-center font-semibold">
@@ -478,6 +492,23 @@ const ScoreCard = ({
                             />
                           </td>
                         )}
+                        {isLostBallHole(hole.holeNumber) && (
+                          <td className="border border-red-300 bg-red-50 px-1 text-center">
+                            <input
+                              type="checkbox"
+                              checked={
+                                game.lostBalls[hole.holeNumber]?.[player.id] || false
+                              }
+                              onChange={(e) =>
+                                onToggleLostBall(
+                                  hole.holeNumber,
+                                  player.id,
+                                  e.target.checked,
+                                )
+                              }
+                            />
+                          </td>
+                        )}
                       </Fragment>
                     );
                   })}
@@ -541,6 +572,9 @@ const ScoreCard = ({
                           {hole.par === 4 && isFourHole(hole.holeNumber) && (
                             <td className="border border-blue-300 bg-blue-50 px-1" />
                           )}
+                          {isLostBallHole(hole.holeNumber) && (
+                            <td className="border border-red-300 bg-red-50 px-1" />
+                          )}
                         </Fragment>
                       );
                     })}
@@ -603,6 +637,9 @@ const ScoreCard = ({
                   {hole.par === 4 && isFourHole(hole.holeNumber) && (
                     <td className="border border-blue-300 bg-blue-50 px-1" />
                   )}
+                  {isLostBallHole(hole.holeNumber) && (
+                    <td className="border border-red-300 bg-red-50 px-1" />
+                  )}
                 </Fragment>
               ))}
               <td
@@ -653,6 +690,44 @@ const ScoreCard = ({
                   {hole.par === 4 && isFourHole(hole.holeNumber) && (
                     <td className="border border-blue-300 bg-blue-50 px-1" />
                   )}
+                  {isLostBallHole(hole.holeNumber) && (
+                    <td className="border border-red-300 bg-red-50 px-1" />
+                  )}
+                </Fragment>
+              ))}
+              <td
+                className="border border-gray-300 px-3 py-2"
+                colSpan={3}
+              ></td>
+            </tr>
+            <tr className="bg-yellow-50">
+              <td className="border border-gray-300 px-3 py-2 font-medium">
+                Lost Ball
+              </td>
+              <td className="border border-gray-300 px-3 py-2" />
+              {game.course.holes.map((hole) => (
+                <Fragment key={hole.holeNumber}>
+                  <td className="border border-gray-300 px-2 py-1 text-center">
+                    <input
+                      type="checkbox"
+                      checked={game.lostBallHoles[hole.holeNumber] || false}
+                      onChange={(e) =>
+                        onToggleLostBallHole(hole.holeNumber, e.target.checked)
+                      }
+                    />
+                  </td>
+                  {hole.par === 3 && isGreenieHole(hole.holeNumber) && (
+                    <td className="border border-green-300 bg-green-50 px-1" />
+                  )}
+                  {hole.par === 5 && (
+                    <td className="border border-orange-300 bg-orange-50 px-1" />
+                  )}
+                  {hole.par === 4 && isFourHole(hole.holeNumber) && (
+                    <td className="border border-blue-300 bg-blue-50 px-1" />
+                  )}
+                  {isLostBallHole(hole.holeNumber) && (
+                    <td className="border border-red-300 bg-red-50 px-1" />
+                  )}
                 </Fragment>
               ))}
               <td
@@ -685,6 +760,7 @@ const ScoreCard = ({
                     <th className="border px-2 py-1 text-center">G</th>
                     <th className="border px-2 py-1 text-center">5</th>
                     <th className="border px-2 py-1 text-center">4</th>
+                    <th className="border px-2 py-1 text-center">😅</th>
                     <th className="border px-2 py-1 text-center">Adj</th>
                   </tr>
                 </thead>
@@ -797,6 +873,25 @@ const ScoreCard = ({
                             "-"
                           )}
                         </td>
+                        <td className="border px-2 py-1 text-center">
+                          {isLostBallHole(hole.holeNumber) ? (
+                            <input
+                              type="checkbox"
+                              checked={
+                                game.lostBalls[hole.holeNumber]?.[player.id] || false
+                              }
+                              onChange={(e) =>
+                                onToggleLostBall(
+                                  hole.holeNumber,
+                                  player.id,
+                                  e.target.checked,
+                                )
+                              }
+                            />
+                          ) : (
+                            "-"
+                          )}
+                        </td>
                         <td className="border px-2 py-1 text-center text-sm">
                           {(() => {
                             const adj = getAdjustedScoreForHole(
@@ -814,22 +909,23 @@ const ScoreCard = ({
                     <td className="border px-2 py-1 text-center">
                       {player.totalScore}
                     </td>
-                    <td className="border px-2 py-1" />
-                    <td className="border px-2 py-1" />
-                    <td className="border px-2 py-1" />
-                    <td className="border px-2 py-1 text-center">
-                      {player.handicap > 0 ? adjustedScore : "-"}
-                    </td>
+                  <td className="border px-2 py-1" />
+                  <td className="border px-2 py-1" />
+                  <td className="border px-2 py-1" />
+                  <td className="border px-2 py-1" />
+                  <td className="border px-2 py-1 text-center">
+                    {player.handicap > 0 ? adjustedScore : "-"}
+                  </td>
                   </tr>
                   <tr className="bg-gray-50 font-semibold text-sm">
                     <td className="border px-2 py-1">To Par</td>
-                    <td className="border px-2 py-1 text-center" colSpan={5}>
+                    <td className="border px-2 py-1 text-center" colSpan={6}>
                       {toPar === 0 ? "E" : toPar > 0 ? `+${toPar}` : `${toPar}`}
                     </td>
                   </tr>
                   <tr className="bg-gray-50 font-semibold text-sm">
                     <td className="border px-2 py-1">Skins</td>
-                    <td className="border px-2 py-1 text-center" colSpan={5}>
+                    <td className="border px-2 py-1 text-center" colSpan={6}>
                       {player.skins}
                     </td>
                   </tr>
@@ -839,7 +935,7 @@ const ScoreCard = ({
                         <td className="border px-2 py-1">Adjusted Score</td>
                         <td
                           className="border px-2 py-1 text-center"
-                          colSpan={5}
+                          colSpan={6}
                         >
                           {adjustedScore}
                         </td>
@@ -848,7 +944,7 @@ const ScoreCard = ({
                         <td className="border px-2 py-1">Adjusted To Par</td>
                         <td
                           className="border px-2 py-1 text-center"
-                          colSpan={5}
+                          colSpan={6}
                         >
                           {adjustedToPar === 0
                             ? "E"
