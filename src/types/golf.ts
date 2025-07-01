@@ -51,4 +51,5 @@ export interface Game {
   longestDrive: Record<number, string | null>;
   greenies: Record<number, Record<string, boolean>>;
   fivers: Record<number, Record<string, boolean>>;
+  fours: Record<number, Record<string, boolean>>;
 }
