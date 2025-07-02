@@ -1216,7 +1216,7 @@ const ScoreCard = ({
                         className={`border border-yellow-300 bg-yellow-50 px-1 text-center ${PLAYER_COL_WIDTH}`}
                       >
                         {playerMadePar(player.id, hole.holeNumber) ? (
-                          <div className="flex flex-col items-center space-y-0.5">
+                          <div className="flex items-center space-x-1">
                             <input
                               type="checkbox"
                               checked={
@@ -1231,7 +1231,7 @@ const ScoreCard = ({
                               }
                             />
                             {game.sandies[hole.holeNumber]?.[player.id] && (
-                              <label className="relative">
+                              <label className="relative inline-block w-4 h-4">
                                 <input
                                   type="checkbox"
                                   checked={
@@ -1246,7 +1246,9 @@ const ScoreCard = ({
                                   }
                                   className="w-4 h-4"
                                 />
-                                <span className="absolute inset-0 flex items-center justify-center text-[10px] pointer-events-none">
+                                <span
+                                  className="pointer-events-none absolute inset-0 flex items-center justify-center text-[10px]"
+                                >
                                   2
                                 </span>
                               </label>
