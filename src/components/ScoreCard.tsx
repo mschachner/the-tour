@@ -807,48 +807,6 @@ const ScoreCard = ({
           </tbody>
         </table>
       </div>
-
-
-      {/* Summary */}
-      <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {game.players.map((player) => {
-          const toPar = calculateTotalToPar(player);
-
-          return (
-            <div key={player.id} className="bg-gray-50 rounded-lg p-4">
-              <h4 className="font-semibold text-gray-800 mb-2">
-                {player.name}
-              </h4>
-              <div className="space-y-1 text-sm">
-                <div className="flex justify-between">
-                  <span>Total Score:</span>
-                  <span className="font-bold text-blue-600">
-                    {player.totalScore}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span>To Par:</span>
-                  <span
-                    className={`font-bold ${
-                      toPar === 0
-                        ? "text-gray-600"
-                        : toPar > 0
-                          ? "text-red-600"
-                          : "text-green-600"
-                    }`}
-                  >
-                    {toPar === 0 ? "E" : toPar > 0 ? `+${toPar}` : `${toPar}`}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Skins:</span>
-                  <span className="font-bold">{player.skins}</span>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
     </div>
   );
 };
