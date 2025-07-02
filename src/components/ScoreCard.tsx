@@ -206,6 +206,20 @@ const ScoreCard = ({
     return hole ? hole.strokes <= hole.par && hole.strokes > 0 : false;
   };
 
+  const isHoleWinner = (holeNumber: number, playerId: string) => {
+    const scores = game.players
+      .map((p) => ({
+        id: p.id,
+        strokes:
+          p.holes.find((h) => h.holeNumber === holeNumber)?.strokes || 0,
+      }))
+      .filter((s) => s.strokes > 0);
+    if (scores.length === 0) return false;
+    const min = Math.min(...scores.map((s) => s.strokes));
+    const winners = scores.filter((s) => s.strokes === min);
+    return winners.length === 1 && winners[0].id === playerId;
+  };
+
   const getGreenieHolesForSide = (
     holes: CourseHole[],
     closest: Record<number, string | null>,
@@ -1069,16 +1083,18 @@ const ScoreCard = ({
                         />
                       ) : (
                         <button
-                          className={`score-button hover:bg-gray-200 ${getScoreColor(phole.strokes, phole.par)} ${getScoreBorderStyle(phole.strokes, phole.par)}`}
+                          className={`score-button hover:bg-gray-200 ${getScoreColor(phole.strokes, phole.par)} ${getScoreBorderStyle(phole.strokes, phole.par)} ${
+                            isHoleWinner(hole.holeNumber, player.id) ? 'text-xl font-bold' : ''
+                          }`}
                           style={{
                             ...getDoubleCircleStyle(phole.strokes, phole.par),
                             ...getDoubleSquareStyle(phole.strokes, phole.par),
-                              ...getCrossHatchStyle(phole.strokes, phole.par),
-                            }}
-                            onClick={() => handleCellClick(player.id, hole.holeNumber)}
-                          >
-                            {getScoreDisplay(phole.strokes, phole.par)}
-                          </button>
+                            ...getCrossHatchStyle(phole.strokes, phole.par),
+                          }}
+                          onClick={() => handleCellClick(player.id, hole.holeNumber)}
+                        >
+                          {getScoreDisplay(phole.strokes, phole.par)}
+                        </button>
                         )}
                       </td>
                     );
