@@ -6,17 +6,20 @@ import {
 } from '../services/courseService';
 import CourseSelector from './CourseSelector';
 import CourseEditor from './CourseEditor';
+import PlayerIcon from './PlayerIcon';
 
 interface PlayerSetupProps {
   onStartGame: (players: Player[], course: Course) => void;
 }
 
 const PlayerSetup = ({ onStartGame }: PlayerSetupProps) => {
+  const getRandomColor = () =>
+    `#${Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, '0')}`;
   const [players, setPlayers] = useState<PlayerSetupType[]>([
     { id: '1', name: '' },
     { id: '2', name: '' },
     { id: '3', name: '' },
-    { id: '4', name: '' }
+    { id: '4', name: '' },
   ]);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [activePlayers, setActivePlayers] = useState(2);
@@ -30,7 +33,21 @@ const PlayerSetup = ({ onStartGame }: PlayerSetupProps) => {
     value: string,
   ) => {
     setPlayers((prev) =>
-      prev.map((player) => (player.id === id ? { ...player, [field]: value } : player)),
+      prev.map((player) => {
+        if (player.id !== id) return player;
+        const updated: PlayerSetupType = { ...player, [field]: value };
+        if (
+          field === 'name' &&
+          value.trim() !== '' &&
+          !player.color
+        ) {
+          updated.color = getRandomColor();
+        }
+        if (field === 'name' && value.trim() === '') {
+          updated.color = undefined;
+        }
+        return updated;
+      }),
     );
   };
 
@@ -196,13 +213,18 @@ const PlayerSetup = ({ onStartGame }: PlayerSetupProps) => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Player {index + 1} Name
                   </label>
-                  <input
-                    type="text"
-                    value={player.name}
-                    onChange={(e) => updatePlayer(player.id, 'name', e.target.value)}
-                    placeholder={`Player ${index + 1}`}
-                    className="golf-input w-full"
-                  />
+                  <div className="flex items-center space-x-3">
+                    <PlayerIcon name={player.name} color={player.color} size={32} />
+                    <input
+                      type="text"
+                      value={player.name}
+                      onChange={(e) =>
+                        updatePlayer(player.id, 'name', e.target.value)
+                      }
+                      placeholder={`Player ${index + 1}`}
+                      className="golf-input w-full"
+                    />
+                  </div>
                 </div>
               </div>
             ))}
