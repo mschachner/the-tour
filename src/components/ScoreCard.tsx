@@ -1,6 +1,7 @@
 import { useState, Fragment } from "react";
 import type { ChangeEvent } from "react";
 import { Game, Player, HoleScore, CourseHole } from "../types/golf";
+import PlayerIcon from "./PlayerIcon";
 
 const HOLE_COL_WIDTH = "w-12";
 const SKIN_COL_WIDTH = "w-6";
@@ -403,7 +404,10 @@ const ScoreCard = ({
               <td
                 className={`border border-gray-300 px-3 py-2 font-medium ${PLAYER_COL_WIDTH}`}
               >
-                {player.name}
+                <div className="flex items-center space-x-2">
+                  <PlayerIcon name={player.name} color={player.color} size={24} />
+                  <span>{player.name}</span>
+                </div>
               </td>
               {holes.map((hole) => {
                 const value = player.holes.find(
@@ -961,7 +965,12 @@ const ScoreCard = ({
       <tbody>
         {game.players.map((player, idx) => (
           <tr key={player.id} className={idx % 2 === 0 ? "bg-white" : "bg-gray-50"}>
-            <td className={`border border-gray-300 px-3 py-2 font-medium ${PLAYER_COL_WIDTH}`}>{player.name}</td>
+            <td className={`border border-gray-300 px-3 py-2 font-medium ${PLAYER_COL_WIDTH}`}>
+              <div className="flex items-center space-x-2">
+                <PlayerIcon name={player.name} color={player.color} size={24} />
+                <span>{player.name}</span>
+              </div>
+            </td>
             <td className={`border border-gray-300 px-3 py-2 text-center font-bold bg-blue-100 ${TOTAL_COL_WIDTH}`}>{player.totalScore}</td>
             <td className={`border border-gray-300 px-3 py-2 text-center font-bold bg-purple-100 ${TOTAL_COL_WIDTH}`}>{(() => {const t = calculateTotalToPar(player); if (t === 0) return 'E'; return t > 0 ? `+${t}` : `${t}`;})()}</td>
             <td className={`border border-gray-300 px-3 py-2 text-center font-bold bg-green-100 ${TOTAL_COL_WIDTH}`}>{player.skins}</td>
@@ -1001,7 +1010,10 @@ const ScoreCard = ({
                   key={player.id}
                   className={`border border-gray-300 px-2 py-2 text-center font-semibold ${PLAYER_COL_WIDTH}`}
                 >
-                  {player.name}
+                  <div className="flex items-center space-x-1 justify-center">
+                    <PlayerIcon name={player.name} color={player.color} size={20} />
+                    <span>{player.name}</span>
+                  </div>
                 </th>
               ))}
               <th

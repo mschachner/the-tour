@@ -1,11 +1,13 @@
 export interface PlayerSetup {
   id: string;
   name: string;
+  color?: string;
 }
 
 export interface Player {
   id: string;
   name: string;
+  color?: string;
   totalScore: number;
   totalPutts: number;
   skins: number;
