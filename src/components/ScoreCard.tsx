@@ -1125,6 +1125,91 @@ const ScoreCard = ({
         </table>
       </div>
 
+      {/* Mobile Table */}
+      <div className="md:hidden overflow-x-auto mt-4">
+        <table className="w-full table-fixed border-collapse text-sm">
+          <thead>
+            <tr className="bg-gray-100">
+              <th className={`border border-gray-300 px-3 py-2 text-left font-semibold ${HOLE_COL_WIDTH}`}>Hole</th>
+              {game.players.map((player) => (
+                <th
+                  key={player.id}
+                  className={`border border-gray-300 px-2 py-2 text-center font-semibold ${PLAYER_COL_WIDTH}`}
+                >
+                  {player.name}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {game.course.holes.map((hole, holeIndex) => (
+              <tr key={hole.holeNumber} className={holeIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                <td
+                  className={`border border-gray-300 px-3 py-2 text-center font-medium ${HOLE_COL_WIDTH}`}
+                >
+                  <div>{hole.holeNumber}</div>
+                  <div className="text-xs text-gray-600">Par {hole.par}</div>
+                  <div className="text-xs text-gray-500">H{hole.handicap}</div>
+                </td>
+                {game.players.map((player) => {
+                  const phole = player.holes.find((h) => h.holeNumber === hole.holeNumber)!;
+                  const editing = isEditing(player.id, hole.holeNumber);
+                  return (
+                    <td
+                      key={player.id}
+                      className={`border border-gray-300 px-2 py-1 text-center ${PLAYER_COL_WIDTH}`}
+                    >
+                      {editing ? (
+                        <input
+                          type="number"
+                          value={editingValue}
+                          onChange={handleInputChange}
+                          onBlur={(e) => handleCellChange(e.target.value)}
+                          onKeyPress={(e) => e.key === 'Enter' && handleCellChange(editingValue)}
+                          className="w-12 text-center"
+                        />
+                      ) : (
+                        <button
+                          className={`w-full ${getScoreColor(phole.strokes, phole.par)} ${getScoreBorderStyle(phole.strokes, phole.par)}`}
+                          style={{ ...getDoubleCircleStyle(phole.strokes, phole.par), ...getDoubleSquareStyle(phole.strokes, phole.par), ...getCrossHatchStyle(phole.strokes, phole.par) }}
+                          onClick={() => handleCellClick(player.id, hole.holeNumber)}
+                        >
+                          {getScoreDisplay(phole.strokes, phole.par)}
+                        </button>
+                      )}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+            <tr className="bg-yellow-50">
+              <td className={`border border-gray-300 px-3 py-2 font-medium ${HOLE_COL_WIDTH}`}>Total</td>
+              {game.players.map((p) => (
+                <td key={p.id} className={`border border-gray-300 px-2 py-1 text-center font-bold bg-blue-100 ${PLAYER_COL_WIDTH}`}>{p.totalScore}</td>
+              ))}
+            </tr>
+            <tr className="bg-yellow-50">
+              <td className={`border border-gray-300 px-3 py-2 font-medium ${HOLE_COL_WIDTH}`}>To Par</td>
+              {game.players.map((p) => (
+                <td key={p.id} className={`border border-gray-300 px-2 py-1 text-center font-bold bg-purple-100 ${PLAYER_COL_WIDTH}`}>
+                  {(() => {
+                    const toPar = calculateTotalToPar(p);
+                    if (toPar === 0) return 'E';
+                    return toPar > 0 ? `+${toPar}` : `${toPar}`;
+                  })()}
+                </td>
+              ))}
+            </tr>
+            <tr className="bg-yellow-50">
+              <td className={`border border-gray-300 px-3 py-2 font-medium ${HOLE_COL_WIDTH}`}>Skins</td>
+              {game.players.map((p) => (
+                <td key={p.id} className={`border border-gray-300 px-2 py-1 text-center font-bold bg-green-100 ${PLAYER_COL_WIDTH}`}>{p.skins}</td>
+              ))}
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
     </div>
   );
 };
