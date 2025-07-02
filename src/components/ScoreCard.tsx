@@ -427,11 +427,11 @@ const ScoreCard = ({
                           onKeyPress={(e) =>
                             e.key === "Enter" && handleCellChange(editingValue)
                           }
-                          className="w-12 text-center"
+                          className="score-input"
                         />
                       ) : (
                         <button
-                          className={`w-10 h-10 md:w-8 md:h-8 mx-auto flex items-center justify-center ${getScoreColor(
+                          className={`score-button hover:bg-gray-200 ${getScoreColor(
                             value,
                             hole.par,
                           )} ${getScoreBorderStyle(value, hole.par)}`}
@@ -1035,14 +1035,14 @@ const ScoreCard = ({
                             onChange={handleInputChange}
                             onBlur={(e) => handleCellChange(e.target.value)}
                             onKeyPress={(e) => e.key === 'Enter' && handleCellChange(editingValue)}
-                            className="w-12 text-center"
-                          />
-                        ) : (
-                          <button
-                            className={`w-10 h-10 md:w-8 md:h-8 mx-auto flex items-center justify-center ${getScoreColor(phole.strokes, phole.par)} ${getScoreBorderStyle(phole.strokes, phole.par)}`}
-                            style={{
-                              ...getDoubleCircleStyle(phole.strokes, phole.par),
-                              ...getDoubleSquareStyle(phole.strokes, phole.par),
+                          className="score-input"
+                        />
+                      ) : (
+                        <button
+                          className={`score-button hover:bg-gray-200 ${getScoreColor(phole.strokes, phole.par)} ${getScoreBorderStyle(phole.strokes, phole.par)}`}
+                          style={{
+                            ...getDoubleCircleStyle(phole.strokes, phole.par),
+                            ...getDoubleSquareStyle(phole.strokes, phole.par),
                               ...getCrossHatchStyle(phole.strokes, phole.par),
                             }}
                             onClick={() => handleCellClick(player.id, hole.holeNumber)}
