@@ -4,7 +4,7 @@ import { Game, Player, HoleScore, CourseHole } from "../types/golf";
 
 const HOLE_COL_WIDTH = "w-12";
 const SKIN_COL_WIDTH = "w-6";
-const PLAYER_COL_WIDTH = "w-24";
+const PLAYER_COL_WIDTH = "w-20 md:w-24";
 const TOTAL_COL_WIDTH = "w-12";
 
 const getClosestHoleForSide = (
@@ -428,6 +428,7 @@ const ScoreCard = ({
                             e.key === "Enter" && handleCellChange(editingValue)
                           }
                           className="score-input"
+                          autoFocus
                         />
                       ) : (
                         <button
@@ -801,7 +802,7 @@ const ScoreCard = ({
         </tr>
         {/* Sandy Row */}
         <tr className="bg-yellow-50">
-          <td className={`border border-gray-300 px-3 py-2 font-medium ${PLAYER_COL_WIDTH}`}>🏖️</td>
+          <td className={`border border-gray-300 px-3 py-2 font-medium text-center ${PLAYER_COL_WIDTH}`}>🏖️</td>
           {holes.map((hole) => (
             <Fragment key={hole.holeNumber}>
               <td
@@ -865,7 +866,7 @@ const ScoreCard = ({
         </tr>
         {/* Lost Ball Row */}
         <tr className="bg-yellow-50">
-          <td className={`border border-gray-300 px-3 py-2 font-medium ${PLAYER_COL_WIDTH}`}>LB</td>
+          <td className={`border border-gray-300 px-3 py-2 font-medium text-center ${PLAYER_COL_WIDTH}`}>LB</td>
           {holes.map((hole) => (
             <Fragment key={hole.holeNumber}>
               <td
@@ -1036,6 +1037,7 @@ const ScoreCard = ({
                             onBlur={(e) => handleCellChange(e.target.value)}
                             onKeyPress={(e) => e.key === 'Enter' && handleCellChange(editingValue)}
                           className="score-input"
+                          autoFocus
                         />
                       ) : (
                         <button
