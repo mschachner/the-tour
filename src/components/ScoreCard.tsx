@@ -190,14 +190,14 @@ const ScoreCard = ({
   game.course.holes.forEach((hole) => {
     parMap[hole.holeNumber] = game.players.some((p) => {
       const score = p.holes.find((h) => h.holeNumber === hole.holeNumber);
-      return score !== undefined && score.strokes === hole.par && score.strokes > 0;
+      return score !== undefined && score.strokes <= hole.par && score.strokes > 0;
     });
   });
 
   const playerMadePar = (playerId: string, holeNumber: number) => {
     const player = game.players.find((p) => p.id === playerId);
     const hole = player?.holes.find((h) => h.holeNumber === holeNumber);
-    return hole ? hole.strokes === hole.par && hole.strokes > 0 : false;
+    return hole ? hole.strokes <= hole.par && hole.strokes > 0 : false;
   };
 
   const holeWinners: Record<number, string | null> = (() => {
