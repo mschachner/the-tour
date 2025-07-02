@@ -567,7 +567,6 @@ const ScoreCard = ({
                                       e.target.checked,
                                     )
                                   }
-                                  className="w-5 h-5 md:w-4 md:h-4"
                                 />
                                 <span className="absolute inset-0 flex items-center justify-center text-[10px] pointer-events-none">
                                   2
@@ -1257,7 +1256,6 @@ const ScoreCard = ({
                                       e.target.checked,
                                     )
                                   }
-                                  className="w-5 h-5 md:w-4 md:h-4"
                                 />
                                 <span
                                   className="pointer-events-none absolute inset-0 flex items-center justify-center text-[10px]"
