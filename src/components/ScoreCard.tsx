@@ -963,7 +963,6 @@ const ScoreCard = ({
     </table>
   );
 
-
   return (
     <div className="golf-card">
       <h3 className="text-xl font-bold text-gray-800 mb-4">Score Card</h3>
