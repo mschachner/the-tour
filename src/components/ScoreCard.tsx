@@ -812,7 +812,7 @@ const ScoreCard = ({
               >
                 <input
                   type="checkbox"
-                  className="w-5 h-5 md:w-4 md:h-4"
+                  className="mx-auto block w-5 h-5 md:w-4 md:h-4"
                   checked={game.sandyHoles[hole.holeNumber] || false}
                   onChange={(e) =>
                     onToggleSandyHole(hole.holeNumber, e.target.checked)
@@ -876,7 +876,7 @@ const ScoreCard = ({
               >
                 <input
                   type="checkbox"
-                  className="w-5 h-5 md:w-4 md:h-4"
+                  className="mx-auto block w-5 h-5 md:w-4 md:h-4"
                   checked={game.lostBallHoles[hole.holeNumber] || false}
                   onChange={(e) =>
                     onToggleLostBallHole(hole.holeNumber, e.target.checked)
@@ -1004,10 +1004,26 @@ const ScoreCard = ({
                   {player.name}
                 </th>
               ))}
-              <th className={`border border-gray-300 px-2 py-2 text-center font-semibold text-xs md:text-sm ${SKIN_COL_WIDTH}`}>CTP</th>
-              <th className={`border border-gray-300 px-2 py-2 text-center font-semibold text-xs md:text-sm ${SKIN_COL_WIDTH}`}>LD</th>
-              <th className={`border border-gray-300 px-2 py-2 text-center font-semibold ${SKIN_COL_WIDTH}`}>🏖️</th>
-              <th className={`border border-gray-300 px-2 py-2 text-center font-semibold ${SKIN_COL_WIDTH}`}>LB</th>
+              <th
+                className={`border border-gray-300 px-1 py-2 text-center font-semibold leading-tight text-[10px] ${SKIN_COL_WIDTH}`}
+              >
+                CTP
+              </th>
+              <th
+                className={`border border-gray-300 px-1 py-2 text-center font-semibold leading-tight text-[10px] ${SKIN_COL_WIDTH}`}
+              >
+                LD
+              </th>
+              <th
+                className={`border border-gray-300 px-1 py-2 text-center font-semibold leading-tight text-sm ${SKIN_COL_WIDTH}`}
+              >
+                🏖️
+              </th>
+              <th
+                className={`border border-gray-300 px-1 py-2 text-center font-semibold leading-tight text-[10px] ${SKIN_COL_WIDTH}`}
+              >
+                LB
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -1114,7 +1130,7 @@ const ScoreCard = ({
                   <td className={`border border-gray-300 px-1 text-center ${SKIN_COL_WIDTH}`}>
                     <input
                       type="checkbox"
-                      className="w-5 h-5 md:w-4 md:h-4"
+                      className="mx-auto block w-5 h-5 md:w-4 md:h-4"
                       checked={game.sandyHoles[hole.holeNumber] || false}
                       onChange={(e) => onToggleSandyHole(hole.holeNumber, e.target.checked)}
                     />
@@ -1122,7 +1138,7 @@ const ScoreCard = ({
                   <td className={`border border-gray-300 px-1 text-center ${SKIN_COL_WIDTH}`}>
                     <input
                       type="checkbox"
-                      className="w-5 h-5 md:w-4 md:h-4"
+                      className="mx-auto block w-5 h-5 md:w-4 md:h-4"
                       checked={game.lostBallHoles[hole.holeNumber] || false}
                       onChange={(e) => onToggleLostBallHole(hole.holeNumber, e.target.checked)}
                     />
@@ -1231,7 +1247,7 @@ const ScoreCard = ({
                           <div className="flex flex-col items-center justify-center space-y-1 md:flex-row md:space-x-1 md:space-y-0">
                             <input
                               type="checkbox"
-                              className="w-5 h-5 md:w-4 md:h-4"
+                              className="mx-auto block w-5 h-5 md:w-4 md:h-4"
                               checked={
                                 game.sandies[hole.holeNumber]?.[player.id] || false
                               }
@@ -1244,10 +1260,10 @@ const ScoreCard = ({
                               }
                             />
                             {game.sandies[hole.holeNumber]?.[player.id] && (
-                              <label className="relative inline-block w-5 h-5 md:w-4 md:h-4">
+                              <label className="relative inline-block mx-auto w-5 h-5 md:w-4 md:h-4">
                                 <input
                                   type="checkbox"
-                                  className="w-5 h-5 md:w-4 md:h-4"
+                                  className="mx-auto block w-5 h-5 md:w-4 md:h-4"
                                   checked={
                                     game.doubleSandies[hole.holeNumber]?.[player.id] || false
                                   }
@@ -1287,7 +1303,7 @@ const ScoreCard = ({
                         {playerMadePar(player.id, hole.holeNumber) ? (
                           <input
                             type="checkbox"
-                            className="w-5 h-5 md:w-4 md:h-4"
+                            className="mx-auto block w-5 h-5 md:w-4 md:h-4"
                             checked={game.lostBalls[hole.holeNumber]?.[player.id] || false}
                             onChange={(e) =>
                               onToggleLostBall(
