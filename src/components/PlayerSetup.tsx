@@ -13,8 +13,12 @@ interface PlayerSetupProps {
 }
 
 const PlayerSetup = ({ onStartGame }: PlayerSetupProps) => {
-  const getRandomColor = () =>
-    `#${Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, '0')}`;
+  const getRandomColor = () => {
+    const h = Math.floor(Math.random() * 360);
+    const s = 70 + Math.floor(Math.random() * 30); // 70-100% saturation
+    const l = 40 + Math.floor(Math.random() * 20); // 40-60% lightness
+    return `hsl(${h}, ${s}%, ${l}%)`;
+  };
   const [players, setPlayers] = useState<PlayerSetupType[]>([
     { id: '1', name: '' },
     { id: '2', name: '' },
@@ -48,6 +52,14 @@ const PlayerSetup = ({ onStartGame }: PlayerSetupProps) => {
         }
         return updated;
       }),
+    );
+  };
+
+  const randomizePlayerColor = (id: string) => {
+    setPlayers((prev) =>
+      prev.map((player) =>
+        player.id === id ? { ...player, color: getRandomColor() } : player,
+      ),
     );
   };
 
@@ -214,7 +226,12 @@ const PlayerSetup = ({ onStartGame }: PlayerSetupProps) => {
                     Player {index + 1} Name
                   </label>
                   <div className="flex items-center space-x-3">
-                    <PlayerIcon name={player.name} color={player.color} size={32} />
+                    <PlayerIcon
+                      name={player.name}
+                      color={player.color}
+                      size={32}
+                      onClick={() => randomizePlayerColor(player.id)}
+                    />
                     <input
                       type="text"
                       value={player.name}
