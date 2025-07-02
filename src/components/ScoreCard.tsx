@@ -2,6 +2,7 @@ import { useState, Fragment } from "react";
 import type { ChangeEvent } from "react";
 import { Game, Player, HoleScore, CourseHole } from "../types/golf";
 import PlayerIcon from "./PlayerIcon";
+import PlayerSelect from "./PlayerSelect";
 
 const HOLE_COL_WIDTH = "w-12";
 const SKIN_COL_WIDTH = "w-6";
@@ -665,30 +666,11 @@ const ScoreCard = ({
                 } ${HOLE_COL_WIDTH}`}
               >
                 {isClosestHole(hole.holeNumber) ? (
-                  <select
-                    className="text-sm w-full"
-                    value={
-                      game.closestToPin[hole.holeNumber] === null
-                        ? "none"
-                        : game.closestToPin[hole.holeNumber] ?? ""
-                    }
-                    onChange={(e) =>
-                      onUpdateClosest(
-                        hole.holeNumber,
-                        e.target.value === "none" ? null : e.target.value,
-                      )
-                    }
-                  >
-                    <option value="" disabled>
-                      ...
-                    </option>
-                    <option value="none">None</option>
-                    {game.players.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.name}
-                      </option>
-                    ))}
-                  </select>
+                  <PlayerSelect
+                    players={game.players}
+                    selected={game.closestToPin[hole.holeNumber]}
+                    onSelect={(id) => onUpdateClosest(hole.holeNumber, id)}
+                  />
                 ) : null}
               </td>
               {hole.par === 3 &&
@@ -747,30 +729,11 @@ const ScoreCard = ({
                 } ${HOLE_COL_WIDTH}`}
               >
                 {isLongestHole(hole.holeNumber) ? (
-                  <select
-                    className="text-sm w-full"
-                    value={
-                      game.longestDrive[hole.holeNumber] === null
-                        ? "none"
-                        : game.longestDrive[hole.holeNumber] ?? ""
-                    }
-                    onChange={(e) =>
-                      onUpdateLongest(
-                        hole.holeNumber,
-                        e.target.value === "none" ? null : e.target.value,
-                      )
-                    }
-                  >
-                    <option value="" disabled>
-                      ...
-                    </option>
-                    <option value="none">None</option>
-                    {game.players.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.name}
-                      </option>
-                    ))}
-                  </select>
+                  <PlayerSelect
+                    players={game.players}
+                    selected={game.longestDrive[hole.holeNumber]}
+                    onSelect={(id) => onUpdateLongest(hole.holeNumber, id)}
+                  />
                 ) : null}
               </td>
               {hole.par === 3 &&
@@ -1101,58 +1064,20 @@ const ScoreCard = ({
                   })}
                   <td className={`border border-gray-300 px-1 text-center ${SKIN_COL_WIDTH}`}>
                     {isClosestHole(hole.holeNumber) ? (
-                      <select
-                        className="text-sm w-full"
-                        value={
-                          game.closestToPin[hole.holeNumber] === null
-                            ? 'none'
-                            : game.closestToPin[hole.holeNumber] ?? ''
-                        }
-                        onChange={(e) =>
-                          onUpdateClosest(
-                            hole.holeNumber,
-                            e.target.value === 'none' ? null : e.target.value,
-                          )
-                        }
-                      >
-                        <option value="" disabled>
-                          ...
-                        </option>
-                        <option value="none">None</option>
-                        {game.players.map((p) => (
-                          <option key={p.id} value={p.id}>
-                            {p.name}
-                          </option>
-                        ))}
-                      </select>
+                      <PlayerSelect
+                        players={game.players}
+                        selected={game.closestToPin[hole.holeNumber]}
+                        onSelect={(id) => onUpdateClosest(hole.holeNumber, id)}
+                      />
                     ) : null}
                   </td>
                   <td className={`border border-gray-300 px-1 text-center ${SKIN_COL_WIDTH}`}>
                     {isLongestHole(hole.holeNumber) ? (
-                      <select
-                        className="text-sm w-full"
-                        value={
-                          game.longestDrive[hole.holeNumber] === null
-                            ? 'none'
-                            : game.longestDrive[hole.holeNumber] ?? ''
-                        }
-                        onChange={(e) =>
-                          onUpdateLongest(
-                            hole.holeNumber,
-                            e.target.value === 'none' ? null : e.target.value,
-                          )
-                        }
-                      >
-                        <option value="" disabled>
-                          ...
-                        </option>
-                        <option value="none">None</option>
-                        {game.players.map((p) => (
-                          <option key={p.id} value={p.id}>
-                            {p.name}
-                          </option>
-                        ))}
-                      </select>
+                      <PlayerSelect
+                        players={game.players}
+                        selected={game.longestDrive[hole.holeNumber]}
+                        onSelect={(id) => onUpdateLongest(hole.holeNumber, id)}
+                      />
                     ) : null}
                   </td>
                   <td className={`border border-gray-300 px-1 text-center ${SKIN_COL_WIDTH}`}>
