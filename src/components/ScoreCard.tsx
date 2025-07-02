@@ -186,6 +186,20 @@ const ScoreCard = ({
   const isLostBallHole = (holeNumber: number) =>
     game.lostBallHoles[holeNumber];
 
+  const parMap: Record<number, boolean> = {};
+  game.course.holes.forEach((hole) => {
+    parMap[hole.holeNumber] = game.players.some((p) => {
+      const score = p.holes.find((h) => h.holeNumber === hole.holeNumber);
+      return score !== undefined && score.strokes === hole.par && score.strokes > 0;
+    });
+  });
+
+  const playerMadePar = (playerId: string, holeNumber: number) => {
+    const player = game.players.find((p) => p.id === playerId);
+    const hole = player?.holes.find((h) => h.holeNumber === holeNumber);
+    return hole ? hole.strokes === hole.par && hole.strokes > 0 : false;
+  };
+
   const holeWinners: Record<number, string | null> = (() => {
     const winners: Record<number, string | null> = {};
     game.course.holes.forEach((hole) => {
@@ -323,35 +337,39 @@ const ScoreCard = ({
                     <div className="text-xs text-gray-600">Par {hole.par}</div>
                     <div className="text-xs text-gray-500">H{hole.handicap}</div>
                   </th>
-                  {hole.par === 3 && isGreenieHole(hole.holeNumber) && (
+                  {hole.par === 3 &&
+                    isGreenieHole(hole.holeNumber) &&
+                    parMap[hole.holeNumber] && (
                     <th
                       className={`border border-green-300 bg-green-50 px-1 py-2 text-center font-semibold text-xs ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
                     >
                       G
                     </th>
                   )}
-                  {hole.par === 5 && (
+                  {hole.par === 5 && parMap[hole.holeNumber] && (
                     <th
                       className={`border border-orange-300 bg-orange-50 px-1 py-2 text-center font-semibold text-xs ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
                     >
                       5
                     </th>
                   )}
-                  {hole.par === 4 && isFourHole(hole.holeNumber) && (
+                  {hole.par === 4 &&
+                    isFourHole(hole.holeNumber) &&
+                    parMap[hole.holeNumber] && (
                     <th
                       className={`border border-blue-300 bg-blue-50 px-1 py-2 text-center font-semibold text-xs ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
                     >
                       4
                     </th>
                   )}
-                  {isSandyHole(hole.holeNumber) && (
+                  {isSandyHole(hole.holeNumber) && parMap[hole.holeNumber] && (
                     <th
                       className={`border border-yellow-300 bg-yellow-50 px-1 py-2 text-center font-semibold text-xs ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
                     >
                       🏖️
                     </th>
                   )}
-                  {isLostBallHole(hole.holeNumber) && (
+                  {isLostBallHole(hole.holeNumber) && parMap[hole.holeNumber] && (
                     <th
                       className={`border border-red-300 bg-red-50 px-1 py-2 text-center font-semibold text-xs ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
                     >
@@ -424,43 +442,55 @@ const ScoreCard = ({
                             </button>
                           )}
                         </td>
-                        {hole.par === 3 && isGreenieHole(hole.holeNumber) && (
-                          <td className={`border border-green-300 bg-green-50 px-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={
-                                game.greenies[hole.holeNumber]?.[player.id] || false
-                              }
-                              onChange={(e) =>
-                                onToggleGreenie(
-                                  hole.holeNumber,
-                                  player.id,
-                                  e.target.checked,
-                                )
-                              }
-                            />
-                          </td>
-                        )}
-                        {hole.par === 5 && (
+                        {hole.par === 3 &&
+                          isGreenieHole(hole.holeNumber) &&
+                          parMap[hole.holeNumber] && (
+                            <td className={`border border-green-300 bg-green-50 px-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
+                            >
+                              {playerMadePar(player.id, hole.holeNumber) ? (
+                                <input
+                                  type="checkbox"
+                                  checked={
+                                    game.greenies[hole.holeNumber]?.[player.id] || false
+                                  }
+                                  onChange={(e) =>
+                                    onToggleGreenie(
+                                      hole.holeNumber,
+                                      player.id,
+                                      e.target.checked,
+                                    )
+                                  }
+                                />
+                              ) : (
+                                "-"
+                              )}
+                            </td>
+                          )}
+                        {hole.par === 5 && parMap[hole.holeNumber] && (
                           <td className={`border border-orange-300 bg-orange-50 px-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
                           >
-                            <input
-                              type="checkbox"
-                              checked={
-                                game.fivers[hole.holeNumber]?.[player.id] || false
-                              }
-                              onChange={(e) =>
-                                onToggleFiver(
-                                  hole.holeNumber,
-                                  player.id,
-                                  e.target.checked,
-                                )
-                              }
-                            />
+                            {playerMadePar(player.id, hole.holeNumber) ? (
+                              <input
+                                type="checkbox"
+                                checked={
+                                  game.fivers[hole.holeNumber]?.[player.id] || false
+                                }
+                                onChange={(e) =>
+                                  onToggleFiver(
+                                    hole.holeNumber,
+                                    player.id,
+                                    e.target.checked,
+                                  )
+                                }
+                              />
+                            ) : (
+                              "-"
+                            )}
                           </td>
                         )}
-                        {hole.par === 4 && isFourHole(hole.holeNumber) && (
+                        {hole.par === 4 &&
+                          isFourHole(hole.holeNumber) &&
+                          parMap[hole.holeNumber] && (
                           <td className={`border border-blue-300 bg-blue-50 px-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
                           >
                             <input
@@ -478,64 +508,72 @@ const ScoreCard = ({
                             />
                           </td>
                         )}
-                        {isSandyHole(hole.holeNumber) && (
+                        {isSandyHole(hole.holeNumber) && parMap[hole.holeNumber] && (
                           <td className={`border border-yellow-300 bg-yellow-50 px-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
                           >
-                            <div className="flex flex-col items-center space-y-0.5">
+                            {playerMadePar(player.id, hole.holeNumber) ? (
+                              <div className="flex flex-col items-center space-y-0.5">
+                                <input
+                                  type="checkbox"
+                                  checked={
+                                    game.sandies[hole.holeNumber]?.[player.id] || false
+                                  }
+                                  onChange={(e) =>
+                                    onToggleSandy(
+                                      hole.holeNumber,
+                                      player.id,
+                                      e.target.checked,
+                                    )
+                                  }
+                                />
+                                {game.sandies[hole.holeNumber]?.[player.id] && (
+                                  <label className="relative">
+                                    <input
+                                      type="checkbox"
+                                      checked={
+                                        game.doubleSandies[hole.holeNumber]?.[player.id] ||
+                                        false
+                                      }
+                                      onChange={(e) =>
+                                        onToggleDoubleSandy(
+                                          hole.holeNumber,
+                                          player.id,
+                                          e.target.checked,
+                                        )
+                                      }
+                                      className="w-4 h-4"
+                                    />
+                                    <span className="absolute inset-0 flex items-center justify-center text-[10px] pointer-events-none">
+                                      2
+                                    </span>
+                                  </label>
+                                )}
+                              </div>
+                            ) : (
+                              "-"
+                            )}
+                          </td>
+                        )}
+                        {isLostBallHole(hole.holeNumber) && parMap[hole.holeNumber] && (
+                          <td className={`border border-red-300 bg-red-50 px-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
+                          >
+                            {playerMadePar(player.id, hole.holeNumber) ? (
                               <input
                                 type="checkbox"
                                 checked={
-                                  game.sandies[hole.holeNumber]?.[player.id] || false
+                                  game.lostBalls[hole.holeNumber]?.[player.id] || false
                                 }
                                 onChange={(e) =>
-                                  onToggleSandy(
+                                  onToggleLostBall(
                                     hole.holeNumber,
                                     player.id,
                                     e.target.checked,
                                   )
                                 }
                               />
-                              {game.sandies[hole.holeNumber]?.[player.id] && (
-                                <label className="relative">
-                                  <input
-                                    type="checkbox"
-                                    checked={
-                                      game.doubleSandies[hole.holeNumber]?.[player.id] ||
-                                      false
-                                    }
-                                    onChange={(e) =>
-                                      onToggleDoubleSandy(
-                                        hole.holeNumber,
-                                        player.id,
-                                        e.target.checked,
-                                      )
-                                    }
-                                    className="w-4 h-4"
-                                  />
-                                  <span className="absolute inset-0 flex items-center justify-center text-[10px] pointer-events-none">
-                                    2
-                                  </span>
-                                </label>
-                              )}
-                            </div>
-                          </td>
-                        )}
-                        {isLostBallHole(hole.holeNumber) && (
-                          <td className={`border border-red-300 bg-red-50 px-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={
-                                game.lostBalls[hole.holeNumber]?.[player.id] || false
-                              }
-                              onChange={(e) =>
-                                onToggleLostBall(
-                                  hole.holeNumber,
-                                  player.id,
-                                  e.target.checked,
-                                )
-                              }
-                            />
+                            ) : (
+                              "-"
+                            )}
                           </td>
                         )}
                       </Fragment>
@@ -593,19 +631,23 @@ const ScoreCard = ({
                       </select>
                     ) : null}
                   </td>
-                  {hole.par === 3 && isGreenieHole(hole.holeNumber) && (
+                  {hole.par === 3 &&
+                    isGreenieHole(hole.holeNumber) &&
+                    parMap[hole.holeNumber] && (
                     <td className={`border border-green-300 bg-green-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
                   )}
-                  {hole.par === 5 && (
+                  {hole.par === 5 && parMap[hole.holeNumber] && (
                     <td className={`border border-orange-300 bg-orange-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
                   )}
-                  {hole.par === 4 && isFourHole(hole.holeNumber) && (
+                  {hole.par === 4 &&
+                    isFourHole(hole.holeNumber) &&
+                    parMap[hole.holeNumber] && (
                     <td className={`border border-blue-300 bg-blue-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
                   )}
-                  {isSandyHole(hole.holeNumber) && (
+                  {isSandyHole(hole.holeNumber) && parMap[hole.holeNumber] && (
                     <td className={`border border-yellow-300 bg-yellow-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
                   )}
-                  {isLostBallHole(hole.holeNumber) && (
+                  {isLostBallHole(hole.holeNumber) && parMap[hole.holeNumber] && (
                     <td className={`border border-red-300 bg-red-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
                   )}
                 </Fragment>
@@ -650,19 +692,23 @@ const ScoreCard = ({
                       </select>
                     ) : null}
                   </td>
-                  {hole.par === 3 && isGreenieHole(hole.holeNumber) && (
+                  {hole.par === 3 &&
+                    isGreenieHole(hole.holeNumber) &&
+                    parMap[hole.holeNumber] && (
                     <td className={`border border-green-300 bg-green-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
                   )}
-                  {hole.par === 5 && (
+                  {hole.par === 5 && parMap[hole.holeNumber] && (
                     <td className={`border border-orange-300 bg-orange-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
                   )}
-                  {hole.par === 4 && isFourHole(hole.holeNumber) && (
+                  {hole.par === 4 &&
+                    isFourHole(hole.holeNumber) &&
+                    parMap[hole.holeNumber] && (
                     <td className={`border border-blue-300 bg-blue-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
                   )}
-                  {isSandyHole(hole.holeNumber) && (
+                  {isSandyHole(hole.holeNumber) && parMap[hole.holeNumber] && (
                     <td className={`border border-yellow-300 bg-yellow-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
                   )}
-                  {isLostBallHole(hole.holeNumber) && (
+                  {isLostBallHole(hole.holeNumber) && parMap[hole.holeNumber] && (
                     <td className={`border border-red-300 bg-red-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
                   )}
                 </Fragment>
@@ -689,19 +735,23 @@ const ScoreCard = ({
                       }
                     />
                   </td>
-                  {hole.par === 3 && isGreenieHole(hole.holeNumber) && (
+                  {hole.par === 3 &&
+                    isGreenieHole(hole.holeNumber) &&
+                    parMap[hole.holeNumber] && (
                     <td className={`border border-green-300 bg-green-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
                   )}
-                  {hole.par === 5 && (
+                  {hole.par === 5 && parMap[hole.holeNumber] && (
                     <td className={`border border-orange-300 bg-orange-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
                   )}
-                  {hole.par === 4 && isFourHole(hole.holeNumber) && (
+                  {hole.par === 4 &&
+                    isFourHole(hole.holeNumber) &&
+                    parMap[hole.holeNumber] && (
                     <td className={`border border-blue-300 bg-blue-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
                   )}
-                  {isSandyHole(hole.holeNumber) && (
+                  {isSandyHole(hole.holeNumber) && parMap[hole.holeNumber] && (
                     <td className={`border border-yellow-300 bg-yellow-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
                   )}
-                  {isLostBallHole(hole.holeNumber) && (
+                  {isLostBallHole(hole.holeNumber) && parMap[hole.holeNumber] && (
                     <td className={`border border-red-300 bg-red-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
                   )}
                 </Fragment>
@@ -728,19 +778,23 @@ const ScoreCard = ({
                       }
                     />
                   </td>
-                  {hole.par === 3 && isGreenieHole(hole.holeNumber) && (
+                  {hole.par === 3 &&
+                    isGreenieHole(hole.holeNumber) &&
+                    parMap[hole.holeNumber] && (
                     <td className={`border border-green-300 bg-green-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
                   )}
-                  {hole.par === 5 && (
+                  {hole.par === 5 && parMap[hole.holeNumber] && (
                     <td className={`border border-orange-300 bg-orange-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
                   )}
-                  {hole.par === 4 && isFourHole(hole.holeNumber) && (
+                  {hole.par === 4 &&
+                    isFourHole(hole.holeNumber) &&
+                    parMap[hole.holeNumber] && (
                     <td className={`border border-blue-300 bg-blue-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
                   )}
-                  {isSandyHole(hole.holeNumber) && (
+                  {isSandyHole(hole.holeNumber) && parMap[hole.holeNumber] && (
                     <td className={`border border-yellow-300 bg-yellow-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
                   )}
-                  {isLostBallHole(hole.holeNumber) && (
+                  {isLostBallHole(hole.holeNumber) && parMap[hole.holeNumber] && (
                     <td className={`border border-red-300 bg-red-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
                   )}
                 </Fragment>
@@ -831,121 +885,129 @@ const ScoreCard = ({
                           )}
                         </td>
                         <td className={`border px-2 py-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}>
-                          {hole.par === 3 && isGreenieHole(hole.holeNumber) ? (
-                            <input
-                              type="checkbox"
-                              checked={
-                                game.greenies[hole.holeNumber]?.[player.id] || false
-                              }
-                              onChange={(e) =>
-                                onToggleGreenie(
-                                  hole.holeNumber,
-                                  player.id,
-                                  e.target.checked,
-                                )
-                              }
-                            />
-                          ) : (
-                            "-"
-                          )}
-                        </td>
-                        <td className={`border px-2 py-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}>
-                          {hole.par === 5 ? (
-                            <input
-                              type="checkbox"
-                              checked={
-                                game.fivers[hole.holeNumber]?.[player.id] || false
-                              }
-                              onChange={(e) =>
-                                onToggleFiver(
-                                  hole.holeNumber,
-                                  player.id,
-                                  e.target.checked,
-                                )
-                              }
-                            />
-                          ) : (
-                            "-"
-                          )}
-                        </td>
-                        <td className={`border px-2 py-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}>
-                          {hole.par === 4 && isFourHole(hole.holeNumber) ? (
-                            <input
-                              type="checkbox"
-                              checked={
-                                game.fours[hole.holeNumber]?.[player.id] || false
-                              }
-                              onChange={(e) =>
-                                onToggleFour(
-                                  hole.holeNumber,
-                                  player.id,
-                                  e.target.checked,
-                                )
-                              }
-                            />
-                          ) : (
-                            "-"
-                          )}
-                        </td>
-                        <td className={`border px-2 py-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}>
-                          {isSandyHole(hole.holeNumber) ? (
-                            <div className="flex flex-col items-center space-y-0.5">
-                              <input
-                                type="checkbox"
-                                checked={
-                                  game.sandies[hole.holeNumber]?.[player.id] || false
-                                }
-                                onChange={(e) =>
-                                  onToggleSandy(
-                                    hole.holeNumber,
-                                    player.id,
-                                    e.target.checked,
-                                  )
-                                }
-                              />
-                              {game.sandies[hole.holeNumber]?.[player.id] && (
-                                <label className="relative">
+                          {hole.par === 3 && isGreenieHole(hole.holeNumber) && parMap[hole.holeNumber]
+                            ? playerMadePar(player.id, hole.holeNumber)
+                              ? (
                                   <input
                                     type="checkbox"
                                     checked={
-                                      game.doubleSandies[hole.holeNumber]?.[player.id] ||
-                                      false
+                                      game.greenies[hole.holeNumber]?.[player.id] || false
                                     }
                                     onChange={(e) =>
-                                      onToggleDoubleSandy(
+                                      onToggleGreenie(
                                         hole.holeNumber,
                                         player.id,
                                         e.target.checked,
                                       )
                                     }
-                                    className="w-4 h-4"
                                   />
-                                  <span className="absolute inset-0 flex items-center justify-center text-[10px] pointer-events-none">2</span>
-                                </label>
-                              )}
-                            </div>
-                          ) : (
-                            "-"
-                          )}
+                                )
+                              : "-"
+                            : "-"}
                         </td>
                         <td className={`border px-2 py-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}>
-                          {isLostBallHole(hole.holeNumber) ? (
-                            <input
-                              type="checkbox"
-                              checked={
-                                game.lostBalls[hole.holeNumber]?.[player.id] || false
-                              }
-                              onChange={(e) =>
-                                onToggleLostBall(
-                                  hole.holeNumber,
-                                  player.id,
-                                  e.target.checked,
+                          {hole.par === 5 && parMap[hole.holeNumber]
+                            ? playerMadePar(player.id, hole.holeNumber)
+                              ? (
+                                  <input
+                                    type="checkbox"
+                                    checked={
+                                      game.fivers[hole.holeNumber]?.[player.id] || false
+                                    }
+                                    onChange={(e) =>
+                                      onToggleFiver(
+                                        hole.holeNumber,
+                                        player.id,
+                                        e.target.checked,
+                                      )
+                                    }
+                                  />
                                 )
-                              }
-                            />
-                          ) : (
-                            "-"
-                          )}
+                              : "-"
+                            : "-"}
+                        </td>
+                        <td className={`border px-2 py-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}>
+                          {hole.par === 4 && isFourHole(hole.holeNumber) && parMap[hole.holeNumber]
+                            ? (
+                                <input
+                                  type="checkbox"
+                                  checked={
+                                    game.fours[hole.holeNumber]?.[player.id] || false
+                                  }
+                                  onChange={(e) =>
+                                    onToggleFour(
+                                      hole.holeNumber,
+                                      player.id,
+                                      e.target.checked,
+                                    )
+                                  }
+                                />
+                              )
+                            : "-"}
+                        </td>
+                        <td className={`border px-2 py-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}>
+                          {isSandyHole(hole.holeNumber) && parMap[hole.holeNumber]
+                            ? playerMadePar(player.id, hole.holeNumber)
+                              ? (
+                                  <div className="flex flex-col items-center space-y-0.5">
+                                    <input
+                                      type="checkbox"
+                                      checked={
+                                        game.sandies[hole.holeNumber]?.[player.id] || false
+                                      }
+                                      onChange={(e) =>
+                                        onToggleSandy(
+                                          hole.holeNumber,
+                                          player.id,
+                                          e.target.checked,
+                                        )
+                                      }
+                                    />
+                                    {game.sandies[hole.holeNumber]?.[player.id] && (
+                                      <label className="relative">
+                                        <input
+                                          type="checkbox"
+                                          checked={
+                                            game.doubleSandies[hole.holeNumber]?.[player.id] ||
+                                            false
+                                          }
+                                          onChange={(e) =>
+                                            onToggleDoubleSandy(
+                                              hole.holeNumber,
+                                              player.id,
+                                              e.target.checked,
+                                            )
+                                          }
+                                          className="w-4 h-4"
+                                        />
+                                        <span className="absolute inset-0 flex items-center justify-center text-[10px] pointer-events-none">2</span>
+                                      </label>
+                                    )}
+                                  </div>
+                                )
+                              : "-"
+                            : "-"}
+                        </td>
+                        <td className={`border px-2 py-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}>
+                          {isLostBallHole(hole.holeNumber) && parMap[hole.holeNumber]
+                            ? playerMadePar(player.id, hole.holeNumber)
+                              ? (
+                                  <input
+                                    type="checkbox"
+                                    checked={
+                                      game.lostBalls[hole.holeNumber]?.[player.id] || false
+                                    }
+                                    onChange={(e) =>
+                                      onToggleLostBall(
+                                        hole.holeNumber,
+                                        player.id,
+                                        e.target.checked,
+                                      )
+                                    }
+                                  />
+                                )
+                              : "-"
+                            : "-"}
                         </td>
                       </tr>
                     );
