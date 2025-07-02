@@ -924,6 +924,44 @@ const ScoreCard = ({
     </table>
   );
 
+  const renderTotalsTable = () => (
+    <table className="w-full table-fixed border-collapse mt-4">
+      <thead>
+        <tr className="bg-gray-100">
+          <th
+            className={`border border-gray-300 px-3 py-2 text-left font-semibold ${PLAYER_COL_WIDTH}`}
+          >
+            Player
+          </th>
+          <th
+            className={`border border-gray-300 px-3 py-2 text-center font-semibold ${TOTAL_COL_WIDTH}`}
+          >
+            Total
+          </th>
+          <th
+            className={`border border-gray-300 px-3 py-2 text-center font-semibold ${TOTAL_COL_WIDTH}`}
+          >
+            To Par
+          </th>
+          <th
+            className={`border border-gray-300 px-3 py-2 text-center font-semibold ${TOTAL_COL_WIDTH}`}
+          >
+            Skins
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {game.players.map((player, idx) => (
+          <tr key={player.id} className={idx % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+            <td className={`border border-gray-300 px-3 py-2 font-medium ${PLAYER_COL_WIDTH}`}>{player.name}</td>
+            <td className={`border border-gray-300 px-3 py-2 text-center font-bold bg-blue-100 ${TOTAL_COL_WIDTH}`}>{player.totalScore}</td>
+            <td className={`border border-gray-300 px-3 py-2 text-center font-bold bg-purple-100 ${TOTAL_COL_WIDTH}`}>{(() => {const t = calculateTotalToPar(player); if (t === 0) return 'E'; return t > 0 ? `+${t}` : `${t}`;})()}</td>
+            <td className={`border border-gray-300 px-3 py-2 text-center font-bold bg-green-100 ${TOTAL_COL_WIDTH}`}>{player.skins}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
 
   return (
     <div className="golf-card">
@@ -938,7 +976,10 @@ const ScoreCard = ({
             {renderDesktopTable(frontHoles, false)}
           </div>
           <div className="grow md:ml-4 mt-4 md:mt-0">
-            {renderDesktopTable(backHoles, true)}
+            {renderDesktopTable(backHoles, false)}
+          </div>
+          <div className="basis-full mt-4">
+            {renderTotalsTable()}
           </div>
         </div>
       {/* Mobile Table */}
