@@ -807,7 +807,6 @@ const ScoreCard = ({
           </tbody>
         </table>
       </div>
-
     </div>
   );
 };
