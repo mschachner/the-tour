@@ -2,6 +2,11 @@ import { useState, Fragment } from "react";
 import type { ChangeEvent } from "react";
 import { Game, Player, HoleScore, CourseHole } from "../types/golf";
 
+const HOLE_COL_WIDTH = "w-12";
+const SKIN_COL_WIDTH = "w-8";
+const PLAYER_COL_WIDTH = "w-24";
+const TOTAL_COL_WIDTH = "w-12";
+
 const getClosestHoleForSide = (
   holes: CourseHole[],
   closest: Record<number, string | null>,
@@ -320,18 +325,18 @@ const ScoreCard = ({
     <div className="golf-card">
       <h3 className="text-xl font-bold text-gray-800 mb-4">Score Card</h3>
 
-      {/* Desktop Table */}
-      <div className="hidden md:block overflow-x-auto">
-        <table className="min-w-full border-collapse">
+      {/* Main Table */}
+      <div>
+        <table className="w-full table-fixed border-collapse">
           <thead>
             <tr className="bg-gray-100">
-              <th className="border border-gray-300 px-3 py-2 text-left font-semibold">
+              <th className={`border border-gray-300 px-3 py-2 text-left font-semibold ${PLAYER_COL_WIDTH}`}>
                 Player
               </th>
               {game.course.holes.map((hole) => (
                 <Fragment key={hole.holeNumber}>
                   <th
-                    className={`border border-gray-300 px-2 py-2 text-center font-semibold text-sm ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
+                    className={`border border-gray-300 px-2 py-2 text-center font-semibold text-sm ${hole.holeNumber === 10 ? "border-l-4" : ""} ${HOLE_COL_WIDTH}`}
                   >
                     <div>{hole.holeNumber}</div>
                     <div className="text-xs text-gray-600">Par {hole.par}</div>
@@ -341,14 +346,14 @@ const ScoreCard = ({
                     isGreenieHole(hole.holeNumber) &&
                     parMap[hole.holeNumber] && (
                     <th
-                      className={`border border-green-300 bg-green-50 px-1 py-2 text-center font-semibold text-xs ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
+                      className={`border border-green-300 bg-green-50 px-1 py-2 text-center font-semibold text-xs ${hole.holeNumber === 10 ? "border-l-4" : ""} ${SKIN_COL_WIDTH}`}
                     >
                       G
                     </th>
                   )}
                   {hole.par === 5 && parMap[hole.holeNumber] && (
                     <th
-                      className={`border border-orange-300 bg-orange-50 px-1 py-2 text-center font-semibold text-xs ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
+                      className={`border border-orange-300 bg-orange-50 px-1 py-2 text-center font-semibold text-xs ${hole.holeNumber === 10 ? "border-l-4" : ""} ${SKIN_COL_WIDTH}`}
                     >
                       5
                     </th>
@@ -357,34 +362,34 @@ const ScoreCard = ({
                     isFourHole(hole.holeNumber) &&
                     parMap[hole.holeNumber] && (
                     <th
-                      className={`border border-blue-300 bg-blue-50 px-1 py-2 text-center font-semibold text-xs ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
+                      className={`border border-blue-300 bg-blue-50 px-1 py-2 text-center font-semibold text-xs ${hole.holeNumber === 10 ? "border-l-4" : ""} ${SKIN_COL_WIDTH}`}
                     >
                       4
                     </th>
                   )}
                   {isSandyHole(hole.holeNumber) && parMap[hole.holeNumber] && (
                     <th
-                      className={`border border-yellow-300 bg-yellow-50 px-1 py-2 text-center font-semibold text-xs ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
+                      className={`border border-yellow-300 bg-yellow-50 px-1 py-2 text-center font-semibold text-xs ${hole.holeNumber === 10 ? "border-l-4" : ""} ${SKIN_COL_WIDTH}`}
                     >
                       🏖️
                     </th>
                   )}
                   {isLostBallHole(hole.holeNumber) && parMap[hole.holeNumber] && (
                     <th
-                      className={`border border-red-300 bg-red-50 px-1 py-2 text-center font-semibold text-xs ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
+                      className={`border border-red-300 bg-red-50 px-1 py-2 text-center font-semibold text-xs ${hole.holeNumber === 10 ? "border-l-4" : ""} ${SKIN_COL_WIDTH}`}
                     >
                       😅
                     </th>
                   )}
                 </Fragment>
               ))}
-              <th className="border border-gray-300 px-3 py-2 text-center font-semibold">
+              <th className={`border border-gray-300 px-3 py-2 text-center font-semibold ${TOTAL_COL_WIDTH}`}>
                 Total
               </th>
-              <th className="border border-gray-300 px-3 py-2 text-center font-semibold">
+              <th className={`border border-gray-300 px-3 py-2 text-center font-semibold ${TOTAL_COL_WIDTH}`}>
                 To Par
               </th>
-              <th className="border border-gray-300 px-3 py-2 text-center font-semibold">
+              <th className={`border border-gray-300 px-3 py-2 text-center font-semibold ${TOTAL_COL_WIDTH}`}>
                 Skins
               </th>
             </tr>
@@ -396,7 +401,7 @@ const ScoreCard = ({
                 <tr
                   className={playerIndex % 2 === 0 ? "bg-white" : "bg-gray-50"}
                 >
-                  <td className="border border-gray-300 px-3 py-2 font-medium">
+                  <td className={`border border-gray-300 px-3 py-2 font-medium ${PLAYER_COL_WIDTH}`}>
                     {player.name}
                   </td>
                   {player.holes.map((hole) => {
@@ -405,7 +410,7 @@ const ScoreCard = ({
 
                     return (
                       <Fragment key={hole.holeNumber}>
-                        <td className={`border border-gray-300 px-2 py-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}>
+                        <td className={`border border-gray-300 px-2 py-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""} ${HOLE_COL_WIDTH}`}>
                           {editing ? (
                             <input
                               type="number"
@@ -445,7 +450,7 @@ const ScoreCard = ({
                         {hole.par === 3 &&
                           isGreenieHole(hole.holeNumber) &&
                           parMap[hole.holeNumber] && (
-                            <td className={`border border-green-300 bg-green-50 px-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
+                            <td className={`border border-green-300 bg-green-50 px-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""} ${SKIN_COL_WIDTH}`}
                             >
                               {playerMadePar(player.id, hole.holeNumber) ? (
                                 <input
@@ -467,7 +472,7 @@ const ScoreCard = ({
                             </td>
                           )}
                         {hole.par === 5 && parMap[hole.holeNumber] && (
-                          <td className={`border border-orange-300 bg-orange-50 px-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
+                          <td className={`border border-orange-300 bg-orange-50 px-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""} ${SKIN_COL_WIDTH}`}
                           >
                             {playerMadePar(player.id, hole.holeNumber) ? (
                               <input
@@ -491,7 +496,7 @@ const ScoreCard = ({
                         {hole.par === 4 &&
                           isFourHole(hole.holeNumber) &&
                           parMap[hole.holeNumber] && (
-                          <td className={`border border-blue-300 bg-blue-50 px-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
+                          <td className={`border border-blue-300 bg-blue-50 px-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""} ${SKIN_COL_WIDTH}`}
                           >
                             <input
                               type="checkbox"
@@ -509,7 +514,7 @@ const ScoreCard = ({
                           </td>
                         )}
                         {isSandyHole(hole.holeNumber) && parMap[hole.holeNumber] && (
-                          <td className={`border border-yellow-300 bg-yellow-50 px-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
+                          <td className={`border border-yellow-300 bg-yellow-50 px-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""} ${SKIN_COL_WIDTH}`}
                           >
                             {playerMadePar(player.id, hole.holeNumber) ? (
                               <div className="flex flex-col items-center space-y-0.5">
@@ -555,7 +560,7 @@ const ScoreCard = ({
                           </td>
                         )}
                         {isLostBallHole(hole.holeNumber) && parMap[hole.holeNumber] && (
-                          <td className={`border border-red-300 bg-red-50 px-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
+                          <td className={`border border-red-300 bg-red-50 px-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""} ${SKIN_COL_WIDTH}`}
                           >
                             {playerMadePar(player.id, hole.holeNumber) ? (
                               <input
@@ -579,17 +584,17 @@ const ScoreCard = ({
                       </Fragment>
                     );
                   })}
-                  <td className="border border-gray-300 px-3 py-2 text-center font-bold bg-blue-100">
+                  <td className={`border border-gray-300 px-3 py-2 text-center font-bold bg-blue-100 ${TOTAL_COL_WIDTH}`}>
                     {player.totalScore}
                   </td>
-                  <td className="border border-gray-300 px-3 py-2 text-center font-bold bg-purple-100">
+                  <td className={`border border-gray-300 px-3 py-2 text-center font-bold bg-purple-100 ${TOTAL_COL_WIDTH}`}>
                     {(() => {
                       const toPar = calculateTotalToPar(player);
                       if (toPar === 0) return "E";
                       return toPar > 0 ? `+${toPar}` : `${toPar}`;
                     })()}
                   </td>
-                  <td className="border border-gray-300 px-3 py-2 text-center font-bold bg-green-100">
+                  <td className={`border border-gray-300 px-3 py-2 text-center font-bold bg-green-100 ${TOTAL_COL_WIDTH}`}>
                     {player.skins}
                   </td>
                 </tr>
@@ -598,13 +603,13 @@ const ScoreCard = ({
               </Fragment>
             ))}
             <tr className="bg-yellow-50">
-              <td className="border border-gray-300 px-3 py-2 font-medium">
+              <td className={`border border-gray-300 px-3 py-2 font-medium ${PLAYER_COL_WIDTH}`}>
                 CTP
               </td>
 
               {game.course.holes.map((hole) => (
                 <Fragment key={hole.holeNumber}>
-                  <td className={`border border-gray-300 px-2 py-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
+                  <td className={`border border-gray-300 px-2 py-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""} ${HOLE_COL_WIDTH}`}
                   >
                     {isClosestHole(hole.holeNumber) ? (
                       <select
@@ -634,21 +639,21 @@ const ScoreCard = ({
                   {hole.par === 3 &&
                     isGreenieHole(hole.holeNumber) &&
                     parMap[hole.holeNumber] && (
-                    <td className={`border border-green-300 bg-green-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
+                    <td className={`border border-green-300 bg-green-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""} ${SKIN_COL_WIDTH}`} />
                   )}
                   {hole.par === 5 && parMap[hole.holeNumber] && (
-                    <td className={`border border-orange-300 bg-orange-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
+                    <td className={`border border-orange-300 bg-orange-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""} ${SKIN_COL_WIDTH}`} />
                   )}
                   {hole.par === 4 &&
                     isFourHole(hole.holeNumber) &&
                     parMap[hole.holeNumber] && (
-                    <td className={`border border-blue-300 bg-blue-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
+                    <td className={`border border-blue-300 bg-blue-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""} ${SKIN_COL_WIDTH}`} />
                   )}
                   {isSandyHole(hole.holeNumber) && parMap[hole.holeNumber] && (
-                    <td className={`border border-yellow-300 bg-yellow-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
+                    <td className={`border border-yellow-300 bg-yellow-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""} ${SKIN_COL_WIDTH}`} />
                   )}
                   {isLostBallHole(hole.holeNumber) && parMap[hole.holeNumber] && (
-                    <td className={`border border-red-300 bg-red-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
+                    <td className={`border border-red-300 bg-red-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""} ${SKIN_COL_WIDTH}`} />
                   )}
                 </Fragment>
               ))}
@@ -659,13 +664,13 @@ const ScoreCard = ({
             </tr>
 
             <tr className="bg-yellow-50">
-              <td className="border border-gray-300 px-3 py-2 font-medium">
+              <td className={`border border-gray-300 px-3 py-2 font-medium ${PLAYER_COL_WIDTH}`}>
                 LD
               </td>
 
               {game.course.holes.map((hole) => (
                 <Fragment key={hole.holeNumber}>
-                  <td className={`border border-gray-300 px-2 py-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
+                  <td className={`border border-gray-300 px-2 py-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""} ${HOLE_COL_WIDTH}`}
                   >
                     {isLongestHole(hole.holeNumber) ? (
                       <select
@@ -695,21 +700,21 @@ const ScoreCard = ({
                   {hole.par === 3 &&
                     isGreenieHole(hole.holeNumber) &&
                     parMap[hole.holeNumber] && (
-                    <td className={`border border-green-300 bg-green-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
+                    <td className={`border border-green-300 bg-green-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""} ${SKIN_COL_WIDTH}`} />
                   )}
                   {hole.par === 5 && parMap[hole.holeNumber] && (
-                    <td className={`border border-orange-300 bg-orange-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
+                    <td className={`border border-orange-300 bg-orange-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""} ${SKIN_COL_WIDTH}`} />
                   )}
                   {hole.par === 4 &&
                     isFourHole(hole.holeNumber) &&
                     parMap[hole.holeNumber] && (
-                    <td className={`border border-blue-300 bg-blue-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
+                    <td className={`border border-blue-300 bg-blue-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""} ${SKIN_COL_WIDTH}`} />
                   )}
                   {isSandyHole(hole.holeNumber) && parMap[hole.holeNumber] && (
-                    <td className={`border border-yellow-300 bg-yellow-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
+                    <td className={`border border-yellow-300 bg-yellow-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""} ${SKIN_COL_WIDTH}`} />
                   )}
                   {isLostBallHole(hole.holeNumber) && parMap[hole.holeNumber] && (
-                    <td className={`border border-red-300 bg-red-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
+                    <td className={`border border-red-300 bg-red-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""} ${SKIN_COL_WIDTH}`} />
                   )}
                 </Fragment>
               ))}
@@ -719,13 +724,13 @@ const ScoreCard = ({
               ></td>
             </tr>
             <tr className="bg-yellow-50">
-              <td className="border border-gray-300 px-3 py-2 font-medium">
+              <td className={`border border-gray-300 px-3 py-2 font-medium ${PLAYER_COL_WIDTH}`}>
                 🏖️
               </td>
 
               {game.course.holes.map((hole) => (
                 <Fragment key={hole.holeNumber}>
-                  <td className={`border border-gray-300 px-2 py-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
+                  <td className={`border border-gray-300 px-2 py-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""} ${HOLE_COL_WIDTH}`}
                   >
                     <input
                       type="checkbox"
@@ -738,21 +743,21 @@ const ScoreCard = ({
                   {hole.par === 3 &&
                     isGreenieHole(hole.holeNumber) &&
                     parMap[hole.holeNumber] && (
-                    <td className={`border border-green-300 bg-green-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
+                    <td className={`border border-green-300 bg-green-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""} ${SKIN_COL_WIDTH}`} />
                   )}
                   {hole.par === 5 && parMap[hole.holeNumber] && (
-                    <td className={`border border-orange-300 bg-orange-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
+                    <td className={`border border-orange-300 bg-orange-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""} ${SKIN_COL_WIDTH}`} />
                   )}
                   {hole.par === 4 &&
                     isFourHole(hole.holeNumber) &&
                     parMap[hole.holeNumber] && (
-                    <td className={`border border-blue-300 bg-blue-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
+                    <td className={`border border-blue-300 bg-blue-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""} ${SKIN_COL_WIDTH}`} />
                   )}
                   {isSandyHole(hole.holeNumber) && parMap[hole.holeNumber] && (
-                    <td className={`border border-yellow-300 bg-yellow-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
+                    <td className={`border border-yellow-300 bg-yellow-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""} ${SKIN_COL_WIDTH}`} />
                   )}
                   {isLostBallHole(hole.holeNumber) && parMap[hole.holeNumber] && (
-                    <td className={`border border-red-300 bg-red-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
+                    <td className={`border border-red-300 bg-red-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""} ${SKIN_COL_WIDTH}`} />
                   )}
                 </Fragment>
               ))}
@@ -762,13 +767,13 @@ const ScoreCard = ({
               ></td>
             </tr>
             <tr className="bg-yellow-50">
-              <td className="border border-gray-300 px-3 py-2 font-medium">
+              <td className={`border border-gray-300 px-3 py-2 font-medium ${PLAYER_COL_WIDTH}`}>
                 LB
               </td>
 
               {game.course.holes.map((hole) => (
                 <Fragment key={hole.holeNumber}>
-                  <td className={`border border-gray-300 px-2 py-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}
+                  <td className={`border border-gray-300 px-2 py-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""} ${HOLE_COL_WIDTH}`}
                   >
                     <input
                       type="checkbox"
@@ -781,21 +786,21 @@ const ScoreCard = ({
                   {hole.par === 3 &&
                     isGreenieHole(hole.holeNumber) &&
                     parMap[hole.holeNumber] && (
-                    <td className={`border border-green-300 bg-green-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
+                    <td className={`border border-green-300 bg-green-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""} ${SKIN_COL_WIDTH}`} />
                   )}
                   {hole.par === 5 && parMap[hole.holeNumber] && (
-                    <td className={`border border-orange-300 bg-orange-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
+                    <td className={`border border-orange-300 bg-orange-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""} ${SKIN_COL_WIDTH}`} />
                   )}
                   {hole.par === 4 &&
                     isFourHole(hole.holeNumber) &&
                     parMap[hole.holeNumber] && (
-                    <td className={`border border-blue-300 bg-blue-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
+                    <td className={`border border-blue-300 bg-blue-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""} ${SKIN_COL_WIDTH}`} />
                   )}
                   {isSandyHole(hole.holeNumber) && parMap[hole.holeNumber] && (
-                    <td className={`border border-yellow-300 bg-yellow-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
+                    <td className={`border border-yellow-300 bg-yellow-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""} ${SKIN_COL_WIDTH}`} />
                   )}
                   {isLostBallHole(hole.holeNumber) && parMap[hole.holeNumber] && (
-                    <td className={`border border-red-300 bg-red-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""}`} />
+                    <td className={`border border-red-300 bg-red-50 px-1 ${hole.holeNumber === 10 ? "border-l-4" : ""} ${SKIN_COL_WIDTH}`} />
                   )}
                 </Fragment>
               ))}
@@ -808,280 +813,6 @@ const ScoreCard = ({
         </table>
       </div>
 
-      {/* Mobile Layout */}
-      <div className="md:hidden space-y-4">
-          {game.players.map((player) => {
-          const toPar = calculateTotalToPar(player);
-
-          return (
-            <div key={player.id} className="border rounded-lg overflow-hidden">
-              <div className="flex justify-between items-center bg-gray-100 px-3 py-2">
-                <span className="font-semibold">{player.name}</span>
-              </div>
-              <table className="w-full border-collapse">
-                <thead className="text-xs">
-                  <tr className="bg-gray-50">
-                    <th className="border px-2 py-1 text-left">Hole</th>
-                    <th className="border px-2 py-1 text-center">Strokes</th>
-                    <th className="border px-2 py-1 text-center">G</th>
-                    <th className="border px-2 py-1 text-center">5</th>
-                    <th className="border px-2 py-1 text-center">4</th>
-                    <th className="border px-2 py-1 text-center">🏖️</th>
-                    <th className="border px-2 py-1 text-center">😅</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {player.holes.map((hole) => {
-                    const strokeEditing = isEditing(
-                      player.id,
-                      hole.holeNumber,
-                    );
-                    return (
-                      <tr key={hole.holeNumber}>
-                        <td className="border px-2 py-1">
-                          <div className="font-medium">{hole.holeNumber}</div>
-                          <div className="text-xs text-gray-600 flex items-center space-x-1">
-                            <span>Par {hole.par}</span>
-                            <span className="text-gray-500">H{hole.holeHandicap}</span>
-                          </div>
-                        </td>
-                        <td className={`border px-2 py-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}>
-                          {strokeEditing ? (
-                            <input
-                              type="number"
-                              value={editingValue}
-                              onChange={handleInputChange}
-                              onBlur={(e) => handleCellChange(e.target.value)}
-                              onKeyPress={(e) =>
-                                e.key === "Enter" &&
-                                handleCellChange(
-                                  (e.target as HTMLInputElement).value,
-                                )
-                              }
-                              className="w-12 text-center border border-gray-300 rounded px-1 text-sm"
-                              autoFocus
-                              min="1"
-                              max="20"
-                            />
-                          ) : (
-                            <button
-                              onClick={() =>
-                                handleCellClick(
-                                  player.id,
-                                  hole.holeNumber,
-                                )
-                              }
-                              className={`mx-auto w-10 h-10 md:w-8 md:h-8 flex items-center justify-center rounded border border-gray-300 bg-white hover:bg-gray-200 transition-colors ${
-                                holeWinners[hole.holeNumber] === player.id ? "text-lg font-bold" : "text-sm"
-                              } ${getScoreColor(hole.strokes, hole.par)} ${getScoreBorderStyle(hole.strokes, hole.par)}`}
-                              style={{
-                                ...getCrossHatchStyle(hole.strokes, hole.par),
-                                ...getDoubleCircleStyle(hole.strokes, hole.par),
-                                ...getDoubleSquareStyle(hole.strokes, hole.par),
-                              }}
-                            >
-                              {getScoreDisplay(hole.strokes, hole.par)}
-                            </button>
-                          )}
-                        </td>
-                        <td className={`border px-2 py-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}>
-                          {hole.par === 3 && isGreenieHole(hole.holeNumber) && parMap[hole.holeNumber]
-                            ? playerMadePar(player.id, hole.holeNumber)
-                              ? (
-                                  <input
-                                    type="checkbox"
-                                    checked={
-                                      game.greenies[hole.holeNumber]?.[player.id] || false
-                                    }
-                                    onChange={(e) =>
-                                      onToggleGreenie(
-                                        hole.holeNumber,
-                                        player.id,
-                                        e.target.checked,
-                                      )
-                                    }
-                                  />
-                                )
-                              : "-"
-                            : "-"}
-                        </td>
-                        <td className={`border px-2 py-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}>
-                          {hole.par === 5 && parMap[hole.holeNumber]
-                            ? playerMadePar(player.id, hole.holeNumber)
-                              ? (
-                                  <input
-                                    type="checkbox"
-                                    checked={
-                                      game.fivers[hole.holeNumber]?.[player.id] || false
-                                    }
-                                    onChange={(e) =>
-                                      onToggleFiver(
-                                        hole.holeNumber,
-                                        player.id,
-                                        e.target.checked,
-                                      )
-                                    }
-                                  />
-                                )
-                              : "-"
-                            : "-"}
-                        </td>
-                        <td className={`border px-2 py-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}>
-                          {hole.par === 4 && isFourHole(hole.holeNumber) && parMap[hole.holeNumber]
-                            ? (
-                                <input
-                                  type="checkbox"
-                                  checked={
-                                    game.fours[hole.holeNumber]?.[player.id] || false
-                                  }
-                                  onChange={(e) =>
-                                    onToggleFour(
-                                      hole.holeNumber,
-                                      player.id,
-                                      e.target.checked,
-                                    )
-                                  }
-                                />
-                              )
-                            : "-"}
-                        </td>
-                        <td className={`border px-2 py-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}>
-                          {isSandyHole(hole.holeNumber) && parMap[hole.holeNumber]
-                            ? playerMadePar(player.id, hole.holeNumber)
-                              ? (
-                                  <div className="flex flex-col items-center space-y-0.5">
-                                    <input
-                                      type="checkbox"
-                                      checked={
-                                        game.sandies[hole.holeNumber]?.[player.id] || false
-                                      }
-                                      onChange={(e) =>
-                                        onToggleSandy(
-                                          hole.holeNumber,
-                                          player.id,
-                                          e.target.checked,
-                                        )
-                                      }
-                                    />
-                                    {game.sandies[hole.holeNumber]?.[player.id] && (
-                                      <label className="relative">
-                                        <input
-                                          type="checkbox"
-                                          checked={
-                                            game.doubleSandies[hole.holeNumber]?.[player.id] ||
-                                            false
-                                          }
-                                          onChange={(e) =>
-                                            onToggleDoubleSandy(
-                                              hole.holeNumber,
-                                              player.id,
-                                              e.target.checked,
-                                            )
-                                          }
-                                          className="w-4 h-4"
-                                        />
-                                        <span className="absolute inset-0 flex items-center justify-center text-[10px] pointer-events-none">2</span>
-                                      </label>
-                                    )}
-                                  </div>
-                                )
-                              : "-"
-                            : "-"}
-                        </td>
-                        <td className={`border px-2 py-1 text-center ${hole.holeNumber === 10 ? "border-l-4" : ""}`}>
-                          {isLostBallHole(hole.holeNumber) && parMap[hole.holeNumber]
-                            ? playerMadePar(player.id, hole.holeNumber)
-                              ? (
-                                  <input
-                                    type="checkbox"
-                                    checked={
-                                      game.lostBalls[hole.holeNumber]?.[player.id] || false
-                                    }
-                                    onChange={(e) =>
-                                      onToggleLostBall(
-                                        hole.holeNumber,
-                                        player.id,
-                                        e.target.checked,
-                                      )
-                                    }
-                                  />
-                                )
-                              : "-"
-                            : "-"}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                  <tr className="bg-gray-50 font-semibold text-sm">
-                    <td className="border px-2 py-1">Total</td>
-                    <td className="border px-2 py-1 text-center">
-                      {player.totalScore}
-                    </td>
-                  <td className="border px-2 py-1" />
-                  <td className="border px-2 py-1" />
-                  <td className="border px-2 py-1" />
-                  <td className="border px-2 py-1" />
-                  <td className="border px-2 py-1" />
-                  </tr>
-                  <tr className="bg-gray-50 font-semibold text-sm">
-                    <td className="border px-2 py-1">To Par</td>
-                    <td className="border px-2 py-1 text-center" colSpan={6}>
-                      {toPar === 0 ? "E" : toPar > 0 ? `+${toPar}` : `${toPar}`}
-                    </td>
-                  </tr>
-                  <tr className="bg-gray-50 font-semibold text-sm">
-                    <td className="border px-2 py-1">Skins</td>
-                    <td className="border px-2 py-1 text-center" colSpan={6}>
-                      {player.skins}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Summary */}
-      <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {game.players.map((player) => {
-          const toPar = calculateTotalToPar(player);
-
-          return (
-            <div key={player.id} className="bg-gray-50 rounded-lg p-4">
-              <h4 className="font-semibold text-gray-800 mb-2">
-                {player.name}
-              </h4>
-              <div className="space-y-1 text-sm">
-                <div className="flex justify-between">
-                  <span>Total Score:</span>
-                  <span className="font-bold text-blue-600">
-                    {player.totalScore}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span>To Par:</span>
-                  <span
-                    className={`font-bold ${
-                      toPar === 0
-                        ? "text-gray-600"
-                        : toPar > 0
-                          ? "text-red-600"
-                          : "text-green-600"
-                    }`}
-                  >
-                    {toPar === 0 ? "E" : toPar > 0 ? `+${toPar}` : `${toPar}`}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Skins:</span>
-                  <span className="font-bold">{player.skins}</span>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
     </div>
   );
 };
