@@ -3,7 +3,7 @@ import type { ChangeEvent } from "react";
 import { Game, Player, HoleScore, CourseHole } from "../types/golf";
 
 const HOLE_COL_WIDTH = "w-12";
-const SKIN_COL_WIDTH = "w-8";
+const SKIN_COL_WIDTH = "w-6";
 const PLAYER_COL_WIDTH = "w-24";
 const TOTAL_COL_WIDTH = "w-12";
 
@@ -613,7 +613,7 @@ const ScoreCard = ({
                   >
                     {isClosestHole(hole.holeNumber) ? (
                       <select
-                        className="text-sm"
+                        className="text-sm w-full"
                         value={
                           game.closestToPin[hole.holeNumber] === null
                             ? "none"
@@ -674,7 +674,7 @@ const ScoreCard = ({
                   >
                     {isLongestHole(hole.holeNumber) ? (
                       <select
-                        className="text-sm"
+                        className="text-sm w-full"
                         value={
                           game.longestDrive[hole.holeNumber] === null
                             ? "none"
