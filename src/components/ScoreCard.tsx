@@ -661,7 +661,7 @@ const ScoreCard = ({
           {holes.map((hole) => (
             <Fragment key={hole.holeNumber}>
               <td
-                className={`border border-gray-300 px-2 py-1 text-center ${
+                className={`border border-gray-300 px-2 py-1 text-center align-middle ${
                   hole.holeNumber === 10 ? "border-l-4" : ""
                 } ${HOLE_COL_WIDTH}`}
               >
@@ -724,7 +724,7 @@ const ScoreCard = ({
           {holes.map((hole) => (
             <Fragment key={hole.holeNumber}>
               <td
-                className={`border border-gray-300 px-2 py-1 text-center ${
+                className={`border border-gray-300 px-2 py-1 text-center align-middle ${
                   hole.holeNumber === 10 ? "border-l-4" : ""
                 } ${HOLE_COL_WIDTH}`}
               >
@@ -1062,7 +1062,7 @@ const ScoreCard = ({
                       </td>
                     );
                   })}
-                  <td className={`border border-gray-300 px-1 text-center ${SKIN_COL_WIDTH}`}>
+                  <td className={`border border-gray-300 px-1 text-center align-middle ${SKIN_COL_WIDTH}`}>
                     {isClosestHole(hole.holeNumber) ? (
                       <PlayerSelect
                         players={game.players}
@@ -1071,7 +1071,7 @@ const ScoreCard = ({
                       />
                     ) : null}
                   </td>
-                  <td className={`border border-gray-300 px-1 text-center ${SKIN_COL_WIDTH}`}>
+                  <td className={`border border-gray-300 px-1 text-center align-middle ${SKIN_COL_WIDTH}`}>
                     {isLongestHole(hole.holeNumber) ? (
                       <PlayerSelect
                         players={game.players}
