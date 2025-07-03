@@ -346,23 +346,23 @@ const renderDesktopTable = (
   holes: CourseHole[],
   includeTotals: boolean,
 ) => (
-    <table className="w-full table-fixed border-collapse">
+    <table className="w-full table-fixed border-collapse divide-y divide-gray-200">
       <thead>
         <tr className="bg-gray-100">
           <th
-            className={`border border-gray-300 px-3 py-2 text-left font-semibold ${PLAYER_COL_WIDTH}`}
+            className={`border border-gray-300 px-3 py-2 text-left font-semibold font-marker ${PLAYER_COL_WIDTH}`}
           >
             Player
           </th>
           <th
-            className={`border border-gray-300 px-3 py-2 text-center font-semibold ${TOTAL_COL_WIDTH}`}
+            className={`border border-gray-300 px-3 py-2 text-center font-semibold font-marker ${TOTAL_COL_WIDTH}`}
           >
             Skins
           </th>
           {holes.map((hole) => (
             <Fragment key={hole.holeNumber}>
               <th
-                className={`border border-gray-300 px-2 py-2 text-center font-semibold text-sm ${
+                className={`border border-gray-300 px-2 py-2 text-center font-semibold text-sm font-mono ${
                   hole.holeNumber === 10 ? "border-l-4" : ""
                 } ${HOLE_COL_WIDTH}`}
               >
@@ -424,12 +424,12 @@ const renderDesktopTable = (
           {includeTotals && (
             <>
               <th
-                className={`border border-gray-300 px-3 py-2 text-center font-semibold ${TOTAL_COL_WIDTH}`}
+                className={`border border-gray-300 px-3 py-2 text-center font-semibold font-marker ${TOTAL_COL_WIDTH}`}
               >
                 Total
               </th>
               <th
-                className={`border border-gray-300 px-3 py-2 text-center font-semibold ${TOTAL_COL_WIDTH}`}
+                className={`border border-gray-300 px-3 py-2 text-center font-semibold font-marker ${TOTAL_COL_WIDTH}`}
               >
                 To Par
               </th>
@@ -450,7 +450,7 @@ const renderDesktopTable = (
                 </div>
               </td>
               <td
-                className={`border border-gray-300 px-3 py-2 text-center font-bold bg-green-100 ${TOTAL_COL_WIDTH}`}
+                className={`border border-gray-300 px-3 py-2 text-center font-bold bg-green-100 ${TOTAL_COL_WIDTH} font-mono`}
               >
                 {player.skins}
               </td>
@@ -662,12 +662,12 @@ const renderDesktopTable = (
               {includeTotals && (
                 <>
                   <td
-                    className={`border border-gray-300 px-3 py-2 text-center font-bold bg-blue-100 ${TOTAL_COL_WIDTH}`}
+                    className={`border border-gray-300 px-3 py-2 text-center font-bold bg-blue-100 ${TOTAL_COL_WIDTH} font-mono`}
                   >
                     {player.totalScore}
                   </td>
                   <td
-                    className={`border border-gray-300 px-3 py-2 text-center font-bold bg-purple-100 ${TOTAL_COL_WIDTH}`}
+                    className={`border border-gray-300 px-3 py-2 text-center font-bold bg-purple-100 ${TOTAL_COL_WIDTH} font-mono`}
                   >
                     {(() => {
                       const toPar = calculateTotalToPar(player);
@@ -943,7 +943,7 @@ const renderDesktopTable = (
   );
 
   const renderTotalsTable = () => (
-    <table className="w-full table-fixed border-collapse mt-4">
+    <table className="w-full table-fixed border-collapse divide-y divide-gray-200 mt-4">
       <thead>
         <tr className="bg-gray-100">
           <th
@@ -959,12 +959,12 @@ const renderDesktopTable = (
           {showTotals && (
             <>
               <th
-                className={`border border-gray-300 px-3 py-2 text-center font-semibold ${TOTAL_COL_WIDTH}`}
+                className={`border border-gray-300 px-3 py-2 text-center font-semibold font-marker ${TOTAL_COL_WIDTH}`}
               >
                 Total
               </th>
               <th
-                className={`border border-gray-300 px-3 py-2 text-center font-semibold ${TOTAL_COL_WIDTH}`}
+                className={`border border-gray-300 px-3 py-2 text-center font-semibold font-marker ${TOTAL_COL_WIDTH}`}
               >
                 To Par
               </th>
@@ -981,11 +981,11 @@ const renderDesktopTable = (
                 <span>{player.name}</span>
               </div>
             </td>
-            <td className={`border border-gray-300 px-3 py-2 text-center font-bold bg-green-100 ${TOTAL_COL_WIDTH}`}>{player.skins}</td>
+            <td className={`border border-gray-300 px-3 py-2 text-center font-bold bg-green-100 ${TOTAL_COL_WIDTH} font-mono`}>{player.skins}</td>
             {showTotals && (
               <>
-                <td className={`border border-gray-300 px-3 py-2 text-center font-bold bg-blue-100 ${TOTAL_COL_WIDTH}`}>{player.totalScore}</td>
-                <td className={`border border-gray-300 px-3 py-2 text-center font-bold bg-purple-100 ${TOTAL_COL_WIDTH}`}>{(() => {const t = calculateTotalToPar(player); if (t === 0) return 'E'; return t > 0 ? `+${t}` : `${t}`;})()}</td>
+                <td className={`border border-gray-300 px-3 py-2 text-center font-bold bg-blue-100 ${TOTAL_COL_WIDTH} font-mono`}>{player.totalScore}</td>
+                <td className={`border border-gray-300 px-3 py-2 text-center font-bold bg-purple-100 ${TOTAL_COL_WIDTH} font-mono`}>{(() => {const t = calculateTotalToPar(player); if (t === 0) return 'E'; return t > 0 ? `+${t}` : `${t}`;})()}</td>
               </>
             )}
           </tr>
@@ -995,9 +995,9 @@ const renderDesktopTable = (
   );
 
   return (
-    <div className="golf-card">
+    <div className="golf-card fade-in">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-xl font-bold text-gray-800">Score Card</h3>
+        <h3 className="text-xl font-bold text-gray-800 font-marker">Score Card</h3>
         <button
           className="hidden md:inline-block px-2 py-1 text-sm text-white bg-blue-500 rounded"
           onClick={() => setShowTotals((s) => !s)}
@@ -1023,10 +1023,10 @@ const renderDesktopTable = (
         </div>
       {/* Mobile Table */}
       <div className="md:hidden overflow-x-auto mt-4">
-        <table className="w-full table-fixed border-collapse text-sm">
+        <table className="w-full table-fixed border-collapse divide-y divide-gray-200 text-sm">
           <thead>
             <tr className="bg-gray-100">
-              <th className={`border border-gray-300 px-3 py-2 text-left font-semibold ${HOLE_COL_WIDTH}`}>Hole</th>
+              <th className={`border border-gray-300 px-3 py-2 text-left font-semibold font-mono ${HOLE_COL_WIDTH}`}>Hole</th>
               {game.players.map((player) => (
                 <th
                   key={player.id}
@@ -1063,11 +1063,11 @@ const renderDesktopTable = (
           </thead>
           <tbody>
             <tr className="bg-yellow-50">
-              <td className={`border border-gray-300 px-3 py-2 font-medium ${HOLE_COL_WIDTH}`}>Skins</td>
+              <td className={`border border-gray-300 px-3 py-2 font-medium font-mono font-marker ${HOLE_COL_WIDTH}`}>Skins</td>
               {game.players.map((p) => (
                 <td
                   key={p.id}
-                  className={`border border-gray-300 ${mobilePlayerPaddingClass} md:px-2 py-1 text-center font-bold bg-green-100 ${PLAYER_COL_WIDTH} ${mobilePlayerWidthClass}`}
+                  className={`border border-gray-300 ${mobilePlayerPaddingClass} md:px-2 py-1 text-center font-bold bg-green-100 ${PLAYER_COL_WIDTH} ${mobilePlayerWidthClass} font-mono`}
                 >
                   {p.skins}
                 </td>
@@ -1337,11 +1337,11 @@ const renderDesktopTable = (
             {showTotals && (
               <>
                 <tr className="bg-yellow-50">
-                  <td className={`border border-gray-300 px-3 py-2 font-medium ${HOLE_COL_WIDTH}`}>Total</td>
+                  <td className={`border border-gray-300 px-3 py-2 font-medium font-mono font-marker ${HOLE_COL_WIDTH}`}>Total</td>
                   {game.players.map((p) => (
                     <td
                       key={p.id}
-                      className={`border border-gray-300 ${mobilePlayerPaddingClass} md:px-2 py-1 text-center font-bold bg-blue-100 ${PLAYER_COL_WIDTH} ${mobilePlayerWidthClass}`}
+                      className={`border border-gray-300 ${mobilePlayerPaddingClass} md:px-2 py-1 text-center font-bold bg-blue-100 ${PLAYER_COL_WIDTH} ${mobilePlayerWidthClass} font-mono`}
                     >
                       {p.totalScore}
                     </td>
@@ -1349,11 +1349,11 @@ const renderDesktopTable = (
                   <td className="border border-gray-300 px-3 py-2" colSpan={4}></td>
                 </tr>
                 <tr className="bg-yellow-50">
-                  <td className={`border border-gray-300 px-3 py-2 font-medium ${HOLE_COL_WIDTH}`}>To Par</td>
+                  <td className={`border border-gray-300 px-3 py-2 font-medium font-mono font-marker ${HOLE_COL_WIDTH}`}>To Par</td>
                   {game.players.map((p) => (
                     <td
                       key={p.id}
-                      className={`border border-gray-300 ${mobilePlayerPaddingClass} md:px-2 py-1 text-center font-bold bg-purple-100 ${PLAYER_COL_WIDTH} ${mobilePlayerWidthClass}`}
+                      className={`border border-gray-300 ${mobilePlayerPaddingClass} md:px-2 py-1 text-center font-bold bg-purple-100 ${PLAYER_COL_WIDTH} ${mobilePlayerWidthClass} font-mono`}
                     >
                       {(() => {
                         const toPar = calculateTotalToPar(p);

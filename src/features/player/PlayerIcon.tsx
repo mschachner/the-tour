@@ -11,8 +11,8 @@ const PlayerIcon = ({ name, color = '#ccc', size = 24, onClick }: PlayerIconProp
   return (
     <div
       style={{ backgroundColor: color, width: size, height: size }}
-      className={`rounded-full flex items-center justify-center text-white font-bold select-none ${
-        onClick ? 'cursor-pointer' : ''
+      className={`rounded-full flex items-center justify-center text-white font-bold select-none transition-transform duration-200 ${
+        onClick ? 'cursor-pointer hover:scale-105 active:scale-95' : ''
       }`}
       onClick={onClick}
     >

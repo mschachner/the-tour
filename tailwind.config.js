@@ -10,7 +10,10 @@ module.exports = {
         'fairway': '#8fbc8f',
         'rough': '#556b2f',
         'sand': '#f4d03f',
-      }
+      },
+      fontFamily: {
+        marker: ['"Permanent Marker"', 'cursive'],
+      },
     },
   },
   plugins: [],
