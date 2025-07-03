@@ -27,6 +27,7 @@ const CourseSelector = ({ onCourseSelect, selectedCourse, refreshKey }: CourseSe
   const [savedCourses, setSavedCourses] = useState<Course[]>([]);
   const [publicError, setPublicError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Load saved custom courses
   useEffect(() => {
@@ -64,6 +65,17 @@ const CourseSelector = ({ onCourseSelect, selectedCourse, refreshKey }: CourseSe
       active = false;
     };
   }, [inputValue, refreshKey]);
+
+  useEffect(() => {
+    if (!showSuggestions) return;
+    const handleClick = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [showSuggestions]);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -131,7 +143,7 @@ const CourseSelector = ({ onCourseSelect, selectedCourse, refreshKey }: CourseSe
   };
 
   return (
-    <div className="relative">
+    <div className="relative" ref={containerRef}>
       <label className="block text-sm font-medium text-gray-700 mb-2">
         Golf Course
       </label>
@@ -183,6 +195,10 @@ const CourseSelector = ({ onCourseSelect, selectedCourse, refreshKey }: CourseSe
               </div>
             </button>
           ))}
+
+          {suggestions.length === 0 && (
+            <div className="px-4 py-3 text-gray-500">No matching courses.</div>
+          )}
           
           {inputValue.trim() && (
             <button
