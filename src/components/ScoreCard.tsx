@@ -115,6 +115,7 @@ const ScoreCard = ({
     holeNumber: number;
   } | null>(null);
   const [editingValue, setEditingValue] = useState<string>("");
+  const [showTotals, setShowTotals] = useState(false);
 
   const handleCellClick = (
     playerId: string,
@@ -341,10 +342,10 @@ const ScoreCard = ({
   const frontHoles = game.course.holes.filter((h) => h.holeNumber <= 9);
   const backHoles = game.course.holes.filter((h) => h.holeNumber > 9);
 
-  const renderDesktopTable = (
-    holes: CourseHole[],
-    includeTotals: boolean,
-  ) => (
+const renderDesktopTable = (
+  holes: CourseHole[],
+  includeTotals: boolean,
+) => (
     <table className="w-full table-fixed border-collapse">
       <thead>
         <tr className="bg-gray-100">
@@ -352,6 +353,11 @@ const ScoreCard = ({
             className={`border border-gray-300 px-3 py-2 text-left font-semibold ${PLAYER_COL_WIDTH}`}
           >
             Player
+          </th>
+          <th
+            className={`border border-gray-300 px-3 py-2 text-center font-semibold ${TOTAL_COL_WIDTH}`}
+          >
+            Skins
           </th>
           {holes.map((hole) => (
             <Fragment key={hole.holeNumber}>
@@ -427,11 +433,6 @@ const ScoreCard = ({
               >
                 To Par
               </th>
-              <th
-                className={`border border-gray-300 px-3 py-2 text-center font-semibold ${TOTAL_COL_WIDTH}`}
-              >
-                Skins
-              </th>
             </>
           )}
         </tr>
@@ -447,6 +448,11 @@ const ScoreCard = ({
                   <PlayerIcon name={player.name} color={player.color} size={24} />
                   <span>{player.name}</span>
                 </div>
+              </td>
+              <td
+                className={`border border-gray-300 px-3 py-2 text-center font-bold bg-green-100 ${TOTAL_COL_WIDTH}`}
+              >
+                {player.skins}
               </td>
               {holes.map((hole) => {
                 const value = player.holes.find(
@@ -669,11 +675,6 @@ const ScoreCard = ({
                       return toPar > 0 ? `+${toPar}` : `${toPar}`;
                     })()}
                   </td>
-                  <td
-                    className={`border border-gray-300 px-3 py-2 text-center font-bold bg-green-100 ${TOTAL_COL_WIDTH}`}
-                  >
-                    {player.skins}
-                  </td>
                 </>
               )}
             </tr>
@@ -682,6 +683,7 @@ const ScoreCard = ({
         {/* CTP Row */}
         <tr className="bg-yellow-50">
           <td className={`border border-gray-300 px-3 py-2 font-medium text-center ${PLAYER_COL_WIDTH}`}>CTP</td>
+          <td className={`border border-gray-300 px-3 py-2 ${TOTAL_COL_WIDTH}`}></td>
           {holes.map((hole) => (
             <Fragment key={hole.holeNumber}>
               <td
@@ -739,12 +741,13 @@ const ScoreCard = ({
             </Fragment>
           ))}
           {includeTotals && (
-            <td className="border border-gray-300 px-3 py-2" colSpan={3}></td>
+            <td className="border border-gray-300 px-3 py-2" colSpan={2}></td>
           )}
         </tr>
         {/* LD Row */}
         <tr className="bg-yellow-50">
           <td className={`border border-gray-300 px-3 py-2 font-medium text-center ${PLAYER_COL_WIDTH}`}>LD</td>
+          <td className={`border border-gray-300 px-3 py-2 ${TOTAL_COL_WIDTH}`}></td>
           {holes.map((hole) => (
             <Fragment key={hole.holeNumber}>
               <td
@@ -802,12 +805,13 @@ const ScoreCard = ({
             </Fragment>
           ))}
           {includeTotals && (
-            <td className="border border-gray-300 px-3 py-2" colSpan={3}></td>
+            <td className="border border-gray-300 px-3 py-2" colSpan={2}></td>
           )}
         </tr>
         {/* Sandy Row */}
         <tr className="bg-yellow-50">
           <td className={`border border-gray-300 px-3 py-2 font-medium text-center ${PLAYER_COL_WIDTH}`}>🏖️</td>
+          <td className={`border border-gray-300 px-3 py-2 ${TOTAL_COL_WIDTH}`}></td>
           {holes.map((hole) => (
             <Fragment key={hole.holeNumber}>
               <td
@@ -866,12 +870,13 @@ const ScoreCard = ({
             </Fragment>
           ))}
           {includeTotals && (
-            <td className="border border-gray-300 px-3 py-2" colSpan={3}></td>
+            <td className="border border-gray-300 px-3 py-2" colSpan={2}></td>
           )}
         </tr>
         {/* Lost Ball Row */}
         <tr className="bg-yellow-50">
           <td className={`border border-gray-300 px-3 py-2 font-medium text-center ${PLAYER_COL_WIDTH}`}>LB</td>
+          <td className={`border border-gray-300 px-3 py-2 ${TOTAL_COL_WIDTH}`}></td>
           {holes.map((hole) => (
             <Fragment key={hole.holeNumber}>
               <td
@@ -930,7 +935,7 @@ const ScoreCard = ({
             </Fragment>
           ))}
           {includeTotals && (
-            <td className="border border-gray-300 px-3 py-2" colSpan={3}></td>
+            <td className="border border-gray-300 px-3 py-2" colSpan={2}></td>
           )}
         </tr>
       </tbody>
@@ -949,18 +954,22 @@ const ScoreCard = ({
           <th
             className={`border border-gray-300 px-3 py-2 text-center font-semibold ${TOTAL_COL_WIDTH}`}
           >
-            Total
-          </th>
-          <th
-            className={`border border-gray-300 px-3 py-2 text-center font-semibold ${TOTAL_COL_WIDTH}`}
-          >
-            To Par
-          </th>
-          <th
-            className={`border border-gray-300 px-3 py-2 text-center font-semibold ${TOTAL_COL_WIDTH}`}
-          >
             Skins
           </th>
+          {showTotals && (
+            <>
+              <th
+                className={`border border-gray-300 px-3 py-2 text-center font-semibold ${TOTAL_COL_WIDTH}`}
+              >
+                Total
+              </th>
+              <th
+                className={`border border-gray-300 px-3 py-2 text-center font-semibold ${TOTAL_COL_WIDTH}`}
+              >
+                To Par
+              </th>
+            </>
+          )}
         </tr>
       </thead>
       <tbody>
@@ -972,9 +981,13 @@ const ScoreCard = ({
                 <span>{player.name}</span>
               </div>
             </td>
-            <td className={`border border-gray-300 px-3 py-2 text-center font-bold bg-blue-100 ${TOTAL_COL_WIDTH}`}>{player.totalScore}</td>
-            <td className={`border border-gray-300 px-3 py-2 text-center font-bold bg-purple-100 ${TOTAL_COL_WIDTH}`}>{(() => {const t = calculateTotalToPar(player); if (t === 0) return 'E'; return t > 0 ? `+${t}` : `${t}`;})()}</td>
             <td className={`border border-gray-300 px-3 py-2 text-center font-bold bg-green-100 ${TOTAL_COL_WIDTH}`}>{player.skins}</td>
+            {showTotals && (
+              <>
+                <td className={`border border-gray-300 px-3 py-2 text-center font-bold bg-blue-100 ${TOTAL_COL_WIDTH}`}>{player.totalScore}</td>
+                <td className={`border border-gray-300 px-3 py-2 text-center font-bold bg-purple-100 ${TOTAL_COL_WIDTH}`}>{(() => {const t = calculateTotalToPar(player); if (t === 0) return 'E'; return t > 0 ? `+${t}` : `${t}`;})()}</td>
+              </>
+            )}
           </tr>
         ))}
       </tbody>
@@ -983,18 +996,26 @@ const ScoreCard = ({
 
   return (
     <div className="golf-card">
-      <h3 className="text-xl font-bold text-gray-800 mb-4">Score Card</h3>
+      <div className="flex items-center mb-4 space-x-2">
+        <h3 className="text-xl font-bold text-gray-800">Score Card</h3>
+        <button
+          className="px-2 py-1 text-sm text-white bg-blue-500 rounded"
+          onClick={() => setShowTotals((s) => !s)}
+        >
+          {showTotals ? "Hide Totals" : "Show Totals"}
+        </button>
+      </div>
 
       {/* Desktop Table */}
         <div className="hidden xl:block">
-          {renderDesktopTable(game.course.holes, true)}
+          {renderDesktopTable(game.course.holes, showTotals)}
         </div>
         <div className="hidden md:flex xl:hidden flex-wrap gap-4">
           <div className="grow">
-            {renderDesktopTable(frontHoles, false)}
+            {renderDesktopTable(frontHoles, showTotals)}
           </div>
           <div className="grow md:ml-4 mt-4 md:mt-0">
-            {renderDesktopTable(backHoles, false)}
+            {renderDesktopTable(backHoles, showTotals)}
           </div>
           <div className="basis-full mt-4">
             {renderTotalsTable()}
@@ -1301,34 +1322,38 @@ const ScoreCard = ({
                 )}
               </Fragment>
             ))}
-            <tr className="bg-yellow-50">
-              <td className={`border border-gray-300 px-3 py-2 font-medium ${HOLE_COL_WIDTH}`}>Total</td>
-              {game.players.map((p) => (
-                <td
-                  key={p.id}
-                  className={`border border-gray-300 ${mobilePlayerPaddingClass} md:px-2 py-1 text-center font-bold bg-blue-100 ${PLAYER_COL_WIDTH} ${mobilePlayerWidthClass}`}
-                >
-                  {p.totalScore}
-                </td>
-              ))}
-              <td className="border border-gray-300 px-3 py-2" colSpan={4}></td>
-            </tr>
-            <tr className="bg-yellow-50">
-              <td className={`border border-gray-300 px-3 py-2 font-medium ${HOLE_COL_WIDTH}`}>To Par</td>
-              {game.players.map((p) => (
-                <td
-                  key={p.id}
-                  className={`border border-gray-300 ${mobilePlayerPaddingClass} md:px-2 py-1 text-center font-bold bg-purple-100 ${PLAYER_COL_WIDTH} ${mobilePlayerWidthClass}`}
-                >
-                  {(() => {
-                    const toPar = calculateTotalToPar(p);
-                    if (toPar === 0) return 'E';
-                    return toPar > 0 ? `+${toPar}` : `${toPar}`;
-                  })()}
-                </td>
-              ))}
-              <td className="border border-gray-300 px-3 py-2" colSpan={4}></td>
-            </tr>
+            {showTotals && (
+              <>
+                <tr className="bg-yellow-50">
+                  <td className={`border border-gray-300 px-3 py-2 font-medium ${HOLE_COL_WIDTH}`}>Total</td>
+                  {game.players.map((p) => (
+                    <td
+                      key={p.id}
+                      className={`border border-gray-300 ${mobilePlayerPaddingClass} md:px-2 py-1 text-center font-bold bg-blue-100 ${PLAYER_COL_WIDTH} ${mobilePlayerWidthClass}`}
+                    >
+                      {p.totalScore}
+                    </td>
+                  ))}
+                  <td className="border border-gray-300 px-3 py-2" colSpan={4}></td>
+                </tr>
+                <tr className="bg-yellow-50">
+                  <td className={`border border-gray-300 px-3 py-2 font-medium ${HOLE_COL_WIDTH}`}>To Par</td>
+                  {game.players.map((p) => (
+                    <td
+                      key={p.id}
+                      className={`border border-gray-300 ${mobilePlayerPaddingClass} md:px-2 py-1 text-center font-bold bg-purple-100 ${PLAYER_COL_WIDTH} ${mobilePlayerWidthClass}`}
+                    >
+                      {(() => {
+                        const toPar = calculateTotalToPar(p);
+                        if (toPar === 0) return 'E';
+                        return toPar > 0 ? `+${toPar}` : `${toPar}`;
+                      })()}
+                    </td>
+                  ))}
+                  <td className="border border-gray-300 px-3 py-2" colSpan={4}></td>
+                </tr>
+              </>
+            )}
             <tr className="bg-yellow-50">
               <td className={`border border-gray-300 px-3 py-2 font-medium ${HOLE_COL_WIDTH}`}>Skins</td>
               {game.players.map((p) => (
