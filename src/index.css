@@ -11,11 +11,11 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: #556b2f;
-  background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScyMDAnIGhlaWdodD0nMjAwJz48ZmlsdGVyIGlkPSduJz48ZmVUdXJidWxlbmNlIHR5cGU9J2ZyYWN0YWxOb2lzZScgYmFzZUZyZXF1ZW5jeT0nMC44JyBudW1PY3RhdmVzPSc0Jy8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9JzIwMCcgaGVpZ2h0PScyMDAnIGZpbHRlcj0ndXJsKCNuKScgb3BhY2l0eT0nMC4wNScvPjwvc3ZnPg=='),
-    radial-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
-    radial-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScyMDAnIGhlaWdodD0nMjAwJz48ZmlsdGVyIGlkPSduJz48ZmVUdXJidWxlbmNlIHR5cGU9J2ZyYWN0YWxOb2lzZScgYmFzZUZyZXF1ZW5jeT0nMS4yJyBudW1PY3RhdmVzPSc0Jy8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9JzIwMCcgaGVpZ2h0PScyMDAnIGZpbHRlcj0ndXJsKCNuKScgb3BhY2l0eT0nMC4wOCcvPjwvc3ZnPg=='),
+    radial-gradient(rgba(0, 0, 0, 0.07) 1px, transparent 1px),
+    radial-gradient(rgba(0, 0, 0, 0.06) 1px, transparent 1px);
   background-position: center, 0 0, 3px 3px;
-  background-size: cover, 6px 6px, 6px 6px;
+  background-size: cover, 4px 4px, 4px 4px;
   background-blend-mode: multiply;
   min-height: 100vh;
 }
@@ -39,7 +39,7 @@ code {
   }
   
   .golf-button {
-    @apply bg-earth-green hover:bg-rough text-white font-bold py-2 px-4 rounded border-2 border-earth-brown uppercase tracking-wide transition-colors duration-200;
+    @apply bg-earth-burlap hover:bg-earth-beige text-earth-brown font-bold py-2 px-4 rounded border-2 border-earth-brown uppercase tracking-wide transition-colors duration-200;
     transform: rotate(-1deg);
   }
   
