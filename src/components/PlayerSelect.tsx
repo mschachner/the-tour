@@ -26,7 +26,7 @@ const PlayerSelect = ({ players, selected, onSelect }: PlayerSelectProps) => {
   const selectedPlayer = players.find((p) => p.id === selected);
 
   return (
-    <div className="relative inline-block" ref={ref}>
+    <div className="relative inline-block align-middle" ref={ref}>
       {selected === null ? (
         <div
           className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center cursor-pointer"
@@ -43,7 +43,7 @@ const PlayerSelect = ({ players, selected, onSelect }: PlayerSelectProps) => {
         />
       ) : (
         <div
-          className="w-6 h-6 bg-gray-300 rounded-full cursor-pointer"
+          className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center cursor-pointer"
           onClick={() => setOpen(!open)}
         />
       )}
