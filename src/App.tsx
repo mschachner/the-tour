@@ -609,11 +609,11 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-400 to-blue-500 fade-in">
+    <div className="min-h-screen fade-in">
       <div className="container mx-auto px-4 py-8">
         <header className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2 font-marker">🏌️ The Tour</h1>
-          <p className="text-white/80">Track your game with style</p>
+          <h1 className="text-4xl font-bold text-earth-beige mb-2 font-marker">🏌️ The Tour</h1>
+          <p className="text-earth-beige/80">Track your game with style</p>
         </header>
 
         {showSetup ? (
@@ -621,10 +621,10 @@ function App() {
         ) : game ? (
           <div className="space-y-6">
             <div className="flex justify-between items-center">
-              <div className="text-white">
+              <div className="text-earth-beige">
                 <h2 className="text-2xl font-semibold">{game.course.name}</h2>
-                <p className="text-white/80">{game.course.location} • {game.date}</p>
-                <p className="text-white/80">Par {game.course.totalPar}
+                <p className="text-earth-beige/80">{game.course.location} • {game.date}</p>
+                <p className="text-earth-beige/80">Par {game.course.totalPar}
                   {game.course.totalDistance && ` • ${game.course.totalDistance} yards`}
                 </p>
               </div>
