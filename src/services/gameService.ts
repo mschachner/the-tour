@@ -1,6 +1,6 @@
-export const GAME_STORAGE_KEY = 'golfer-current-game';
 import { Game } from '../types/golf';
 
+export const GAME_STORAGE_KEY = 'golfer-current-game';
 export const loadGame = (): Game | null => {
   try {
     const stored = localStorage.getItem(GAME_STORAGE_KEY);
