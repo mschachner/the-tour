@@ -2,6 +2,7 @@ import { useState, Fragment } from "react";
 import type { ChangeEvent } from "react";
 import { Game, Player, HoleScore, CourseHole } from "../types/golf";
 import PlayerIcon from "./PlayerIcon";
+import PlayerHeader from "./PlayerHeader";
 import PlayerSelect from "./PlayerSelect";
 
 const HOLE_COL_WIDTH = "w-12";
@@ -170,18 +171,8 @@ const ScoreCard = ({
     if (n === 6) return "px-1";
     return "px-0.5";
   };
-  const getMobileScoreSizeClass = (n: number) => {
-    if (n <= 3) return "w-12 h-12";
-    if (n === 4) return "w-10 h-10";
-    if (n === 5) return "w-8 h-8";
-    if (n === 6) return "w-8 h-8";
-    if (n === 7) return "w-6 h-6";
-    if (n === 8) return "w-6 h-6";
-    return "w-5 h-5";
-  };
   const mobilePlayerWidthClass = getMobilePlayerWidthClass(numPlayers);
   const mobilePlayerPaddingClass = getMobilePlayerPaddingClass(numPlayers);
-  const mobileScoreSizeClass = getMobileScoreSizeClass(numPlayers);
   const mobileHeaderTextClass = numPlayers >= 7 ? "text-[10px]" : numPlayers > 4 ? "text-xs" : "";
   const mobileIconSize = numPlayers >= 7 ? 12 : numPlayers > 4 ? 16 : 20;
 
@@ -1020,10 +1011,11 @@ const ScoreCard = ({
                   key={player.id}
                   className={`border border-gray-300 ${mobilePlayerPaddingClass} md:px-2 py-2 text-center font-semibold ${PLAYER_COL_WIDTH} ${mobilePlayerWidthClass}`}
                 >
-                  <div className="flex items-center space-x-1 justify-center">
-                    <PlayerIcon name={player.name} color={player.color} size={mobileIconSize} />
-                    <span className={`truncate ${mobileHeaderTextClass}`}>{player.name}</span>
-                  </div>
+                  <PlayerHeader
+                    player={player}
+                    iconSize={mobileIconSize}
+                    textClass={mobileHeaderTextClass}
+                  />
                 </th>
               ))}
               <th
@@ -1074,12 +1066,12 @@ const ScoreCard = ({
                             onChange={handleInputChange}
                             onBlur={(e) => handleCellChange(e.target.value)}
                             onKeyPress={(e) => e.key === 'Enter' && handleCellChange(editingValue)}
-                          className={`score-input ${mobileScoreSizeClass}`}
+                          className="score-input"
                           autoFocus
                         />
                       ) : (
                         <button
-                          className={`score-button hover:bg-gray-200 ${mobileScoreSizeClass} ${getScoreColor(phole.strokes, phole.par)} ${getScoreBorderStyle(phole.strokes, phole.par)} ${
+                          className={`score-button hover:bg-gray-200 ${getScoreColor(phole.strokes, phole.par)} ${getScoreBorderStyle(phole.strokes, phole.par)} ${
                             isHoleWinner(hole.holeNumber, player.id) ? 'text-xl font-bold' : ''
                           }`}
                           style={{
