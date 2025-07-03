@@ -5,7 +5,7 @@ import PlayerIcon from "./PlayerIcon";
 import PlayerSelect from "./PlayerSelect";
 
 const HOLE_COL_WIDTH = "w-12";
-const SKIN_COL_WIDTH = "w-6 min-w-[1.5rem]";
+const SKIN_COL_WIDTH = "w-7 md:w-6 min-w-[1.75rem]";
 const PLAYER_COL_WIDTH = "w-20 md:w-24";
 const TOTAL_COL_WIDTH = "w-12";
 
@@ -156,14 +156,21 @@ const ScoreCard = ({
   const numPlayers = game.players.length;
   const getMobilePlayerWidthClass = (n: number) => {
     if (n <= 3) return "w-20";
-    if (n === 4) return "w-16";
-    if (n === 5) return "w-14";
-    return "w-12";
+    if (n === 4) return "w-12";
+    if (n === 5) return "w-10";
+    if (n === 6) return "w-8";
+    if (n === 7) return "w-7";
+    if (n === 8) return "w-6";
+    return "w-5";
   };
   const getMobileScoreSizeClass = (n: number) => {
     if (n <= 3) return "w-12 h-12";
     if (n === 4) return "w-10 h-10";
-    return "w-8 h-8";
+    if (n === 5) return "w-8 h-8";
+    if (n === 6) return "w-8 h-8";
+    if (n === 7) return "w-6 h-6";
+    if (n === 8) return "w-6 h-6";
+    return "w-5 h-5";
   };
   const mobilePlayerWidthClass = getMobilePlayerWidthClass(numPlayers);
   const mobileScoreSizeClass = getMobileScoreSizeClass(numPlayers);
