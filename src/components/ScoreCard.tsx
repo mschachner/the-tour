@@ -996,10 +996,10 @@ const renderDesktopTable = (
 
   return (
     <div className="golf-card">
-      <div className="flex items-center mb-4 space-x-2">
+      <div className="flex items-center justify-between mb-4">
         <h3 className="text-xl font-bold text-gray-800">Score Card</h3>
         <button
-          className="px-2 py-1 text-sm text-white bg-blue-500 rounded"
+          className="hidden md:inline-block px-2 py-1 text-sm text-white bg-blue-500 rounded"
           onClick={() => setShowTotals((s) => !s)}
         >
           {showTotals ? "Hide Totals" : "Show Totals"}
@@ -1062,6 +1062,18 @@ const renderDesktopTable = (
             </tr>
           </thead>
           <tbody>
+            <tr className="bg-yellow-50">
+              <td className={`border border-gray-300 px-3 py-2 font-medium ${HOLE_COL_WIDTH}`}>Skins</td>
+              {game.players.map((p) => (
+                <td
+                  key={p.id}
+                  className={`border border-gray-300 ${mobilePlayerPaddingClass} md:px-2 py-1 text-center font-bold bg-green-100 ${PLAYER_COL_WIDTH} ${mobilePlayerWidthClass}`}
+                >
+                  {p.skins}
+                </td>
+              ))}
+              <td className="border border-gray-300 px-3 py-2" colSpan={4}></td>
+            </tr>
             {game.course.holes.map((hole, holeIndex) => (
               <Fragment key={hole.holeNumber}>
                 <tr className={holeIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
@@ -1354,20 +1366,16 @@ const renderDesktopTable = (
                 </tr>
               </>
             )}
-            <tr className="bg-yellow-50">
-              <td className={`border border-gray-300 px-3 py-2 font-medium ${HOLE_COL_WIDTH}`}>Skins</td>
-              {game.players.map((p) => (
-                <td
-                  key={p.id}
-                  className={`border border-gray-300 ${mobilePlayerPaddingClass} md:px-2 py-1 text-center font-bold bg-green-100 ${PLAYER_COL_WIDTH} ${mobilePlayerWidthClass}`}
-                >
-                  {p.skins}
-                </td>
-              ))}
-              <td className="border border-gray-300 px-3 py-2" colSpan={4}></td>
-            </tr>
           </tbody>
         </table>
+      </div>
+      <div className="md:hidden flex justify-end mt-4">
+        <button
+          className="px-2 py-1 text-sm text-white bg-blue-500 rounded"
+          onClick={() => setShowTotals((s) => !s)}
+        >
+          {showTotals ? "Hide Totals" : "Show Totals"}
+        </button>
       </div>
 
     </div>
