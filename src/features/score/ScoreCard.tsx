@@ -350,12 +350,12 @@ const renderDesktopTable = (
       <thead>
         <tr className="bg-gray-100">
           <th
-            className={`border border-gray-300 px-3 py-2 text-left font-semibold ${PLAYER_COL_WIDTH}`}
+            className={`border border-gray-300 px-3 py-2 text-left font-semibold font-marker ${PLAYER_COL_WIDTH}`}
           >
             Player
           </th>
           <th
-            className={`border border-gray-300 px-3 py-2 text-center font-semibold ${TOTAL_COL_WIDTH}`}
+            className={`border border-gray-300 px-3 py-2 text-center font-semibold font-marker ${TOTAL_COL_WIDTH}`}
           >
             Skins
           </th>
@@ -424,12 +424,12 @@ const renderDesktopTable = (
           {includeTotals && (
             <>
               <th
-                className={`border border-gray-300 px-3 py-2 text-center font-semibold ${TOTAL_COL_WIDTH}`}
+                className={`border border-gray-300 px-3 py-2 text-center font-semibold font-marker ${TOTAL_COL_WIDTH}`}
               >
                 Total
               </th>
               <th
-                className={`border border-gray-300 px-3 py-2 text-center font-semibold ${TOTAL_COL_WIDTH}`}
+                className={`border border-gray-300 px-3 py-2 text-center font-semibold font-marker ${TOTAL_COL_WIDTH}`}
               >
                 To Par
               </th>
@@ -959,12 +959,12 @@ const renderDesktopTable = (
           {showTotals && (
             <>
               <th
-                className={`border border-gray-300 px-3 py-2 text-center font-semibold ${TOTAL_COL_WIDTH}`}
+                className={`border border-gray-300 px-3 py-2 text-center font-semibold font-marker ${TOTAL_COL_WIDTH}`}
               >
                 Total
               </th>
               <th
-                className={`border border-gray-300 px-3 py-2 text-center font-semibold ${TOTAL_COL_WIDTH}`}
+                className={`border border-gray-300 px-3 py-2 text-center font-semibold font-marker ${TOTAL_COL_WIDTH}`}
               >
                 To Par
               </th>
@@ -997,7 +997,7 @@ const renderDesktopTable = (
   return (
     <div className="golf-card fade-in">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-xl font-bold text-gray-800">Score Card</h3>
+        <h3 className="text-xl font-bold text-gray-800 font-marker">Score Card</h3>
         <button
           className="hidden md:inline-block px-2 py-1 text-sm text-white bg-blue-500 rounded"
           onClick={() => setShowTotals((s) => !s)}
@@ -1063,7 +1063,7 @@ const renderDesktopTable = (
           </thead>
           <tbody>
             <tr className="bg-yellow-50">
-              <td className={`border border-gray-300 px-3 py-2 font-medium font-mono ${HOLE_COL_WIDTH}`}>Skins</td>
+              <td className={`border border-gray-300 px-3 py-2 font-medium font-mono font-marker ${HOLE_COL_WIDTH}`}>Skins</td>
               {game.players.map((p) => (
                 <td
                   key={p.id}
@@ -1337,7 +1337,7 @@ const renderDesktopTable = (
             {showTotals && (
               <>
                 <tr className="bg-yellow-50">
-                  <td className={`border border-gray-300 px-3 py-2 font-medium font-mono ${HOLE_COL_WIDTH}`}>Total</td>
+                  <td className={`border border-gray-300 px-3 py-2 font-medium font-mono font-marker ${HOLE_COL_WIDTH}`}>Total</td>
                   {game.players.map((p) => (
                     <td
                       key={p.id}
@@ -1349,7 +1349,7 @@ const renderDesktopTable = (
                   <td className="border border-gray-300 px-3 py-2" colSpan={4}></td>
                 </tr>
                 <tr className="bg-yellow-50">
-                  <td className={`border border-gray-300 px-3 py-2 font-medium font-mono ${HOLE_COL_WIDTH}`}>To Par</td>
+                  <td className={`border border-gray-300 px-3 py-2 font-medium font-mono font-marker ${HOLE_COL_WIDTH}`}>To Par</td>
                   {game.players.map((p) => (
                     <td
                       key={p.id}

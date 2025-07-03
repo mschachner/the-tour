@@ -135,7 +135,7 @@ const CourseEditor = ({ course, onSaveCourse, onCancel, onDeleteCourse }: Course
   return (
     <div className="golf-card fade-in max-w-4xl mx-auto">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold text-gray-800">Course Editor</h2>
+        <h2 className="text-xl font-bold text-gray-800 font-marker">Course Editor</h2>
         <div className="flex space-x-2">
           {isCustomCourse && (
             <button
