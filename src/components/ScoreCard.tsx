@@ -5,7 +5,7 @@ import PlayerIcon from "./PlayerIcon";
 import PlayerSelect from "./PlayerSelect";
 
 const HOLE_COL_WIDTH = "w-12";
-const SKIN_COL_WIDTH = "w-6";
+const SKIN_COL_WIDTH = "w-7 md:w-6 min-w-[1.75rem]";
 const PLAYER_COL_WIDTH = "w-20 md:w-24";
 const TOTAL_COL_WIDTH = "w-12";
 
@@ -151,6 +151,31 @@ const ScoreCard = ({
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setEditingValue(e.target.value);
   };
+
+  // Dynamic sizing for mobile
+  const numPlayers = game.players.length;
+  const getMobilePlayerWidthClass = (n: number) => {
+    if (n <= 3) return "w-20";
+    if (n === 4) return "w-12";
+    if (n === 5) return "w-10";
+    if (n === 6) return "w-8";
+    if (n === 7) return "w-7";
+    if (n === 8) return "w-6";
+    return "w-5";
+  };
+  const getMobileScoreSizeClass = (n: number) => {
+    if (n <= 3) return "w-12 h-12";
+    if (n === 4) return "w-10 h-10";
+    if (n === 5) return "w-8 h-8";
+    if (n === 6) return "w-8 h-8";
+    if (n === 7) return "w-6 h-6";
+    if (n === 8) return "w-6 h-6";
+    return "w-5 h-5";
+  };
+  const mobilePlayerWidthClass = getMobilePlayerWidthClass(numPlayers);
+  const mobileScoreSizeClass = getMobileScoreSizeClass(numPlayers);
+  const mobileHeaderTextClass = numPlayers > 4 ? "text-xs" : "";
+  const mobileIconSize = numPlayers > 4 ? 16 : 20;
 
   const frontClosestHole = getClosestHoleForSide(
     game.course.holes,
@@ -985,11 +1010,11 @@ const ScoreCard = ({
               {game.players.map((player) => (
                 <th
                   key={player.id}
-                  className={`border border-gray-300 px-2 py-2 text-center font-semibold ${PLAYER_COL_WIDTH}`}
+                  className={`border border-gray-300 px-2 py-2 text-center font-semibold ${PLAYER_COL_WIDTH} ${mobilePlayerWidthClass}`}
                 >
                   <div className="flex items-center space-x-1 justify-center">
-                    <PlayerIcon name={player.name} color={player.color} size={20} />
-                    <span>{player.name}</span>
+                    <PlayerIcon name={player.name} color={player.color} size={mobileIconSize} />
+                    <span className={`truncate ${mobileHeaderTextClass}`}>{player.name}</span>
                   </div>
                 </th>
               ))}
@@ -1032,7 +1057,7 @@ const ScoreCard = ({
                     return (
                       <td
                         key={player.id}
-                        className={`border border-gray-300 px-2 py-1 text-center ${PLAYER_COL_WIDTH}`}
+                        className={`border border-gray-300 px-2 py-1 text-center ${PLAYER_COL_WIDTH} ${mobilePlayerWidthClass}`}
                       >
                         {editing ? (
                           <input
@@ -1041,12 +1066,12 @@ const ScoreCard = ({
                             onChange={handleInputChange}
                             onBlur={(e) => handleCellChange(e.target.value)}
                             onKeyPress={(e) => e.key === 'Enter' && handleCellChange(editingValue)}
-                          className="score-input"
+                          className={`score-input ${mobileScoreSizeClass}`}
                           autoFocus
                         />
                       ) : (
                         <button
-                          className={`score-button hover:bg-gray-200 ${getScoreColor(phole.strokes, phole.par)} ${getScoreBorderStyle(phole.strokes, phole.par)} ${
+                          className={`score-button hover:bg-gray-200 ${mobileScoreSizeClass} ${getScoreColor(phole.strokes, phole.par)} ${getScoreBorderStyle(phole.strokes, phole.par)} ${
                             isHoleWinner(hole.holeNumber, player.id) ? 'text-xl font-bold' : ''
                           }`}
                           style={{
@@ -1106,7 +1131,7 @@ const ScoreCard = ({
                       {game.players.map((player) => (
                         <td
                           key={player.id}
-                          className={`border border-green-300 bg-green-50 px-1 text-center ${PLAYER_COL_WIDTH}`}
+                          className={`border border-green-300 bg-green-50 px-1 text-center ${PLAYER_COL_WIDTH} ${mobilePlayerWidthClass}`}
                         >
                           {playerMadePar(player.id, hole.holeNumber) ? (
                             <input
@@ -1137,7 +1162,7 @@ const ScoreCard = ({
                     {game.players.map((player) => (
                       <td
                         key={player.id}
-                        className={`border border-orange-300 bg-orange-50 px-1 text-center ${PLAYER_COL_WIDTH}`}
+                        className={`border border-orange-300 bg-orange-50 px-1 text-center ${PLAYER_COL_WIDTH} ${mobilePlayerWidthClass}`}
                       >
                         {playerMadePar(player.id, hole.holeNumber) ? (
                           <input
@@ -1168,7 +1193,7 @@ const ScoreCard = ({
                       {game.players.map((player) => (
                         <td
                           key={player.id}
-                          className={`border border-blue-300 bg-blue-50 px-1 text-center ${PLAYER_COL_WIDTH}`}
+                          className={`border border-blue-300 bg-blue-50 px-1 text-center ${PLAYER_COL_WIDTH} ${mobilePlayerWidthClass}`}
                         >
                           <input
                             type="checkbox"
@@ -1194,7 +1219,7 @@ const ScoreCard = ({
                     {game.players.map((player) => (
                       <td
                         key={player.id}
-                        className={`border border-yellow-300 bg-yellow-50 px-1 text-center ${PLAYER_COL_WIDTH}`}
+                        className={`border border-yellow-300 bg-yellow-50 px-1 text-center ${PLAYER_COL_WIDTH} ${mobilePlayerWidthClass}`}
                       >
                         {playerMadePar(player.id, hole.holeNumber) ? (
                           <div className="flex flex-col items-center justify-center space-y-1 md:flex-row md:space-x-1 md:space-y-0">
@@ -1251,7 +1276,7 @@ const ScoreCard = ({
                     {game.players.map((player) => (
                       <td
                         key={player.id}
-                        className={`border border-red-300 bg-red-50 px-1 text-center ${PLAYER_COL_WIDTH}`}
+                        className={`border border-red-300 bg-red-50 px-1 text-center ${PLAYER_COL_WIDTH} ${mobilePlayerWidthClass}`}
                       >
                         {playerMadePar(player.id, hole.holeNumber) ? (
                           <input
@@ -1279,14 +1304,22 @@ const ScoreCard = ({
             <tr className="bg-yellow-50">
               <td className={`border border-gray-300 px-3 py-2 font-medium ${HOLE_COL_WIDTH}`}>Total</td>
               {game.players.map((p) => (
-                <td key={p.id} className={`border border-gray-300 px-2 py-1 text-center font-bold bg-blue-100 ${PLAYER_COL_WIDTH}`}>{p.totalScore}</td>
+                <td
+                  key={p.id}
+                  className={`border border-gray-300 px-2 py-1 text-center font-bold bg-blue-100 ${PLAYER_COL_WIDTH} ${mobilePlayerWidthClass}`}
+                >
+                  {p.totalScore}
+                </td>
               ))}
               <td className="border border-gray-300 px-3 py-2" colSpan={4}></td>
             </tr>
             <tr className="bg-yellow-50">
               <td className={`border border-gray-300 px-3 py-2 font-medium ${HOLE_COL_WIDTH}`}>To Par</td>
               {game.players.map((p) => (
-                <td key={p.id} className={`border border-gray-300 px-2 py-1 text-center font-bold bg-purple-100 ${PLAYER_COL_WIDTH}`}>
+                <td
+                  key={p.id}
+                  className={`border border-gray-300 px-2 py-1 text-center font-bold bg-purple-100 ${PLAYER_COL_WIDTH} ${mobilePlayerWidthClass}`}
+                >
                   {(() => {
                     const toPar = calculateTotalToPar(p);
                     if (toPar === 0) return 'E';
@@ -1299,7 +1332,12 @@ const ScoreCard = ({
             <tr className="bg-yellow-50">
               <td className={`border border-gray-300 px-3 py-2 font-medium ${HOLE_COL_WIDTH}`}>Skins</td>
               {game.players.map((p) => (
-                <td key={p.id} className={`border border-gray-300 px-2 py-1 text-center font-bold bg-green-100 ${PLAYER_COL_WIDTH}`}>{p.skins}</td>
+                <td
+                  key={p.id}
+                  className={`border border-gray-300 px-2 py-1 text-center font-bold bg-green-100 ${PLAYER_COL_WIDTH} ${mobilePlayerWidthClass}`}
+                >
+                  {p.skins}
+                </td>
               ))}
               <td className="border border-gray-300 px-3 py-2" colSpan={4}></td>
             </tr>
