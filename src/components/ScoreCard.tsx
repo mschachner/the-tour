@@ -5,7 +5,7 @@ import PlayerIcon from "./PlayerIcon";
 import PlayerSelect from "./PlayerSelect";
 
 const HOLE_COL_WIDTH = "w-12";
-const SKIN_COL_WIDTH = "w-7 md:w-6 min-w-[1.75rem]";
+const SKIN_COL_WIDTH = "w-8 md:w-6 min-w-[2rem]";
 const PLAYER_COL_WIDTH = "w-20 md:w-24";
 const TOTAL_COL_WIDTH = "w-12";
 
@@ -155,13 +155,20 @@ const ScoreCard = ({
   // Dynamic sizing for mobile
   const numPlayers = game.players.length;
   const getMobilePlayerWidthClass = (n: number) => {
-    if (n <= 3) return "w-20";
-    if (n === 4) return "w-12";
-    if (n === 5) return "w-10";
-    if (n === 6) return "w-8";
-    if (n === 7) return "w-7";
-    if (n === 8) return "w-6";
-    return "w-5";
+    if (n <= 3) return "w-10";
+    if (n === 4) return "w-8";
+    if (n === 5) return "w-6";
+    if (n === 6) return "w-5";
+    if (n === 7) return "w-4";
+    if (n === 8) return "w-4";
+    return "w-3";
+  };
+  const getMobilePlayerPaddingClass = (n: number) => {
+    if (n <= 3) return "px-2";
+    if (n === 4) return "px-1";
+    if (n === 5) return "px-1";
+    if (n === 6) return "px-1";
+    return "px-0.5";
   };
   const getMobileScoreSizeClass = (n: number) => {
     if (n <= 3) return "w-12 h-12";
@@ -173,9 +180,10 @@ const ScoreCard = ({
     return "w-5 h-5";
   };
   const mobilePlayerWidthClass = getMobilePlayerWidthClass(numPlayers);
+  const mobilePlayerPaddingClass = getMobilePlayerPaddingClass(numPlayers);
   const mobileScoreSizeClass = getMobileScoreSizeClass(numPlayers);
-  const mobileHeaderTextClass = numPlayers > 4 ? "text-xs" : "";
-  const mobileIconSize = numPlayers > 4 ? 16 : 20;
+  const mobileHeaderTextClass = numPlayers >= 7 ? "text-[10px]" : numPlayers > 4 ? "text-xs" : "";
+  const mobileIconSize = numPlayers >= 7 ? 12 : numPlayers > 4 ? 16 : 20;
 
   const frontClosestHole = getClosestHoleForSide(
     game.course.holes,
@@ -1010,7 +1018,7 @@ const ScoreCard = ({
               {game.players.map((player) => (
                 <th
                   key={player.id}
-                  className={`border border-gray-300 px-2 py-2 text-center font-semibold ${PLAYER_COL_WIDTH} ${mobilePlayerWidthClass}`}
+                  className={`border border-gray-300 ${mobilePlayerPaddingClass} md:px-2 py-2 text-center font-semibold ${PLAYER_COL_WIDTH} ${mobilePlayerWidthClass}`}
                 >
                   <div className="flex items-center space-x-1 justify-center">
                     <PlayerIcon name={player.name} color={player.color} size={mobileIconSize} />
@@ -1057,7 +1065,7 @@ const ScoreCard = ({
                     return (
                       <td
                         key={player.id}
-                        className={`border border-gray-300 px-2 py-1 text-center ${PLAYER_COL_WIDTH} ${mobilePlayerWidthClass}`}
+                        className={`border border-gray-300 ${mobilePlayerPaddingClass} md:px-2 py-1 text-center ${PLAYER_COL_WIDTH} ${mobilePlayerWidthClass}`}
                       >
                         {editing ? (
                           <input
@@ -1131,7 +1139,7 @@ const ScoreCard = ({
                       {game.players.map((player) => (
                         <td
                           key={player.id}
-                          className={`border border-green-300 bg-green-50 px-1 text-center ${PLAYER_COL_WIDTH} ${mobilePlayerWidthClass}`}
+                          className={`border border-green-300 bg-green-50 ${mobilePlayerPaddingClass} md:px-1 text-center ${PLAYER_COL_WIDTH} ${mobilePlayerWidthClass}`}
                         >
                           {playerMadePar(player.id, hole.holeNumber) ? (
                             <input
@@ -1162,7 +1170,7 @@ const ScoreCard = ({
                     {game.players.map((player) => (
                       <td
                         key={player.id}
-                        className={`border border-orange-300 bg-orange-50 px-1 text-center ${PLAYER_COL_WIDTH} ${mobilePlayerWidthClass}`}
+                        className={`border border-orange-300 bg-orange-50 ${mobilePlayerPaddingClass} md:px-1 text-center ${PLAYER_COL_WIDTH} ${mobilePlayerWidthClass}`}
                       >
                         {playerMadePar(player.id, hole.holeNumber) ? (
                           <input
@@ -1193,7 +1201,7 @@ const ScoreCard = ({
                       {game.players.map((player) => (
                         <td
                           key={player.id}
-                          className={`border border-blue-300 bg-blue-50 px-1 text-center ${PLAYER_COL_WIDTH} ${mobilePlayerWidthClass}`}
+                          className={`border border-blue-300 bg-blue-50 ${mobilePlayerPaddingClass} md:px-1 text-center ${PLAYER_COL_WIDTH} ${mobilePlayerWidthClass}`}
                         >
                           <input
                             type="checkbox"
@@ -1219,7 +1227,7 @@ const ScoreCard = ({
                     {game.players.map((player) => (
                       <td
                         key={player.id}
-                        className={`border border-yellow-300 bg-yellow-50 px-1 text-center ${PLAYER_COL_WIDTH} ${mobilePlayerWidthClass}`}
+                        className={`border border-yellow-300 bg-yellow-50 ${mobilePlayerPaddingClass} md:px-1 text-center ${PLAYER_COL_WIDTH} ${mobilePlayerWidthClass}`}
                       >
                         {playerMadePar(player.id, hole.holeNumber) ? (
                           <div className="flex flex-col items-center justify-center space-y-1 md:flex-row md:space-x-1 md:space-y-0">
@@ -1276,7 +1284,7 @@ const ScoreCard = ({
                     {game.players.map((player) => (
                       <td
                         key={player.id}
-                        className={`border border-red-300 bg-red-50 px-1 text-center ${PLAYER_COL_WIDTH} ${mobilePlayerWidthClass}`}
+                        className={`border border-red-300 bg-red-50 ${mobilePlayerPaddingClass} md:px-1 text-center ${PLAYER_COL_WIDTH} ${mobilePlayerWidthClass}`}
                       >
                         {playerMadePar(player.id, hole.holeNumber) ? (
                           <input
@@ -1306,7 +1314,7 @@ const ScoreCard = ({
               {game.players.map((p) => (
                 <td
                   key={p.id}
-                  className={`border border-gray-300 px-2 py-1 text-center font-bold bg-blue-100 ${PLAYER_COL_WIDTH} ${mobilePlayerWidthClass}`}
+                  className={`border border-gray-300 ${mobilePlayerPaddingClass} md:px-2 py-1 text-center font-bold bg-blue-100 ${PLAYER_COL_WIDTH} ${mobilePlayerWidthClass}`}
                 >
                   {p.totalScore}
                 </td>
@@ -1318,7 +1326,7 @@ const ScoreCard = ({
               {game.players.map((p) => (
                 <td
                   key={p.id}
-                  className={`border border-gray-300 px-2 py-1 text-center font-bold bg-purple-100 ${PLAYER_COL_WIDTH} ${mobilePlayerWidthClass}`}
+                  className={`border border-gray-300 ${mobilePlayerPaddingClass} md:px-2 py-1 text-center font-bold bg-purple-100 ${PLAYER_COL_WIDTH} ${mobilePlayerWidthClass}`}
                 >
                   {(() => {
                     const toPar = calculateTotalToPar(p);
@@ -1334,7 +1342,7 @@ const ScoreCard = ({
               {game.players.map((p) => (
                 <td
                   key={p.id}
-                  className={`border border-gray-300 px-2 py-1 text-center font-bold bg-green-100 ${PLAYER_COL_WIDTH} ${mobilePlayerWidthClass}`}
+                  className={`border border-gray-300 ${mobilePlayerPaddingClass} md:px-2 py-1 text-center font-bold bg-green-100 ${PLAYER_COL_WIDTH} ${mobilePlayerWidthClass}`}
                 >
                   {p.skins}
                 </td>
