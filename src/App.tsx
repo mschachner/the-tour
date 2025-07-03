@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Game, Player, Course, CourseHole } from './types/golf';
-import PlayerSetup from './components/PlayerSetup';
-import ScoreCard from './components/ScoreCard';
+import PlayerSetup from './features/player/PlayerSetup';
+import ScoreCard from './features/score/ScoreCard';
 import './App.css';
 
 const calculateSkins = (

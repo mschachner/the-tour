@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { Player, PlayerSetup as PlayerSetupType, Course } from '../types/golf';
+import { Player, PlayerSetup as PlayerSetupType, Course } from '../../types/golf';
 import {
   saveCustomCourse,
   generateCourseId
-} from '../services/courseService';
-import CourseSelector from './CourseSelector';
-import CourseEditor from './CourseEditor';
+} from '../../services/courseService';
+import CourseSelector from '../course/CourseSelector';
+import CourseEditor from '../course/CourseEditor';
 import PlayerIcon from './PlayerIcon';
 
 interface PlayerSetupProps {

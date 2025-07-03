@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from 'react';
-import { Player } from '../types/golf';
+import { Player } from '../../types/golf';
 import PlayerIcon from './PlayerIcon';
 
 interface PlayerHeaderProps {

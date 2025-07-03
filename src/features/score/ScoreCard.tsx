@@ -1,9 +1,9 @@
 import { useState, Fragment } from "react";
 import type { ChangeEvent } from "react";
-import { Game, Player, HoleScore, CourseHole } from "../types/golf";
-import PlayerIcon from "./PlayerIcon";
-import PlayerHeader from "./PlayerHeader";
-import PlayerSelect from "./PlayerSelect";
+import { Game, Player, HoleScore, CourseHole } from "../../types/golf";
+import PlayerIcon from "../player/PlayerIcon";
+import PlayerHeader from "../player/PlayerHeader";
+import PlayerSelect from "../player/PlayerSelect";
 
 const HOLE_COL_WIDTH = "w-12";
 const SKIN_COL_WIDTH = "w-8 md:w-6 min-w-[2rem]";

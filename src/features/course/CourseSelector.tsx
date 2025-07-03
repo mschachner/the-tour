@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import type { ChangeEvent, KeyboardEvent } from 'react';
-import { Course } from '../types/golf';
+import { Course } from '../../types/golf';
 import {
   getCourseSuggestionsAsync,
   fetchPublicCourses,
@@ -10,7 +10,7 @@ import {
   deleteCustomCourse,
   getLastPublicCourseError,
   clearLastPublicCourseError
-} from '../services/courseService';
+} from '../../services/courseService';
 
 interface CourseSelectorProps {
   onCourseSelect: (course: Course) => void;

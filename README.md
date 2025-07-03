@@ -66,11 +66,17 @@ A modern, responsive golf score tracking application built with React and TypeSc
 ```
 the-tour/
 ├── src/
-│   ├── components/           # React components
-│   │   ├── PlayerSetup.tsx   # Player configuration
-│   │   ├── ScoreCard.tsx     # Score tracking interface
-│   │   ├── CourseSelector.tsx # Course selection
-│   │   └── CourseEditor.tsx  # Custom course builder
+│   ├── features/
+│   │   ├── player/           # Player-related components
+│   │   │   ├── PlayerSetup.tsx
+│   │   │   ├── PlayerIcon.tsx
+│   │   │   ├── PlayerSelect.tsx
+│   │   │   └── PlayerHeader.tsx
+│   │   ├── score/            # Scoring interface
+│   │   │   └── ScoreCard.tsx
+│   │   └── course/           # Course selection and editing
+│   │       ├── CourseSelector.tsx
+│   │       └── CourseEditor.tsx
 │   ├── data/
 │   │   └── courses.ts        # Course data and management
 │   ├── types/
