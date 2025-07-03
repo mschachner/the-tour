@@ -32,10 +32,27 @@ code {
   }
 
   .score-input {
-    @apply w-11/12 aspect-square mx-auto text-center rounded-md bg-gray-100 border border-gray-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-golf-green;
+    @apply w-11/12 aspect-square mx-auto text-center rounded-md bg-gray-100 border border-gray-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-golf-green font-mono transition-shadow duration-150;
   }
 
   .score-button {
-    @apply w-11/12 aspect-square mx-auto flex items-center justify-center rounded-md cursor-pointer transition-colors;
+    @apply w-11/12 aspect-square mx-auto flex items-center justify-center rounded-md cursor-pointer transition-all duration-150 font-mono transform hover:scale-105 active:scale-95;
+  }
+}
+
+@layer utilities {
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .fade-in {
+    animation: fade-in 0.5s ease-in-out both;
   }
 }
