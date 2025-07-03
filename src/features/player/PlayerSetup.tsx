@@ -168,7 +168,7 @@ const PlayerSetup = ({ onStartGame }: PlayerSetupProps) => {
   }
 
   return (
-    <div className="golf-card max-w-2xl mx-auto">
+    <div className="golf-card fade-in max-w-2xl mx-auto">
       <h2 className="text-2xl font-bold text-gray-800 mb-6">Game Setup</h2>
       
       <div className="space-y-6">

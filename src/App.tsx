@@ -609,7 +609,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-400 to-blue-500">
+    <div className="min-h-screen bg-gradient-to-br from-green-400 to-blue-500 fade-in">
       <div className="container mx-auto px-4 py-8">
         <header className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white mb-2">🏌️ The Tour</h1>

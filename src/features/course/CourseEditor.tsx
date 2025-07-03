@@ -133,7 +133,7 @@ const CourseEditor = ({ course, onSaveCourse, onCancel, onDeleteCourse }: Course
   const isCustomCourse = course.id !== 'pebble-beach' && course.id !== 'augusta-national' && course.id !== 'st-andrews-old';
 
   return (
-    <div className="golf-card max-w-4xl mx-auto">
+    <div className="golf-card fade-in max-w-4xl mx-auto">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold text-gray-800">Course Editor</h2>
         <div className="flex space-x-2">
