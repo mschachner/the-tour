@@ -10,7 +10,13 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-color: #f5f5dc;
+  background-image:
+    radial-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+    radial-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+  background-position: 0 0, 3px 3px;
+  background-size: 6px 6px;
+  background-blend-mode: multiply;
   min-height: 100vh;
 }
 
@@ -29,19 +35,20 @@ code {
 
 @layer components {
   .golf-card {
-    @apply bg-white rounded-lg shadow-lg p-6 border border-gray-200;
+    @apply bg-earth-beige rounded-md shadow-md p-6 border-2 border-dashed border-earth-brown;
   }
   
   .golf-button {
-    @apply bg-golf-green hover:bg-green-800 text-white font-bold py-2 px-4 rounded transition-colors duration-200;
+    @apply bg-earth-green hover:bg-rough text-white font-bold py-2 px-4 rounded border-2 border-earth-brown uppercase tracking-wide transition-colors duration-200;
+    transform: rotate(-1deg);
   }
   
   .golf-input {
-    @apply border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-golf-green focus:border-transparent;
+    @apply border-2 border-dashed border-earth-brown rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-earth-green focus:border-transparent shadow-sm;
   }
 
   .score-input {
-    @apply w-11/12 aspect-square mx-auto text-center rounded-md bg-gray-100 border border-gray-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-golf-green font-mono transition-shadow duration-150;
+    @apply w-11/12 aspect-square mx-auto text-center rounded-md bg-earth-beige border-2 border-dashed border-earth-brown focus:bg-white focus:outline-none focus:ring-2 focus:ring-earth-green font-mono transition-shadow duration-150;
   }
 
   .score-button {
