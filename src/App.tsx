@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Game, Player, Course, CourseHole } from './types/golf';
 import PlayerSetup from './features/player/PlayerSetup';
 import ScoreCard from './features/score/ScoreCard';
+import { loadGame, saveGame, clearGame } from './services/gameService';
 import './App.css';
 
 const calculateSkins = (
@@ -218,8 +219,15 @@ const getFourHoles = (holes: CourseHole[]): number[] => {
 };
 
 function App() {
-  const [game, setGame] = useState<Game | null>(null);
-  const [showSetup, setShowSetup] = useState(true);
+  const initialGame = loadGame();
+  const [game, setGame] = useState<Game | null>(initialGame);
+  const [showSetup, setShowSetup] = useState(!initialGame);
+
+  useEffect(() => {
+    if (game) {
+      saveGame(game);
+    }
+  }, [game]);
   const startNewGame = (players: Player[], course: Course) => {
     const newGame: Game = {
       id: Date.now().toString(),
@@ -604,6 +612,7 @@ function App() {
   };
 
   const resetGame = () => {
+    clearGame();
     setGame(null);
     setShowSetup(true);
   };
