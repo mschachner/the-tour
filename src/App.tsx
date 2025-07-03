@@ -609,7 +609,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-earth-beige fade-in">
+    <div className="min-h-screen fade-in">
       <div className="container mx-auto px-4 py-8">
         <header className="text-center mb-8">
           <h1 className="text-4xl font-bold text-earth-brown mb-2 font-marker">🏌️ The Tour</h1>

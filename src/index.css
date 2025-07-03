@@ -11,11 +11,11 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: #556b2f;
-  background-image:
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScyMDAnIGhlaWdodD0nMjAwJz48ZmlsdGVyIGlkPSduJz48ZmVUdXJidWxlbmNlIHR5cGU9J2ZyYWN0YWxOb2lzZScgYmFzZUZyZXF1ZW5jeT0nMC44JyBudW1PY3RhdmVzPSc0Jy8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9JzIwMCcgaGVpZ2h0PScyMDAnIGZpbHRlcj0ndXJsKCNuKScgb3BhY2l0eT0nMC4wNScvPjwvc3ZnPg=='),
     radial-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
     radial-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px);
-  background-position: 0 0, 3px 3px;
-  background-size: 6px 6px;
+  background-position: center, 0 0, 3px 3px;
+  background-size: cover, 6px 6px, 6px 6px;
   background-blend-mode: multiply;
   min-height: 100vh;
 }
