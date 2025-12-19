@@ -41,6 +41,7 @@ export interface Course {
 
 export interface Game {
   id: string;
+  eventName: string;
   date: string;
   course: Course;
   players: Player[];

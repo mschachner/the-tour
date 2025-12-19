@@ -1,0 +1,185 @@
+The Tour Scorecard Schema (v1)
+==============================
+
+This schema describes the minimal data needed to recreate a scorecard in the app.
+It intentionally excludes derived values such as skins, totals, or stroke summaries
+that can be calculated from the stored data.
+
+Top-level export format
+-----------------------
+When exporting multiple scorecards, the app writes a JSON document with:
+
+- schema: "the-tour-scorecard"
+- version: number (currently 1)
+- exportedAt: ISO timestamp
+- scorecards: array of SavedScorecard entries
+
+SavedScorecard
+--------------
+Each saved scorecard stores metadata plus the core game data:
+
+- id: string (stable unique ID for the saved entry)
+- name: string (display title in the saved scorecard list)
+- createdAt: ISO timestamp
+- updatedAt: ISO timestamp
+- data: Game object (see below)
+
+Game
+----
+The Game object contains only the data needed to fill out a scorecard.
+It includes:
+
+- id: string (unique game ID)
+- eventName: string (name/title of the scorecard)
+- date: string (YYYY-MM-DD)
+- course: Course
+- players: Player[]
+- currentHole: number
+- totalHoles: number
+- closestToPin: Record<number, string | null>
+- longestDrive: Record<number, string | null>
+- greenies: Record<number, Record<string, boolean>>
+- fivers: Record<number, Record<string, boolean>>
+- fours: Record<number, Record<string, boolean>>
+- sandyHoles: Record<number, boolean>
+- sandies: Record<number, Record<string, boolean>>
+- doubleSandies: Record<number, Record<string, boolean>>
+- lostBallHoles: Record<number, boolean>
+- lostBalls: Record<number, Record<string, boolean>>
+
+Course
+------
+- id: string
+- name: string
+- location: string (optional)
+- holes: CourseHole[]
+- totalPar: number
+- totalDistance: number (optional)
+
+CourseHole
+----------
+- holeNumber: number
+- par: number
+- handicap: number
+- distance: number (optional)
+- description: string (optional)
+
+Player
+------
+- id: string
+- name: string
+- color: string (optional)
+- totalScore: number (can be calculated but stored for convenience)
+- totalPutts: number (can be calculated but stored for convenience)
+- skins: number (can be calculated but stored for convenience)
+- holes: HoleScore[]
+
+HoleScore
+---------
+- holeNumber: number
+- strokes: number
+- putts: number
+- par: number
+- holeHandicap: number
+
+Example: single scorecard export
+--------------------------------
+{
+  "schema": "the-tour-scorecard",
+  "version": 1,
+  "exportedAt": "2024-04-01T12:00:00.000Z",
+  "scorecards": [
+    {
+      "id": "sc-1711972800000",
+      "name": "Saturday Skins",
+      "createdAt": "2024-04-01T12:00:00.000Z",
+      "updatedAt": "2024-04-01T12:45:00.000Z",
+      "data": {
+        "id": "game-1711972800000",
+        "eventName": "Saturday Skins",
+        "date": "2024-04-01",
+        "course": {
+          "id": "stonebridge",
+          "name": "Stonebridge",
+          "location": "Austin, TX",
+          "totalPar": 72,
+          "holes": [
+            { "holeNumber": 1, "par": 4, "handicap": 7 },
+            { "holeNumber": 2, "par": 5, "handicap": 3 }
+          ]
+        },
+        "players": [
+          {
+            "id": "p1",
+            "name": "Alex",
+            "color": "hsl(120, 80%, 50%)",
+            "totalScore": 72,
+            "totalPutts": 30,
+            "skins": 4,
+            "holes": [
+              {
+                "holeNumber": 1,
+                "strokes": 4,
+                "putts": 2,
+                "par": 4,
+                "holeHandicap": 7
+              }
+            ]
+          }
+        ],
+        "currentHole": 3,
+        "totalHoles": 18,
+        "closestToPin": { "3": "p1" },
+        "longestDrive": { "7": "p1" },
+        "greenies": { "3": { "p1": true } },
+        "fivers": {},
+        "fours": {},
+        "sandyHoles": { "5": true },
+        "sandies": { "5": { "p1": true } },
+        "doubleSandies": {},
+        "lostBallHoles": {},
+        "lostBalls": {}
+      }
+    }
+  ]
+}
+
+Example: minimal game data
+--------------------------
+{
+  "id": "game-2",
+  "eventName": "Weekend Round",
+  "date": "2024-04-12",
+  "course": {
+    "id": "custom-course",
+    "name": "Custom 9",
+    "totalPar": 36,
+    "holes": [
+      { "holeNumber": 1, "par": 4, "handicap": 1 }
+    ]
+  },
+  "players": [
+    {
+      "id": "p1",
+      "name": "Jordan",
+      "totalScore": 0,
+      "totalPutts": 0,
+      "skins": 0,
+      "holes": [
+        { "holeNumber": 1, "strokes": 0, "putts": 0, "par": 4, "holeHandicap": 1 }
+      ]
+    }
+  ],
+  "currentHole": 1,
+  "totalHoles": 9,
+  "closestToPin": {},
+  "longestDrive": {},
+  "greenies": {},
+  "fivers": {},
+  "fours": {},
+  "sandyHoles": {},
+  "sandies": {},
+  "doubleSandies": {},
+  "lostBallHoles": {},
+  "lostBalls": {}
+}
