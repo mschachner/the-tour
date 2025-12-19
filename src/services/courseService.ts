@@ -6,6 +6,37 @@ const API_KEY = process.env.REACT_APP_GOLFCOURSE_API_KEY || '';
 const HAS_API_KEY = Boolean(API_KEY);
 
 const CUSTOM_COURSES_KEY = 'golfer-custom-courses';
+const MIN_REMOTE_QUERY_LENGTH = 2;
+
+const normalizeSearchText = (value: string): string =>
+  value.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+
+const fuzzyMatch = (haystack: string, needle: string): boolean => {
+  const compactHaystack = normalizeSearchText(haystack).replace(/\s+/g, '');
+  const compactNeedle = normalizeSearchText(needle).replace(/\s+/g, '');
+
+  if (!compactNeedle) return true;
+  let haystackIndex = 0;
+  for (const char of compactNeedle) {
+    haystackIndex = compactHaystack.indexOf(char, haystackIndex);
+    if (haystackIndex === -1) {
+      return false;
+    }
+    haystackIndex += 1;
+  }
+  return true;
+};
+
+const matchesSearch = (course: Course, term: string): boolean => {
+  const normalizedTerm = normalizeSearchText(term);
+  if (!normalizedTerm) return true;
+  const haystack = normalizeSearchText(
+    `${course.name} ${course.location ?? ''}`
+  );
+  const tokens = normalizedTerm.split(' ').filter(Boolean);
+  const tokenMatch = tokens.every(token => haystack.includes(token));
+  return tokenMatch || fuzzyMatch(haystack, normalizedTerm);
+};
 
 export const loadCustomCourses = (): Course[] => {
   try {
@@ -134,10 +165,8 @@ const mapRemoteCourse = (remote: RemoteCourse): Course => {
 
 export const findCourseByName = (name: string): Course | undefined => {
   const allCourses = getAllCourses();
-  const searchName = name.toLowerCase().trim();
   return allCourses.find(course =>
-    course.name.toLowerCase().includes(searchName) ||
-    course.location?.toLowerCase().includes(searchName)
+    matchesSearch(course, name)
   );
 };
 
@@ -145,15 +174,10 @@ export const getCourseSuggestions = (input: string): Course[] => {
   const allCourses = getAllCourses();
 
   if (!input.trim()) {
-    const customCourses = loadCustomCourses().slice(-2);
-    return [...builtInCourses.slice(0, 3), ...customCourses].slice(0, 5);
+    return loadCustomCourses().slice(-5);
   }
 
-  const searchTerm = input.toLowerCase().trim();
-  const filtered = allCourses.filter(course =>
-    course.name.toLowerCase().includes(searchTerm) ||
-    course.location?.toLowerCase().includes(searchTerm)
-  );
+  const filtered = allCourses.filter(course => matchesSearch(course, input));
 
   if (!filtered.some(c => c.id === 'custom-course')) {
     filtered.push(defaultCustomCourse);
@@ -259,6 +283,13 @@ export const searchPublicCourses = async (query: string): Promise<Course[]> => {
     return courses;
   }
 
+  if (term.length < MIN_REMOTE_QUERY_LENGTH) {
+    const courses = await fetchPublicCourses();
+    const filtered = courses.filter(course => matchesSearch(course, term));
+    searchCache[term] = filtered;
+    return filtered;
+  }
+
   const url = `${API_BASE_URL}/search?search_query=${encodeURIComponent(term)}`;
 
   try {
@@ -273,7 +304,9 @@ export const searchPublicCourses = async (query: string): Promise<Course[]> => {
     const courses: unknown = data.courses ?? data;
 
     if (Array.isArray(courses)) {
-      searchCache[term] = (courses as RemoteCourse[]).map(mapRemoteCourse);
+      const mapped = (courses as RemoteCourse[]).map(mapRemoteCourse);
+      const filtered = mapped.filter(course => matchesSearch(course, term));
+      searchCache[term] = filtered.length > 0 ? filtered : mapped;
       lastPublicCourseError = null;
       return searchCache[term];
     }
@@ -289,10 +322,6 @@ export const getCourseSuggestionsAsync = async (input: string): Promise<Course[]
   const trimmed = input.trim();
 
   const localSuggestions = getCourseSuggestions(input).filter(c => c.id !== 'custom-course');
-
-  if (!trimmed) {
-    return localSuggestions.slice(0, 5);
-  }
 
   const remote = await searchPublicCourses(trimmed);
   const combined: Course[] = [...remote, ...localSuggestions];
