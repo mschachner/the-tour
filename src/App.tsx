@@ -588,24 +588,27 @@ function App() {
     URL.revokeObjectURL(url);
   };
 
+  const importScorecardsFromFile = async (file: File) => {
+    const content = await file.text();
+    const { scorecards, warnings } = parseScorecardImport(content);
+    const { merged, addedCount } = mergeImportedScorecards(scorecards);
+    setSavedScorecards(merged);
+    const status =
+      warnings.length > 0
+        ? warnings.join(' ')
+        : addedCount > 0
+          ? `Imported ${addedCount} new scorecard${addedCount === 1 ? '' : 's'}.`
+          : 'Import complete.';
+    setImportStatus(status);
+    return status;
+  };
+
   const handleImportScorecards = async (
     event: ChangeEvent<HTMLInputElement>,
   ) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    const content = await file.text();
-    const { scorecards, warnings } = parseScorecardImport(content);
-    const { merged, addedCount } = mergeImportedScorecards(scorecards);
-    setSavedScorecards(merged);
-    if (warnings.length > 0) {
-      setImportStatus(warnings.join(' '));
-    } else {
-      setImportStatus(
-        addedCount > 0
-          ? `Imported ${addedCount} new scorecard${addedCount === 1 ? '' : 's'}.`
-          : 'Import complete.',
-      );
-    }
+    await importScorecardsFromFile(file);
     event.target.value = '';
   };
 
