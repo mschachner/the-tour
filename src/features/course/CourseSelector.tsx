@@ -45,7 +45,7 @@ const CourseSelector = ({ onCourseSelect, selectedCourse, refreshKey }: CourseSe
 
   useEffect(() => {
     let active = true;
-    const load = async () => {
+    const timeout = window.setTimeout(async () => {
       if (inputValue.trim()) {
         clearLastPublicCourseError();
         const newSuggestions = await getCourseSuggestionsAsync(inputValue);
@@ -62,10 +62,10 @@ const CourseSelector = ({ onCourseSelect, selectedCourse, refreshKey }: CourseSe
           setPublicError(null);
         }
       }
-    };
-    load();
+    }, 300);
     return () => {
       active = false;
+      window.clearTimeout(timeout);
     };
   }, [inputValue, refreshKey]);
 
@@ -99,15 +99,12 @@ const CourseSelector = ({ onCourseSelect, selectedCourse, refreshKey }: CourseSe
   };
 
   const handleInputFocus = () => {
-    if (inputValue.trim()) {
+    clearLastPublicCourseError();
+    getCourseSuggestionsAsync(inputValue).then((defaultSuggestions) => {
+      setSuggestions(defaultSuggestions);
       setShowSuggestions(true);
-    } else {
-      // Show default suggestions when focused
-      getCourseSuggestionsAsync('').then((defaultSuggestions) => {
-        setSuggestions(defaultSuggestions);
-        setShowSuggestions(true);
-      });
-    }
+      setPublicError(getLastPublicCourseError());
+    });
   };
 
   const handleCustomCourse = () => {
