@@ -213,7 +213,7 @@ function App() {
       saveGame(game);
     }
   }, [game]);
-  const startNewGame = (players: Player[], course: Course) => {
+  const startNewGame = (players: Player[], course: Course, eventName: string) => {
     const newGame: Game = {
       id: Date.now().toString(),
       eventName: 'New Scorecard',
@@ -618,12 +618,20 @@ function App() {
         </header>
 
         {showSetup ? (
-          <PlayerSetup onStartGame={startNewGame} />
+          <PlayerSetup
+            onStartGame={startNewGame}
+            eventName={scorecardTitle}
+            onEventNameChange={setScorecardTitle}
+            savedScorecards={savedScorecards}
+            onLoadScorecard={handleLoadScorecard}
+            onImportScorecards={importScorecardsFromFile}
+          />
         ) : game ? (
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <div className="text-earth-beige">
-                <h2 className="text-2xl font-semibold">{game.course.name}</h2>
+                <h2 className="text-3xl font-semibold">{game.eventName}</h2>
+                <p className="text-earth-beige/80">{game.course.name}</p>
                 <p className="text-earth-beige/80">{game.course.location} • {game.date}</p>
                 <p className="text-earth-beige/80">Par {game.course.totalPar}
                   {game.course.totalDistance && ` • ${game.course.totalDistance} yards`}

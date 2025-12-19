@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import type { ChangeEvent } from 'react';
 import { Player, PlayerSetup as PlayerSetupType, Course } from '../../types/golf';
 import {
   saveCustomCourse,
@@ -9,10 +10,29 @@ import CourseEditor from '../course/CourseEditor';
 import PlayerIcon from './PlayerIcon';
 
 interface PlayerSetupProps {
-  onStartGame: (players: Player[], course: Course) => void;
+  onStartGame: (players: Player[], course: Course, eventName: string) => void;
+  eventName: string;
+  onEventNameChange: (value: string) => void;
+  savedScorecards: Array<{
+    id: string;
+    name: string;
+    data: {
+      course: Course;
+      date: string;
+    };
+  }>;
+  onLoadScorecard: (scorecardId: string) => void;
+  onImportScorecards: (file: File) => Promise<string>;
 }
 
-const PlayerSetup = ({ onStartGame }: PlayerSetupProps) => {
+const PlayerSetup = ({
+  onStartGame,
+  eventName,
+  onEventNameChange,
+  savedScorecards,
+  onLoadScorecard,
+  onImportScorecards,
+}: PlayerSetupProps) => {
   const getRandomColor = () => {
     const h = Math.floor(Math.random() * 360);
     const s = 70 + Math.floor(Math.random() * 30); // 70-100% saturation
@@ -30,6 +50,7 @@ const PlayerSetup = ({ onStartGame }: PlayerSetupProps) => {
   const [showCourseEditor, setShowCourseEditor] = useState(false);
   const [courseToEdit, setCourseToEdit] = useState<Course | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [importStatus, setImportStatus] = useState<string | null>(null);
 
   const updatePlayer = (
     id: string,
@@ -153,7 +174,16 @@ const PlayerSetup = ({ onStartGame }: PlayerSetupProps) => {
       })),
     }));
 
-    onStartGame(gamePlayers, selectedCourse);
+    const trimmedEventName = eventName.trim() || 'New Scorecard';
+    onStartGame(gamePlayers, selectedCourse, trimmedEventName);
+  };
+
+  const handleImport = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const status = await onImportScorecards(file);
+    setImportStatus(status);
+    event.target.value = '';
   };
 
   if (showCourseEditor && courseToEdit) {
@@ -172,6 +202,20 @@ const PlayerSetup = ({ onStartGame }: PlayerSetupProps) => {
       <h2 className="text-2xl font-bold text-gray-800 mb-6 font-marker">Game Setup</h2>
       
       <div className="space-y-6">
+        {/* Event Details */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Event Name
+          </label>
+          <input
+            type="text"
+            value={eventName}
+            onChange={(e) => onEventNameChange(e.target.value)}
+            className="golf-input w-full"
+            placeholder="Weekend skins match"
+          />
+        </div>
+
         {/* Course Selection */}
         <div>
           <CourseSelector 
@@ -190,6 +234,59 @@ const PlayerSetup = ({ onStartGame }: PlayerSetupProps) => {
                 ✏️ Edit Course Details
               </button>
             </div>
+          )}
+        </div>
+
+        {/* Saved Scorecards */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Saved Scorecards
+          </label>
+          {savedScorecards.length === 0 ? (
+            <p className="text-sm text-gray-500">No saved scorecards yet.</p>
+          ) : (
+            <div className="space-y-2">
+              {savedScorecards.map((scorecard) => (
+                <div
+                  key={scorecard.id}
+                  className="flex items-center justify-between rounded-md border border-gray-200 px-3 py-2"
+                >
+                  <div>
+                    <div className="font-medium text-gray-900">
+                      {scorecard.name}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {scorecard.data.course.name} • {scorecard.data.date}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => onLoadScorecard(scorecard.id)}
+                    className="px-3 py-1 rounded-md bg-blue-100 text-blue-800 text-sm"
+                  >
+                    Load
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Import Scorecards */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Import Scorecards
+          </label>
+          <label className="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-800 rounded-md cursor-pointer hover:bg-gray-200 text-sm">
+            Choose JSON file
+            <input
+              type="file"
+              accept="application/json"
+              onChange={handleImport}
+              className="hidden"
+            />
+          </label>
+          {importStatus && (
+            <p className="text-xs text-gray-500 mt-2">{importStatus}</p>
           )}
         </div>
 
