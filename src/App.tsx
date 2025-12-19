@@ -1,8 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, ChangeEvent } from 'react';
 import { Game, Player, Course } from './types/golf';
 import PlayerSetup from './features/player/PlayerSetup';
 import ScoreCard from './features/score/ScoreCard';
-import { loadGame, saveGame, clearGame } from './services/gameService';
+import {
+  buildExportFile,
+  clearGame,
+  deleteScorecard,
+  loadGame,
+  loadScorecards,
+  mergeImportedScorecards,
+  parseScorecardImport,
+  saveGame,
+  saveScorecard,
+} from './services/gameService';
 import { getGreenieHoles, getFourHoles } from './utils/golfLogic';
 import './App.css';
 
@@ -190,6 +200,13 @@ function App() {
   const initialGame = loadGame();
   const [game, setGame] = useState<Game | null>(initialGame);
   const [showSetup, setShowSetup] = useState(!initialGame);
+  const [savedScorecards, setSavedScorecards] = useState(loadScorecards());
+  const [activeScorecardId, setActiveScorecardId] = useState<string | null>(null);
+  const [scorecardTitle, setScorecardTitle] = useState(
+    initialGame?.eventName || '',
+  );
+  const [importStatus, setImportStatus] = useState<string | null>(null);
+  const [showScorecardsMenu, setShowScorecardsMenu] = useState(false);
 
   useEffect(() => {
     if (game) {
@@ -199,6 +216,7 @@ function App() {
   const startNewGame = (players: Player[], course: Course) => {
     const newGame: Game = {
       id: Date.now().toString(),
+      eventName: 'New Scorecard',
       date: new Date().toISOString().split('T')[0],
       course,
       players: calculateSkins(players, {}, {}, {}, {}, {}, {}, {}, {}),
@@ -219,6 +237,8 @@ function App() {
     // Initialize game state with skins computed against empty side-game maps.
     setGame(newGame);
     setShowSetup(false);
+    setActiveScorecardId(null);
+    setScorecardTitle(newGame.eventName);
   };
 
   const updateScore = (playerId: string, holeNumber: number, strokes: number, putts: number) => {
@@ -502,6 +522,91 @@ function App() {
     clearGame();
     setGame(null);
     setShowSetup(true);
+    setActiveScorecardId(null);
+    setScorecardTitle('');
+  };
+
+  const formatScorecardLabel = (scorecard: { name: string; data: Game }) => {
+    const date = scorecard.data.date;
+    const courseName = scorecard.data.course?.name ?? 'Course';
+    return `${scorecard.name} • ${courseName} • ${date}`;
+  };
+
+  const handleScorecardTitleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setScorecardTitle(event.target.value);
+    if (!game) return;
+    setGame({ ...game, eventName: event.target.value });
+  };
+
+  const handleSaveScorecard = () => {
+    if (!game) return;
+    const now = new Date().toISOString();
+    const name = scorecardTitle.trim() || game.eventName || 'Untitled Scorecard';
+    const stored = saveScorecard({
+      id: activeScorecardId ?? `${game.id}-${Date.now()}`,
+      name,
+      createdAt: activeScorecardId
+        ? savedScorecards.find((item) => item.id === activeScorecardId)?.createdAt ??
+          now
+        : now,
+      updatedAt: now,
+      data: { ...game, eventName: name },
+    });
+    setSavedScorecards(stored);
+    setActiveScorecardId(stored[0]?.id ?? null);
+    setScorecardTitle(stored[0]?.name ?? name);
+  };
+
+  const handleLoadScorecard = (scorecardId: string) => {
+    const selected = savedScorecards.find((item) => item.id === scorecardId);
+    if (!selected) return;
+    setGame(selected.data);
+    setShowSetup(false);
+    setActiveScorecardId(selected.id);
+    setScorecardTitle(selected.name);
+  };
+
+  const handleDeleteScorecard = (scorecardId: string) => {
+    const updated = deleteScorecard(scorecardId);
+    setSavedScorecards(updated);
+    if (activeScorecardId === scorecardId) {
+      setActiveScorecardId(null);
+    }
+  };
+
+  const handleExportScorecards = () => {
+    const payload = buildExportFile(savedScorecards);
+    const dataStr = JSON.stringify(payload, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `the-tour-scorecards-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImportScorecards = async (
+    event: ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const content = await file.text();
+    const { scorecards, warnings } = parseScorecardImport(content);
+    const { merged, addedCount } = mergeImportedScorecards(scorecards);
+    setSavedScorecards(merged);
+    if (warnings.length > 0) {
+      setImportStatus(warnings.join(' '));
+    } else {
+      setImportStatus(
+        addedCount > 0
+          ? `Imported ${addedCount} new scorecard${addedCount === 1 ? '' : 's'}.`
+          : 'Import complete.',
+      );
+    }
+    event.target.value = '';
   };
 
   return (
@@ -524,13 +629,103 @@ function App() {
                   {game.course.totalDistance && ` • ${game.course.totalDistance} yards`}
                 </p>
               </div>
-              <button 
-                onClick={resetGame}
-                className="golf-button"
-              >
-                New Game
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setShowScorecardsMenu((prev) => !prev)}
+                  className="px-4 py-2 rounded-md bg-white/10 text-earth-beige border border-white/20 hover:bg-white/20 transition-colors"
+                >
+                  Saved Scorecards
+                </button>
+                <button onClick={resetGame} className="golf-button">
+                  New Game
+                </button>
+              </div>
             </div>
+            {showScorecardsMenu && (
+              <div className="golf-card bg-white/10 border border-white/20">
+                <div className="flex flex-wrap gap-4 items-end">
+                  <div className="flex-1 min-w-[220px]">
+                    <label className="block text-sm font-medium text-earth-beige mb-2">
+                      Scorecard name
+                    </label>
+                    <input
+                      type="text"
+                      value={scorecardTitle}
+                      onChange={handleScorecardTitleChange}
+                      className="w-full rounded-md px-3 py-2 text-gray-900"
+                      placeholder="Weekend skins match"
+                    />
+                  </div>
+                  <button
+                    onClick={handleSaveScorecard}
+                    className="px-4 py-2 rounded-md bg-golf-green text-white"
+                  >
+                    Save Scorecard
+                  </button>
+                  <button
+                    onClick={handleExportScorecards}
+                    className="px-4 py-2 rounded-md bg-white/20 text-earth-beige"
+                    disabled={savedScorecards.length === 0}
+                  >
+                    Export
+                  </button>
+                  <label className="px-4 py-2 rounded-md bg-white/20 text-earth-beige cursor-pointer">
+                    Import
+                    <input
+                      type="file"
+                      accept="application/json"
+                      onChange={handleImportScorecards}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+                {importStatus && (
+                  <p className="text-sm text-earth-beige/80 mt-3">
+                    {importStatus}
+                  </p>
+                )}
+                <div className="mt-4 space-y-2">
+                  {savedScorecards.length === 0 ? (
+                    <p className="text-sm text-earth-beige/80">
+                      No saved scorecards yet.
+                    </p>
+                  ) : (
+                    savedScorecards.map((scorecard) => (
+                      <div
+                        key={scorecard.id}
+                        className="flex items-center justify-between gap-3 rounded-md border border-white/10 px-3 py-2"
+                      >
+                        <button
+                          onClick={() => handleLoadScorecard(scorecard.id)}
+                          className="text-left text-earth-beige hover:text-white flex-1"
+                        >
+                          <div className="font-semibold">
+                            {scorecard.name}
+                          </div>
+                          <div className="text-xs text-earth-beige/70">
+                            {formatScorecardLabel(scorecard)}
+                          </div>
+                        </button>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleLoadScorecard(scorecard.id)}
+                            className="px-3 py-1 rounded-md bg-white/10 text-earth-beige text-sm"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteScorecard(scorecard.id)}
+                            className="px-3 py-1 rounded-md bg-red-500/70 text-white text-sm"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
             <ScoreCard
               game={game}
               onUpdateScore={updateScore}
