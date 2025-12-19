@@ -196,6 +196,13 @@ const getPlayersWithSkins = (players: Player[], game: Game): Player[] =>
     game.lostBalls,
   );
 
+const getDefaultEventName = () =>
+  new Date().toLocaleDateString('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  });
+
 function App() {
   const initialGame = loadGame();
   const [game, setGame] = useState<Game | null>(initialGame);
@@ -203,7 +210,7 @@ function App() {
   const [savedScorecards, setSavedScorecards] = useState(loadScorecards());
   const [activeScorecardId, setActiveScorecardId] = useState<string | null>(null);
   const [scorecardTitle, setScorecardTitle] = useState(
-    initialGame?.eventName || '',
+    initialGame?.eventName || getDefaultEventName(),
   );
   const [importStatus, setImportStatus] = useState<string | null>(null);
   const [showScorecardsMenu, setShowScorecardsMenu] = useState(false);
@@ -214,9 +221,10 @@ function App() {
     }
   }, [game]);
   const startNewGame = (players: Player[], course: Course, eventName: string) => {
+    const trimmedEventName = eventName.trim() || getDefaultEventName();
     const newGame: Game = {
       id: Date.now().toString(),
-      eventName: 'New Scorecard',
+      eventName: trimmedEventName,
       date: new Date().toISOString().split('T')[0],
       course,
       players: calculateSkins(players, {}, {}, {}, {}, {}, {}, {}, {}),
@@ -722,7 +730,7 @@ function App() {
                             onClick={() => handleLoadScorecard(scorecard.id)}
                             className="px-3 py-1 rounded-md bg-white/10 text-earth-beige text-sm"
                           >
-                            Edit
+                            Load
                           </button>
                           <button
                             onClick={() => handleDeleteScorecard(scorecard.id)}

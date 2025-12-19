@@ -51,6 +51,7 @@ const PlayerSetup = ({
   const [courseToEdit, setCourseToEdit] = useState<Course | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [importStatus, setImportStatus] = useState<string | null>(null);
+  const [showScorecardDialog, setShowScorecardDialog] = useState(false);
 
   const updatePlayer = (
     id: string,
@@ -202,6 +203,39 @@ const PlayerSetup = ({
       <h2 className="text-2xl font-bold text-gray-800 mb-6 font-marker">Game Setup</h2>
       
       <div className="space-y-6">
+        {/* Scorecards */}
+        <div className="space-y-3">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Load Saved Scorecard
+            </label>
+            <button
+              onClick={() => setShowScorecardDialog(true)}
+              className="px-4 py-2 rounded-md bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors text-sm"
+            >
+              Load Saved Scorecard
+            </button>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Import Scorecards
+            </label>
+            <label className="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-800 rounded-md cursor-pointer hover:bg-gray-200 text-sm">
+              Choose JSON file
+              <input
+                type="file"
+                accept="application/json"
+                onChange={handleImport}
+                className="hidden"
+              />
+            </label>
+            {importStatus && (
+              <p className="text-xs text-gray-500 mt-2">{importStatus}</p>
+            )}
+          </div>
+        </div>
+
         {/* Event Details */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -234,59 +268,6 @@ const PlayerSetup = ({
                 ✏️ Edit Course Details
               </button>
             </div>
-          )}
-        </div>
-
-        {/* Saved Scorecards */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Saved Scorecards
-          </label>
-          {savedScorecards.length === 0 ? (
-            <p className="text-sm text-gray-500">No saved scorecards yet.</p>
-          ) : (
-            <div className="space-y-2">
-              {savedScorecards.map((scorecard) => (
-                <div
-                  key={scorecard.id}
-                  className="flex items-center justify-between rounded-md border border-gray-200 px-3 py-2"
-                >
-                  <div>
-                    <div className="font-medium text-gray-900">
-                      {scorecard.name}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {scorecard.data.course.name} • {scorecard.data.date}
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => onLoadScorecard(scorecard.id)}
-                    className="px-3 py-1 rounded-md bg-blue-100 text-blue-800 text-sm"
-                  >
-                    Load
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Import Scorecards */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Import Scorecards
-          </label>
-          <label className="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-800 rounded-md cursor-pointer hover:bg-gray-200 text-sm">
-            Choose JSON file
-            <input
-              type="file"
-              accept="application/json"
-              onChange={handleImport}
-              className="hidden"
-            />
-          </label>
-          {importStatus && (
-            <p className="text-xs text-gray-500 mt-2">{importStatus}</p>
           )}
         </div>
 
@@ -360,6 +341,65 @@ const PlayerSetup = ({
           </button>
         </div>
       </div>
+      {showScorecardDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-lg rounded-lg bg-white shadow-xl">
+            <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
+              <h3 className="text-lg font-semibold text-gray-800">
+                Saved Scorecards
+              </h3>
+              <button
+                onClick={() => setShowScorecardDialog(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="max-h-[60vh] overflow-y-auto px-4 py-4">
+              {savedScorecards.length === 0 ? (
+                <p className="text-sm text-gray-500">
+                  No saved scorecards yet.
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {savedScorecards.map((scorecard) => (
+                    <div
+                      key={scorecard.id}
+                      className="flex items-center justify-between rounded-md border border-gray-200 px-3 py-2"
+                    >
+                      <div>
+                        <div className="font-medium text-gray-900">
+                          {scorecard.name}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {scorecard.data.course.name} • {scorecard.data.date}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => {
+                          onLoadScorecard(scorecard.id);
+                          setShowScorecardDialog(false);
+                        }}
+                        className="px-3 py-1 rounded-md bg-blue-100 text-blue-800 text-sm"
+                      >
+                        Load
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="border-t border-gray-200 px-4 py-3 text-right">
+              <button
+                onClick={() => setShowScorecardDialog(false)}
+                className="px-4 py-2 rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200 text-sm"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
