@@ -1,8 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, ChangeEvent } from 'react';
 import { Game, Player, Course } from './types/golf';
 import PlayerSetup from './features/player/PlayerSetup';
 import ScoreCard from './features/score/ScoreCard';
-import { loadGame, saveGame, clearGame } from './services/gameService';
+import CourseSelector from './features/course/CourseSelector';
+import {
+  buildExportFile,
+  clearGame,
+  deleteScorecard,
+  loadGame,
+  loadScorecards,
+  mergeImportedScorecards,
+  parseScorecardImport,
+  saveGame,
+  saveScorecard,
+} from './services/gameService';
 import { getGreenieHoles, getFourHoles } from './utils/golfLogic';
 import './App.css';
 
@@ -190,15 +201,23 @@ function App() {
   const initialGame = loadGame();
   const [game, setGame] = useState<Game | null>(initialGame);
   const [showSetup, setShowSetup] = useState(!initialGame);
+  const [savedScorecards, setSavedScorecards] = useState(loadScorecards());
+  const [activeScorecardId, setActiveScorecardId] = useState<string | null>(null);
+  const [scorecardTitle, setScorecardTitle] = useState(
+    initialGame?.eventName || 'New Scorecard',
+  );
+  const [importStatus, setImportStatus] = useState<string | null>(null);
+  const [showScorecardsMenu, setShowScorecardsMenu] = useState(false);
 
   useEffect(() => {
     if (game) {
       saveGame(game);
     }
   }, [game]);
-  const startNewGame = (players: Player[], course: Course) => {
+  const startNewGame = (players: Player[], course: Course, eventName: string) => {
     const newGame: Game = {
       id: Date.now().toString(),
+      eventName,
       date: new Date().toISOString().split('T')[0],
       course,
       players: calculateSkins(players, {}, {}, {}, {}, {}, {}, {}, {}),
@@ -219,6 +238,8 @@ function App() {
     // Initialize game state with skins computed against empty side-game maps.
     setGame(newGame);
     setShowSetup(false);
+    setActiveScorecardId(null);
+    setScorecardTitle(newGame.eventName);
   };
 
   const updateScore = (playerId: string, holeNumber: number, strokes: number, putts: number) => {
@@ -502,6 +523,134 @@ function App() {
     clearGame();
     setGame(null);
     setShowSetup(true);
+    setActiveScorecardId(null);
+    setScorecardTitle('New Scorecard');
+  };
+
+  const handleImportScorecardsFromFile = async (file: File): Promise<string> => {
+    const content = await file.text();
+    const { scorecards, warnings } = parseScorecardImport(content);
+    const { merged, addedCount } = mergeImportedScorecards(scorecards);
+    setSavedScorecards(merged);
+    if (warnings.length > 0) {
+      return warnings.join(' ');
+    }
+    return addedCount > 0
+      ? `Imported ${addedCount} new scorecard${addedCount === 1 ? '' : 's'}.`
+      : 'Import complete.';
+  };
+
+  const formatScorecardLabel = (scorecard: { name: string; data: Game }) => {
+    const date = scorecard.data.date;
+    const courseName = scorecard.data.course?.name ?? 'Course';
+    return `${scorecard.name} • ${courseName} • ${date}`;
+  };
+
+  const handleScorecardTitleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setScorecardTitle(event.target.value);
+    if (!game) return;
+    setGame({ ...game, eventName: event.target.value });
+  };
+
+  const handleCourseChange = (course: Course) => {
+    if (!game) return;
+    if (course.id === game.course.id) return;
+    const shouldReset = window.confirm(
+      'Changing the course will reset hole scores and side games. Continue?',
+    );
+    if (!shouldReset) return;
+    const updatedPlayers = game.players.map((player) => ({
+      ...player,
+      totalScore: 0,
+      totalPutts: 0,
+      skins: 0,
+      holes: course.holes.map((hole) => ({
+        holeNumber: hole.holeNumber,
+        strokes: 0,
+        putts: 0,
+        par: hole.par,
+        holeHandicap: hole.handicap,
+      })),
+    }));
+
+    const updatedGame: Game = {
+      ...game,
+      course,
+      players: updatedPlayers,
+      currentHole: 1,
+      totalHoles: course.holes.length,
+      closestToPin: {},
+      longestDrive: {},
+      greenies: {},
+      fivers: {},
+      fours: {},
+      sandyHoles: {},
+      sandies: {},
+      doubleSandies: {},
+      lostBallHoles: {},
+      lostBalls: {},
+    };
+    setGame(updatedGame);
+  };
+
+  const handleSaveScorecard = () => {
+    if (!game) return;
+    const now = new Date().toISOString();
+    const name = scorecardTitle.trim() || game.eventName || 'Untitled Scorecard';
+    const stored = saveScorecard({
+      id: activeScorecardId ?? `${game.id}-${Date.now()}`,
+      name,
+      createdAt: activeScorecardId
+        ? savedScorecards.find((item) => item.id === activeScorecardId)?.createdAt ??
+          now
+        : now,
+      updatedAt: now,
+      data: { ...game, eventName: name },
+    });
+    setSavedScorecards(stored);
+    setActiveScorecardId(stored[0]?.id ?? null);
+    setScorecardTitle(stored[0]?.name ?? name);
+  };
+
+  const handleLoadScorecard = (scorecardId: string) => {
+    const selected = savedScorecards.find((item) => item.id === scorecardId);
+    if (!selected) return;
+    setGame(selected.data);
+    setShowSetup(false);
+    setActiveScorecardId(selected.id);
+    setScorecardTitle(selected.name);
+  };
+
+  const handleDeleteScorecard = (scorecardId: string) => {
+    const updated = deleteScorecard(scorecardId);
+    setSavedScorecards(updated);
+    if (activeScorecardId === scorecardId) {
+      setActiveScorecardId(null);
+    }
+  };
+
+  const handleExportScorecards = () => {
+    const payload = buildExportFile(savedScorecards);
+    const dataStr = JSON.stringify(payload, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `the-tour-scorecards-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImportScorecards = async (
+    event: ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const status = await handleImportScorecardsFromFile(file);
+    setImportStatus(status);
+    event.target.value = '';
   };
 
   return (
@@ -513,24 +662,131 @@ function App() {
         </header>
 
         {showSetup ? (
-          <PlayerSetup onStartGame={startNewGame} />
+          <PlayerSetup
+            onStartGame={startNewGame}
+            eventName={scorecardTitle}
+            onEventNameChange={setScorecardTitle}
+            savedScorecards={savedScorecards}
+            onLoadScorecard={handleLoadScorecard}
+            onImportScorecards={handleImportScorecardsFromFile}
+          />
         ) : game ? (
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <div className="text-earth-beige">
-                <h2 className="text-2xl font-semibold">{game.course.name}</h2>
+                <h2 className="text-3xl font-semibold">{game.eventName}</h2>
+                <p className="text-earth-beige/80">{game.course.name}</p>
                 <p className="text-earth-beige/80">{game.course.location} • {game.date}</p>
                 <p className="text-earth-beige/80">Par {game.course.totalPar}
                   {game.course.totalDistance && ` • ${game.course.totalDistance} yards`}
                 </p>
               </div>
-              <button 
-                onClick={resetGame}
-                className="golf-button"
-              >
-                New Game
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setShowScorecardsMenu((prev) => !prev)}
+                  className="px-4 py-2 rounded-md bg-white/10 text-earth-beige border border-white/20 hover:bg-white/20 transition-colors"
+                >
+                  Saved Scorecards
+                </button>
+                <button onClick={resetGame} className="golf-button">
+                  New Game
+                </button>
+              </div>
             </div>
+            {showScorecardsMenu && (
+              <div className="golf-card bg-white/10 border border-white/20">
+                <div className="flex flex-wrap gap-4 items-end">
+                  <div className="flex-1 min-w-[220px]">
+                  <label className="block text-sm font-medium text-earth-beige mb-2">
+                    Scorecard name
+                  </label>
+                  <input
+                    type="text"
+                    value={scorecardTitle}
+                    onChange={handleScorecardTitleChange}
+                    className="w-full rounded-md px-3 py-2 text-gray-900"
+                    placeholder="Weekend skins match"
+                  />
+                </div>
+                <div className="flex-1 min-w-[220px]">
+                  <label className="block text-sm font-medium text-earth-beige mb-2">
+                    Course
+                  </label>
+                  <CourseSelector
+                    onCourseSelect={handleCourseChange}
+                    selectedCourse={game.course}
+                  />
+                </div>
+                <button
+                  onClick={handleSaveScorecard}
+                  className="px-4 py-2 rounded-md bg-golf-green text-white"
+                  >
+                    Save Scorecard
+                  </button>
+                  <button
+                    onClick={handleExportScorecards}
+                    className="px-4 py-2 rounded-md bg-white/20 text-earth-beige"
+                    disabled={savedScorecards.length === 0}
+                  >
+                    Export
+                  </button>
+                  <label className="px-4 py-2 rounded-md bg-white/20 text-earth-beige cursor-pointer">
+                    Import
+                    <input
+                      type="file"
+                      accept="application/json"
+                      onChange={handleImportScorecards}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+                {importStatus && (
+                  <p className="text-sm text-earth-beige/80 mt-3">
+                    {importStatus}
+                  </p>
+                )}
+                <div className="mt-4 space-y-2">
+                  {savedScorecards.length === 0 ? (
+                    <p className="text-sm text-earth-beige/80">
+                      No saved scorecards yet.
+                    </p>
+                  ) : (
+                    savedScorecards.map((scorecard) => (
+                      <div
+                        key={scorecard.id}
+                        className="flex items-center justify-between gap-3 rounded-md border border-white/10 px-3 py-2"
+                      >
+                        <button
+                          onClick={() => handleLoadScorecard(scorecard.id)}
+                          className="text-left text-earth-beige hover:text-white flex-1"
+                        >
+                          <div className="font-semibold">
+                            {scorecard.name}
+                          </div>
+                          <div className="text-xs text-earth-beige/70">
+                            {formatScorecardLabel(scorecard)}
+                          </div>
+                        </button>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleLoadScorecard(scorecard.id)}
+                            className="px-3 py-1 rounded-md bg-white/10 text-earth-beige text-sm"
+                          >
+                            Load
+                          </button>
+                          <button
+                            onClick={() => handleDeleteScorecard(scorecard.id)}
+                            className="px-3 py-1 rounded-md bg-red-500/70 text-white text-sm"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
             <ScoreCard
               game={game}
               onUpdateScore={updateScore}
