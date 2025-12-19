@@ -4,73 +4,18 @@ import { Game, Player, HoleScore, CourseHole } from "../../types/golf";
 import PlayerIcon from "../player/PlayerIcon";
 import PlayerHeader from "../player/PlayerHeader";
 import PlayerSelect from "../player/PlayerSelect";
+import {
+  getClosestHoleForSide,
+  getFourHoleForSide,
+  getGreenieHoles,
+  getLongestHoleForSide,
+} from "../../utils/golfLogic";
 
 const HOLE_COL_WIDTH = "w-12";
 const SKIN_COL_WIDTH = "w-8 md:w-6 min-w-[2rem]";
 const PLAYER_COL_WIDTH = "w-20 md:w-24";
 const TOTAL_COL_WIDTH = "w-12";
 
-const getClosestHoleForSide = (
-  holes: CourseHole[],
-  closest: Record<number, string | null>,
-  side: "front" | "back",
-): number | null => {
-  const [start, end] = side === "front" ? [1, 9] : [10, 18];
-  const par3Holes = holes
-    .filter(
-      (h) => h.holeNumber >= start && h.holeNumber <= end && h.par === 3,
-    )
-    .map((h) => h.holeNumber)
-    .sort((a, b) => a - b);
-
-  for (const hole of par3Holes) {
-    const val = closest[hole];
-    if (val === undefined) return hole; // first eligible par-3 not set yet
-    if (val === null) continue; // allow next par-3 if no winner
-    // once a winner exists, no further holes are eligible
-    return null;
-  }
-
-  return null;
-};
-
-const getLongestHoleForSide = (
-  holes: CourseHole[],
-  longest: Record<number, string | null>,
-  side: "front" | "back",
-): number | null => {
-  const [start, end] = side === "front" ? [1, 9] : [10, 18];
-  const par5Holes = holes
-    .filter(
-      (h) => h.holeNumber >= start && h.holeNumber <= end && h.par === 5,
-    )
-    .map((h) => h.holeNumber)
-    .sort((a, b) => a - b);
-
-  for (const hole of par5Holes) {
-    const val = longest[hole];
-    if (val === undefined) return hole;
-    if (val === null) continue;
-    return null;
-  }
-
-  return null;
-};
-
-const getFourHoleForSide = (
-  holes: CourseHole[],
-  side: "front" | "back",
-): number | null => {
-  const [start, end] = side === "front" ? [1, 9] : [10, 18];
-  const sideHoles = holes.filter(
-    (h) => h.holeNumber >= start && h.holeNumber <= end,
-  );
-  const lowest = [...sideHoles].sort((a, b) => a.handicap - b.handicap)[0];
-  const par4 = sideHoles
-    .filter((h) => h.par === 4 && h.holeNumber !== lowest.holeNumber)
-    .sort((a, b) => a.handicap - b.handicap)[0];
-  return par4 ? par4.holeNumber : null;
-};
 
 interface ScoreCardProps {
   game: Game;
@@ -246,28 +191,9 @@ const ScoreCard = ({
     return winners.length === 1 && winners[0].id === playerId;
   };
 
-  const getGreenieHolesForSide = (
-    holes: CourseHole[],
-    closest: Record<number, string | null>,
-    side: "front" | "back",
-  ): number[] => {
-    const [start, end] = side === "front" ? [1, 9] : [10, 18];
-    const par3 = holes
-      .filter((h) => h.par === 3 && h.holeNumber >= start && h.holeNumber <= end)
-      .map((h) => h.holeNumber)
-      .sort((a, b) => a - b);
-
-    const awarded = par3.find(
-      (h) => closest[h] !== undefined && closest[h] !== null,
-    );
-    if (awarded === undefined) return [];
-    return par3.filter((h) => h > awarded);
-  };
-
-  const greenieHolesSet = new Set<number>([
-    ...getGreenieHolesForSide(game.course.holes, game.closestToPin, "front"),
-    ...getGreenieHolesForSide(game.course.holes, game.closestToPin, "back"),
-  ]);
+  const greenieHolesSet = new Set<number>(
+    getGreenieHoles(game.course.holes, game.closestToPin),
+  );
 
   const isGreenieHole = (holeNumber: number) => greenieHolesSet.has(holeNumber);
 

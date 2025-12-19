@@ -3,6 +3,7 @@ import builtInCourses, { defaultCustomCourse } from '../data/courses';
 
 const API_BASE_URL = 'https://api.golfcourseapi.com/v1';
 const API_KEY = process.env.REACT_APP_GOLFCOURSE_API_KEY || '';
+const HAS_API_KEY = Boolean(API_KEY);
 
 const CUSTOM_COURSES_KEY = 'golfer-custom-courses';
 
@@ -173,10 +174,17 @@ export const getLastPublicCourseError = (): string | null => lastPublicCourseErr
 export const clearLastPublicCourseError = (): void => {
   lastPublicCourseError = null;
 };
+export const hasPublicCourseAccess = (): boolean => HAS_API_KEY;
 
 export const fetchPublicCourses = async (): Promise<Course[]> => {
   if (publicCoursesCache) {
     return publicCoursesCache;
+  }
+
+  if (!HAS_API_KEY) {
+    // Skip remote calls when no API key is configured.
+    lastPublicCourseError = null;
+    return [];
   }
 
   // Try localStorage first to avoid unnecessary requests
@@ -238,6 +246,11 @@ export const searchPublicCourses = async (query: string): Promise<Course[]> => {
 
   if (searchCache[term]) {
     return searchCache[term];
+  }
+
+  if (!HAS_API_KEY) {
+    lastPublicCourseError = null;
+    return [];
   }
 
   if (!term) {
