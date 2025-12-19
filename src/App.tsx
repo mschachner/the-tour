@@ -534,6 +534,31 @@ function App() {
     setScorecardTitle('');
   };
 
+  const hasUnsavedScorecard = () => {
+    if (!game) return false;
+    const currentName = scorecardTitle.trim() || game.eventName || 'Untitled Scorecard';
+    if (!activeScorecardId) return true;
+    const saved = savedScorecards.find((item) => item.id === activeScorecardId);
+    if (!saved) return true;
+    return (
+      saved.name !== currentName ||
+      JSON.stringify(saved.data) !== JSON.stringify(game)
+    );
+  };
+
+  const returnToSetup = () => {
+    if (showSetup) return;
+    if (hasUnsavedScorecard()) {
+      const shouldSave = window.confirm(
+        'Save the current scorecard before returning to setup?',
+      );
+      if (shouldSave) {
+        handleSaveScorecard();
+      }
+    }
+    resetGame();
+  };
+
   const formatScorecardLabel = (scorecard: { name: string; data: Game }) => {
     const date = scorecard.data.date;
     const courseName = scorecard.data.course?.name ?? 'Course';
@@ -624,8 +649,13 @@ function App() {
     <div className="min-h-screen fade-in">
       <div className="container mx-auto px-4 py-8">
         <header className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-earth-beige mb-2 font-marker">🏌️ The Tour</h1>
-          <p className="text-earth-beige/80">Track your game with style</p>
+          <button
+            type="button"
+            onClick={returnToSetup}
+            className="text-4xl font-bold text-earth-beige font-marker transition-transform duration-200 hover:scale-105 active:scale-95"
+          >
+            🏌️ The Tour
+          </button>
         </header>
 
         {showSetup ? (
@@ -655,7 +685,7 @@ function App() {
                 >
                   Saved Scorecards
                 </button>
-                <button onClick={resetGame} className="golf-button">
+                <button onClick={returnToSetup} className="golf-button">
                   New Game
                 </button>
               </div>

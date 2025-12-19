@@ -205,24 +205,15 @@ const PlayerSetup = ({
       <div className="space-y-6">
         {/* Scorecards */}
         <div className="space-y-3">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Load Saved Scorecard
-            </label>
+          <div className="flex flex-wrap gap-3">
             <button
               onClick={() => setShowScorecardDialog(true)}
               className="px-4 py-2 rounded-md bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors text-sm"
             >
               Load Saved Scorecard
             </button>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Import Scorecards
-            </label>
             <label className="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-800 rounded-md cursor-pointer hover:bg-gray-200 text-sm">
-              Choose JSON file
+              Import Scorecard
               <input
                 type="file"
                 accept="application/json"
@@ -230,10 +221,10 @@ const PlayerSetup = ({
                 className="hidden"
               />
             </label>
-            {importStatus && (
-              <p className="text-xs text-gray-500 mt-2">{importStatus}</p>
-            )}
           </div>
+          {importStatus && (
+            <p className="text-xs text-gray-500">{importStatus}</p>
+          )}
         </div>
 
         {/* Event Details */}
