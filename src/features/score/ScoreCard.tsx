@@ -923,7 +923,12 @@ const renderDesktopTable = (
   return (
     <div className="golf-card fade-in">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-xl font-bold text-gray-800 font-marker">Score Card</h3>
+        <div>
+          <p className="text-sm text-gray-500">Score Card</p>
+          <h3 className="text-xl font-bold text-gray-800 font-marker">
+            {game.eventName}
+          </h3>
+        </div>
         <button
           className="hidden md:inline-block px-2 py-1 text-sm text-white bg-blue-500 rounded"
           onClick={() => setShowTotals((s) => !s)}
