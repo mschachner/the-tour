@@ -2,7 +2,6 @@ import { useState, useEffect, ChangeEvent } from 'react';
 import { Game, Player, Course } from './types/golf';
 import PlayerSetup from './features/player/PlayerSetup';
 import ScoreCard from './features/score/ScoreCard';
-import CourseSelector from './features/course/CourseSelector';
 import {
   buildExportFile,
   clearGame,
@@ -204,7 +203,7 @@ function App() {
   const [savedScorecards, setSavedScorecards] = useState(loadScorecards());
   const [activeScorecardId, setActiveScorecardId] = useState<string | null>(null);
   const [scorecardTitle, setScorecardTitle] = useState(
-    initialGame?.eventName || 'New Scorecard',
+    initialGame?.eventName || '',
   );
   const [importStatus, setImportStatus] = useState<string | null>(null);
   const [showScorecardsMenu, setShowScorecardsMenu] = useState(false);
@@ -217,7 +216,7 @@ function App() {
   const startNewGame = (players: Player[], course: Course, eventName: string) => {
     const newGame: Game = {
       id: Date.now().toString(),
-      eventName,
+      eventName: 'New Scorecard',
       date: new Date().toISOString().split('T')[0],
       course,
       players: calculateSkins(players, {}, {}, {}, {}, {}, {}, {}, {}),
@@ -524,20 +523,7 @@ function App() {
     setGame(null);
     setShowSetup(true);
     setActiveScorecardId(null);
-    setScorecardTitle('New Scorecard');
-  };
-
-  const handleImportScorecardsFromFile = async (file: File): Promise<string> => {
-    const content = await file.text();
-    const { scorecards, warnings } = parseScorecardImport(content);
-    const { merged, addedCount } = mergeImportedScorecards(scorecards);
-    setSavedScorecards(merged);
-    if (warnings.length > 0) {
-      return warnings.join(' ');
-    }
-    return addedCount > 0
-      ? `Imported ${addedCount} new scorecard${addedCount === 1 ? '' : 's'}.`
-      : 'Import complete.';
+    setScorecardTitle('');
   };
 
   const formatScorecardLabel = (scorecard: { name: string; data: Game }) => {
@@ -550,47 +536,6 @@ function App() {
     setScorecardTitle(event.target.value);
     if (!game) return;
     setGame({ ...game, eventName: event.target.value });
-  };
-
-  const handleCourseChange = (course: Course) => {
-    if (!game) return;
-    if (course.id === game.course.id) return;
-    const shouldReset = window.confirm(
-      'Changing the course will reset hole scores and side games. Continue?',
-    );
-    if (!shouldReset) return;
-    const updatedPlayers = game.players.map((player) => ({
-      ...player,
-      totalScore: 0,
-      totalPutts: 0,
-      skins: 0,
-      holes: course.holes.map((hole) => ({
-        holeNumber: hole.holeNumber,
-        strokes: 0,
-        putts: 0,
-        par: hole.par,
-        holeHandicap: hole.handicap,
-      })),
-    }));
-
-    const updatedGame: Game = {
-      ...game,
-      course,
-      players: updatedPlayers,
-      currentHole: 1,
-      totalHoles: course.holes.length,
-      closestToPin: {},
-      longestDrive: {},
-      greenies: {},
-      fivers: {},
-      fours: {},
-      sandyHoles: {},
-      sandies: {},
-      doubleSandies: {},
-      lostBallHoles: {},
-      lostBalls: {},
-    };
-    setGame(updatedGame);
   };
 
   const handleSaveScorecard = () => {
@@ -648,8 +593,19 @@ function App() {
   ) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    const status = await handleImportScorecardsFromFile(file);
-    setImportStatus(status);
+    const content = await file.text();
+    const { scorecards, warnings } = parseScorecardImport(content);
+    const { merged, addedCount } = mergeImportedScorecards(scorecards);
+    setSavedScorecards(merged);
+    if (warnings.length > 0) {
+      setImportStatus(warnings.join(' '));
+    } else {
+      setImportStatus(
+        addedCount > 0
+          ? `Imported ${addedCount} new scorecard${addedCount === 1 ? '' : 's'}.`
+          : 'Import complete.',
+      );
+    }
     event.target.value = '';
   };
 
@@ -668,7 +624,7 @@ function App() {
             onEventNameChange={setScorecardTitle}
             savedScorecards={savedScorecards}
             onLoadScorecard={handleLoadScorecard}
-            onImportScorecards={handleImportScorecardsFromFile}
+            onImportScorecards={importScorecardsFromFile}
           />
         ) : game ? (
           <div className="space-y-6">
@@ -697,29 +653,20 @@ function App() {
               <div className="golf-card bg-white/10 border border-white/20">
                 <div className="flex flex-wrap gap-4 items-end">
                   <div className="flex-1 min-w-[220px]">
-                  <label className="block text-sm font-medium text-earth-beige mb-2">
-                    Scorecard name
-                  </label>
-                  <input
-                    type="text"
-                    value={scorecardTitle}
-                    onChange={handleScorecardTitleChange}
-                    className="w-full rounded-md px-3 py-2 text-gray-900"
-                    placeholder="Weekend skins match"
-                  />
-                </div>
-                <div className="flex-1 min-w-[220px]">
-                  <label className="block text-sm font-medium text-earth-beige mb-2">
-                    Course
-                  </label>
-                  <CourseSelector
-                    onCourseSelect={handleCourseChange}
-                    selectedCourse={game.course}
-                  />
-                </div>
-                <button
-                  onClick={handleSaveScorecard}
-                  className="px-4 py-2 rounded-md bg-golf-green text-white"
+                    <label className="block text-sm font-medium text-earth-beige mb-2">
+                      Scorecard name
+                    </label>
+                    <input
+                      type="text"
+                      value={scorecardTitle}
+                      onChange={handleScorecardTitleChange}
+                      className="w-full rounded-md px-3 py-2 text-gray-900"
+                      placeholder="Weekend skins match"
+                    />
+                  </div>
+                  <button
+                    onClick={handleSaveScorecard}
+                    className="px-4 py-2 rounded-md bg-golf-green text-white"
                   >
                     Save Scorecard
                   </button>
@@ -772,7 +719,7 @@ function App() {
                             onClick={() => handleLoadScorecard(scorecard.id)}
                             className="px-3 py-1 rounded-md bg-white/10 text-earth-beige text-sm"
                           >
-                            Load
+                            Edit
                           </button>
                           <button
                             onClick={() => handleDeleteScorecard(scorecard.id)}
