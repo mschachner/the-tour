@@ -9,7 +9,8 @@ import {
   loadCustomCourses,
   deleteCustomCourse,
   getLastPublicCourseError,
-  clearLastPublicCourseError
+  clearLastPublicCourseError,
+  hasPublicCourseAccess
 } from '../../services/courseService';
 
 interface CourseSelectorProps {
@@ -28,6 +29,7 @@ const CourseSelector = ({ onCourseSelect, selectedCourse, refreshKey }: CourseSe
   const [publicError, setPublicError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const hasPublicAccess = hasPublicCourseAccess();
 
   // Load saved custom courses
   useEffect(() => {
@@ -37,8 +39,9 @@ const CourseSelector = ({ onCourseSelect, selectedCourse, refreshKey }: CourseSe
 
   // Preload public courses on mount
   useEffect(() => {
+    if (!hasPublicAccess) return;
     fetchPublicCourses().catch(() => undefined);
-  }, []);
+  }, [hasPublicAccess]);
 
   useEffect(() => {
     let active = true;
@@ -116,10 +119,19 @@ const CourseSelector = ({ onCourseSelect, selectedCourse, refreshKey }: CourseSe
     onCourseSelect(customCourse);
   };
 
+  // Match against suggestions first to allow selecting remote results on Enter.
+  const findSuggestionMatch = (value: string) => {
+    const normalized = value.trim().toLowerCase();
+    if (!normalized) return undefined;
+    return suggestions.find(
+      (course) => course.name.toLowerCase() === normalized,
+    );
+  };
+
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      const exactMatch = findCourseByName(inputValue);
+      const exactMatch = findSuggestionMatch(inputValue) || findCourseByName(inputValue);
       if (exactMatch) {
         handleSuggestionClick(exactMatch);
       } else if (inputValue.trim()) {
@@ -176,6 +188,11 @@ const CourseSelector = ({ onCourseSelect, selectedCourse, refreshKey }: CourseSe
       {publicError && (
         <p className="text-xs text-red-600 mt-1">
           Could not fetch public courses. Results may be limited.
+        </p>
+      )}
+      {!hasPublicAccess && (
+        <p className="text-xs text-gray-500 mt-1">
+          Add REACT_APP_GOLFCOURSE_API_KEY to enable public course search.
         </p>
       )}
 

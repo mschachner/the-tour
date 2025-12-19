@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Game, Player, Course, CourseHole } from './types/golf';
+import { Game, Player, Course } from './types/golf';
 import PlayerSetup from './features/player/PlayerSetup';
 import ScoreCard from './features/score/ScoreCard';
 import { loadGame, saveGame, clearGame } from './services/gameService';
+import { getGreenieHoles, getFourHoles } from './utils/golfLogic';
 import './App.css';
 
 const calculateSkins = (
@@ -171,52 +172,19 @@ const calculateSkins = (
   return players.map((p) => ({ ...p, skins: skinsMap[p.id] }));
 };
 
-const getGreenieHolesForSide = (
-  holes: CourseHole[],
-  closest: Record<number, string | null>,
-  side: 'front' | 'back',
-): number[] => {
-  const [start, end] = side === 'front' ? [1, 9] : [10, 18];
-  const par3 = holes
-    .filter((h) => h.par === 3 && h.holeNumber >= start && h.holeNumber <= end)
-    .map((h) => h.holeNumber)
-    .sort((a, b) => a - b);
-
-  const awarded = par3.find(
-    (h) => closest[h] !== undefined && closest[h] !== null,
+// Centralized helper for recomputing skins after any game update.
+const getPlayersWithSkins = (players: Player[], game: Game): Player[] =>
+  calculateSkins(
+    players,
+    game.closestToPin,
+    game.longestDrive,
+    game.greenies,
+    game.fivers,
+    game.fours,
+    game.sandies,
+    game.doubleSandies,
+    game.lostBalls,
   );
-  if (awarded === undefined) return [];
-  return par3.filter((h) => h > awarded);
-};
-
-const getGreenieHoles = (
-  holes: CourseHole[],
-  closest: Record<number, string | null>,
-): number[] => [
-  ...getGreenieHolesForSide(holes, closest, 'front'),
-  ...getGreenieHolesForSide(holes, closest, 'back'),
-];
-
-const getFourHoleForSide = (
-  holes: CourseHole[],
-  side: 'front' | 'back',
-): number | null => {
-  const [start, end] = side === 'front' ? [1, 9] : [10, 18];
-  const sideHoles = holes.filter(
-    (h) => h.holeNumber >= start && h.holeNumber <= end,
-  );
-  const lowest = [...sideHoles].sort((a, b) => a.handicap - b.handicap)[0];
-  const par4 = sideHoles
-    .filter((h) => h.par === 4 && h.holeNumber !== lowest.holeNumber)
-    .sort((a, b) => a.handicap - b.handicap)[0];
-  return par4 ? par4.holeNumber : null;
-};
-
-const getFourHoles = (holes: CourseHole[]): number[] => {
-  const front = getFourHoleForSide(holes, 'front');
-  const back = getFourHoleForSide(holes, 'back');
-  return [front, back].filter((n): n is number => n !== null);
-};
 
 function App() {
   const initialGame = loadGame();
@@ -248,6 +216,7 @@ function App() {
       lostBalls: {}
     };
 
+    // Initialize game state with skins computed against empty side-game maps.
     setGame(newGame);
     setShowSetup(false);
   };
@@ -276,23 +245,14 @@ function App() {
         return player;
       });
 
-    const playersWithSkins = calculateSkins(
-      updatedPlayers,
-      game.closestToPin,
-      game.longestDrive,
-      game.greenies,
-      game.fivers,
-      game.fours,
-      game.sandies,
-      game.doubleSandies,
-      game.lostBalls,
-    );
-
     const updatedGame = {
       ...game,
-      players: playersWithSkins,
+      players: updatedPlayers,
     };
-    setGame(updatedGame);
+    setGame({
+      ...updatedGame,
+      players: getPlayersWithSkins(updatedPlayers, updatedGame),
+    });
   };
 
   const updateClosestToPin = (holeNumber: number, playerId: string | null) => {
@@ -331,22 +291,14 @@ function App() {
       }
     });
 
-    const playersWithSkins = calculateSkins(
-      game.players,
-      closest,
-      game.longestDrive,
-      greenies,
-      game.fivers,
-      game.fours,
-      game.sandies,
-      game.doubleSandies,
-      game.lostBalls,
-    );
-    setGame({
+    const updatedGame = {
       ...game,
       closestToPin: closest,
       greenies,
-      players: playersWithSkins,
+    };
+    setGame({
+      ...updatedGame,
+      players: getPlayersWithSkins(game.players, updatedGame),
     });
   };
 
@@ -376,21 +328,13 @@ function App() {
       }
     }
 
-    const playersWithSkins = calculateSkins(
-      game.players,
-      game.closestToPin,
-      longestMap,
-      game.greenies,
-      game.fivers,
-      game.fours,
-      game.sandies,
-      game.doubleSandies,
-      game.lostBalls,
-    );
-    setGame({
+    const updatedGame = {
       ...game,
       longestDrive: longestMap,
-      players: playersWithSkins,
+    };
+    setGame({
+      ...updatedGame,
+      players: getPlayersWithSkins(game.players, updatedGame),
     });
   };
 
@@ -407,18 +351,11 @@ function App() {
     const holeGreenies = { ...(game.greenies[holeNumber] || {}) };
     holeGreenies[playerId] = value;
     const greenies = { ...game.greenies, [holeNumber]: holeGreenies };
-    const playersWithSkins = calculateSkins(
-      game.players,
-      game.closestToPin,
-      game.longestDrive,
-      greenies,
-      game.fivers,
-      game.fours,
-      game.sandies,
-      game.doubleSandies,
-      game.lostBalls,
-    );
-    setGame({ ...game, greenies, players: playersWithSkins });
+    const updatedGame = { ...game, greenies };
+    setGame({
+      ...updatedGame,
+      players: getPlayersWithSkins(game.players, updatedGame),
+    });
   };
 
   const handleToggleFiver = (
@@ -430,18 +367,11 @@ function App() {
     const holeFivers = { ...(game.fivers[holeNumber] || {}) };
     holeFivers[playerId] = value;
     const fivers = { ...game.fivers, [holeNumber]: holeFivers };
-    const playersWithSkins = calculateSkins(
-      game.players,
-      game.closestToPin,
-      game.longestDrive,
-      game.greenies,
-      fivers,
-      game.fours,
-      game.sandies,
-      game.doubleSandies,
-      game.lostBalls,
-    );
-    setGame({ ...game, fivers, players: playersWithSkins });
+    const updatedGame = { ...game, fivers };
+    setGame({
+      ...updatedGame,
+      players: getPlayersWithSkins(game.players, updatedGame),
+    });
   };
 
   const handleToggleFour = (
@@ -455,18 +385,11 @@ function App() {
     const holeFours = { ...(game.fours[holeNumber] || {}) };
     holeFours[playerId] = value;
     const fours = { ...game.fours, [holeNumber]: holeFours };
-    const playersWithSkins = calculateSkins(
-      game.players,
-      game.closestToPin,
-      game.longestDrive,
-      game.greenies,
-      game.fivers,
-      fours,
-      game.sandies,
-      game.doubleSandies,
-      game.lostBalls,
-    );
-    setGame({ ...game, fours, players: playersWithSkins });
+    const updatedGame = { ...game, fours };
+    setGame({
+      ...updatedGame,
+      players: getPlayersWithSkins(game.players, updatedGame),
+    });
   };
 
   const handleToggleSandyHole = (holeNumber: number, value: boolean) => {
@@ -482,23 +405,15 @@ function App() {
     } else if (!sandies[holeNumber]) {
       sandies[holeNumber] = {};
     }
-    const playersWithSkins = calculateSkins(
-      game.players,
-      game.closestToPin,
-      game.longestDrive,
-      game.greenies,
-      game.fivers,
-      game.fours,
-      sandies,
-      doubleSandies,
-      game.lostBalls,
-    );
-    setGame({
+    const updatedGame = {
       ...game,
       sandyHoles,
       sandies,
       doubleSandies,
-      players: playersWithSkins,
+    };
+    setGame({
+      ...updatedGame,
+      players: getPlayersWithSkins(game.players, updatedGame),
     });
   };
 
@@ -524,18 +439,11 @@ function App() {
     } else if (!doubleSandies[holeNumber]) {
       doubleSandies[holeNumber] = {};
     }
-    const playersWithSkins = calculateSkins(
-      game.players,
-      game.closestToPin,
-      game.longestDrive,
-      game.greenies,
-      game.fivers,
-      game.fours,
-      sandies,
-      doubleSandies,
-      game.lostBalls,
-    );
-    setGame({ ...game, sandies, doubleSandies, players: playersWithSkins });
+    const updatedGame = { ...game, sandies, doubleSandies };
+    setGame({
+      ...updatedGame,
+      players: getPlayersWithSkins(game.players, updatedGame),
+    });
   };
 
   const handleToggleDoubleSandy = (
@@ -549,18 +457,11 @@ function App() {
     const holeMarks = { ...(game.doubleSandies[holeNumber] || {}) };
     holeMarks[playerId] = value;
     const doubleSandies = { ...game.doubleSandies, [holeNumber]: holeMarks };
-    const playersWithSkins = calculateSkins(
-      game.players,
-      game.closestToPin,
-      game.longestDrive,
-      game.greenies,
-      game.fivers,
-      game.fours,
-      game.sandies,
-      doubleSandies,
-      game.lostBalls,
-    );
-    setGame({ ...game, doubleSandies, players: playersWithSkins });
+    const updatedGame = { ...game, doubleSandies };
+    setGame({
+      ...updatedGame,
+      players: getPlayersWithSkins(game.players, updatedGame),
+    });
   };
 
   const handleToggleLostBallHole = (holeNumber: number, value: boolean) => {
@@ -573,18 +474,11 @@ function App() {
     } else if (!lostBalls[holeNumber]) {
       lostBalls[holeNumber] = {};
     }
-    const playersWithSkins = calculateSkins(
-      game.players,
-      game.closestToPin,
-      game.longestDrive,
-      game.greenies,
-      game.fivers,
-      game.fours,
-      game.sandies,
-      game.doubleSandies,
-      lostBalls,
-    );
-    setGame({ ...game, lostBallHoles, lostBalls, players: playersWithSkins });
+    const updatedGame = { ...game, lostBallHoles, lostBalls };
+    setGame({
+      ...updatedGame,
+      players: getPlayersWithSkins(game.players, updatedGame),
+    });
   };
 
   const handleToggleLostBall = (
@@ -597,18 +491,11 @@ function App() {
     const holeMarks = { ...(game.lostBalls[holeNumber] || {}) };
     holeMarks[playerId] = value;
     const lostBalls = { ...game.lostBalls, [holeNumber]: holeMarks };
-    const playersWithSkins = calculateSkins(
-      game.players,
-      game.closestToPin,
-      game.longestDrive,
-      game.greenies,
-      game.fivers,
-      game.fours,
-      game.sandies,
-      game.doubleSandies,
-      lostBalls,
-    );
-    setGame({ ...game, lostBalls, players: playersWithSkins });
+    const updatedGame = { ...game, lostBalls };
+    setGame({
+      ...updatedGame,
+      players: getPlayersWithSkins(game.players, updatedGame),
+    });
   };
 
   const resetGame = () => {
