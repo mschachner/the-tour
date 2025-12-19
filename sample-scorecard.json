@@ -1,0 +1,142 @@
+{
+  "schema": "the-tour-scorecard",
+  "version": 1,
+  "exportedAt": "2025-07-06T19:42:00.000Z",
+  "scorecards": [
+    {
+      "id": "sc-1751821320000",
+      "name": "Sunday Skins at Pine Hollow",
+      "createdAt": "2025-07-06T14:05:00.000Z",
+      "updatedAt": "2025-07-06T19:40:00.000Z",
+      "data": {
+        "id": "game-1751821320000",
+        "eventName": "Sunday Skins at Pine Hollow",
+        "date": "2025-07-06",
+        "course": {
+          "id": "pine-hollow",
+          "name": "Pine Hollow Country Club",
+          "location": "Ithaca, NY",
+          "totalPar": 72,
+          "totalDistance": 6620,
+          "holes": [
+            { "holeNumber": 1, "par": 4, "handicap": 9, "distance": 385 },
+            { "holeNumber": 2, "par": 5, "handicap": 3, "distance": 525 },
+            { "holeNumber": 3, "par": 3, "handicap": 15, "distance": 165 },
+            { "holeNumber": 4, "par": 4, "handicap": 1, "distance": 440 },
+            { "holeNumber": 5, "par": 4, "handicap": 11, "distance": 370 },
+            { "holeNumber": 6, "par": 5, "handicap": 5, "distance": 545 },
+            { "holeNumber": 7, "par": 3, "handicap": 17, "distance": 155 },
+            { "holeNumber": 8, "par": 4, "handicap": 7, "distance": 410 },
+            { "holeNumber": 9, "par": 4, "handicap": 13, "distance": 365 },
+            { "holeNumber": 10, "par": 4, "handicap": 8, "distance": 390 },
+            { "holeNumber": 11, "par": 5, "handicap": 2, "distance": 560 },
+            { "holeNumber": 12, "par": 3, "handicap": 16, "distance": 175 },
+            { "holeNumber": 13, "par": 4, "handicap": 4, "distance": 430 },
+            { "holeNumber": 14, "par": 4, "handicap": 12, "distance": 360 },
+            { "holeNumber": 15, "par": 5, "handicap": 6, "distance": 535 },
+            { "holeNumber": 16, "par": 3, "handicap": 18, "distance": 150 },
+            { "holeNumber": 17, "par": 4, "handicap": 10, "distance": 395 },
+            { "holeNumber": 18, "par": 4, "handicap": 14, "distance": 355 }
+          ]
+        },
+        "players": [
+          {
+            "id": "p1",
+            "name": "Mark",
+            "color": "hsl(210, 80%, 55%)",
+            "totalScore": 74,
+            "totalPutts": 31,
+            "skins": 2,
+            "holes": [
+              { "holeNumber": 1, "strokes": 4, "putts": 2, "par": 4, "holeHandicap": 9 },
+              { "holeNumber": 2, "strokes": 5, "putts": 2, "par": 5, "holeHandicap": 3 },
+              { "holeNumber": 3, "strokes": 3, "putts": 2, "par": 3, "holeHandicap": 15 }
+            ]
+          },
+          {
+            "id": "p2",
+            "name": "Alex",
+            "color": "hsl(120, 70%, 45%)",
+            "totalScore": 71,
+            "totalPutts": 29,
+            "skins": 4,
+            "holes": [
+              { "holeNumber": 1, "strokes": 4, "putts": 2, "par": 4, "holeHandicap": 9 },
+              { "holeNumber": 2, "strokes": 4, "putts": 1, "par": 5, "holeHandicap": 3 },
+              { "holeNumber": 3, "strokes": 2, "putts": 1, "par": 3, "holeHandicap": 15 }
+            ]
+          },
+          {
+            "id": "p3",
+            "name": "Jordan",
+            "color": "hsl(30, 80%, 55%)",
+            "totalScore": 78,
+            "totalPutts": 34,
+            "skins": 1,
+            "holes": [
+              { "holeNumber": 1, "strokes": 5, "putts": 2, "par": 4, "holeHandicap": 9 },
+              { "holeNumber": 2, "strokes": 6, "putts": 2, "par": 5, "holeHandicap": 3 },
+              { "holeNumber": 3, "strokes": 3, "putts": 2, "par": 3, "holeHandicap": 15 }
+            ]
+          },
+          {
+            "id": "p4",
+            "name": "Sam",
+            "color": "hsl(0, 70%, 55%)",
+            "totalScore": 80,
+            "totalPutts": 36,
+            "skins": 0,
+            "holes": [
+              { "holeNumber": 1, "strokes": 5, "putts": 3, "par": 4, "holeHandicap": 9 },
+              { "holeNumber": 2, "strokes": 6, "putts": 2, "par": 5, "holeHandicap": 3 },
+              { "holeNumber": 3, "strokes": 4, "putts": 2, "par": 3, "holeHandicap": 15 }
+            ]
+          }
+        ],
+        "currentHole": 18,
+        "totalHoles": 18,
+        "closestToPin": {
+          "3": "p2",
+          "7": "p1",
+          "12": "p2",
+          "16": "p3"
+        },
+        "longestDrive": {
+          "2": "p2",
+          "6": "p1",
+          "11": "p2",
+          "15": "p4"
+        },
+        "greenies": {
+          "3": { "p2": true },
+          "7": { "p1": true },
+          "12": { "p2": true },
+          "16": { "p3": true }
+        },
+        "fivers": {
+          "2": { "p2": true },
+          "11": { "p1": true }
+        },
+        "fours": {
+          "4": { "p2": true },
+          "13": { "p1": true }
+        },
+        "sandyHoles": {
+          "5": true,
+          "14": true
+        },
+        "sandies": {
+          "5": { "p3": true },
+          "14": { "p1": true }
+        },
+        "doubleSandies": {},
+        "lostBallHoles": {
+          "8": true
+        },
+        "lostBalls": {
+          "8": { "p4": true }
+        }
+      }
+    }
+  ]
+}
